@@ -11,7 +11,7 @@ class PlayerWindow : public QDialog
 public:
     explicit PlayerWindow(QWidget *parent = 0);
 
-    Person GetPerson();
+    Player GetPerson();
 
 signals:
 
@@ -19,7 +19,7 @@ public slots:
 
 private:
     Ui::PlayerWindow ui;
-    Person mPerson;
+    Player mPerson;
 };
 
 #endif // PLAYERWINDOW_H

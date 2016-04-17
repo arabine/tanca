@@ -9,7 +9,10 @@ static QStringList MakeTables()
 {
     QStringList tables;
 
-    tables << "CREATE TABLE IF NOT EXISTS players (id INTEGER PRIMARY KEY, uuid TEXT, name TEXT, last_name TEXT, birth_date TEXT, road TEXT, post_code INTEGER, city TEXT, membership TEXT, comments TEXT);";
+    tables << Player::Table();
+    tables << Match::Table();
+    tables << Team::Table();
+    tables << Round::Table();
 
     return tables;
 }
@@ -80,14 +83,14 @@ DbManager::~DbManager()
     }
 }
 
-bool DbManager::IsValid(const Person& person)
+bool DbManager::IsValid(const Player& person)
 {
     // FIXME: check the validity of the person parameters
     (void) person;
     return true;
 }
 
-bool DbManager::AddPerson(const Person& person)
+bool DbManager::AddPerson(const Player& person)
 {
     bool success = false;
 

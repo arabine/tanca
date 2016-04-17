@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>453</width>
+    <width>525</width>
     <height>235</height>
    </rect>
   </property>
@@ -124,7 +124,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="spinBox">
+        <widget class="QSpinBox" name="pointsA">
          <property name="maximum">
           <number>13</number>
          </property>
@@ -211,7 +211,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="spinBox_2">
+        <widget class="QSpinBox" name="pointsB">
          <property name="maximum">
           <number>13</number>
          </property>

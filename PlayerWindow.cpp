@@ -1,14 +1,15 @@
 #include "PlayerWindow.h"
 
 
-PlayerWindow::PlayerWindow(QWidget *parent) : QDialog(parent)
+PlayerWindow::PlayerWindow(QWidget *parent)
+    : QDialog(parent)
 {
     ui.setupUi(this);
 
     mPerson.name = "zozo";
 }
 
-Person PlayerWindow::GetPerson()
+Player PlayerWindow::GetPerson()
 {
     return mPerson;
 }

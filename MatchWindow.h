@@ -1,12 +1,26 @@
 #ifndef MATCHWINDOW_H
 #define MATCHWINDOW_H
 
+#include <QDialog>
+#include <QPushButton>
+#include <QDateTimeEdit>
+#include <QDialogButtonBox>
 
-class MatchWindow
+#include "DbManager.h"
+
+class MatchWindow : public QDialog
 {
+    Q_OBJECT
 public:
-    MatchWindow();
+    MatchWindow(QWidget *parent = 0);
 
+    Match GetMatch() { return mMatch; }
+
+private:
+    QDateEdit *mDate;
+    QDialogButtonBox *mButtons;
+
+    Match mMatch;
 
 };
 

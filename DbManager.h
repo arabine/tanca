@@ -5,7 +5,7 @@
 #include <QtCore>
 #include <QSqlTableModel>
 
-struct Person
+struct Player
 {
     int id;
     QString uuid;
@@ -17,30 +17,46 @@ struct Person
     QString city;
     QString membership;    ///< JSON format, season start on 01/09 of each year.
     QString comments;
+
+    static QString Table() {
+        return "CREATE TABLE IF NOT EXISTS players (id INTEGER PRIMARY KEY, uuid TEXT, name TEXT, last_name TEXT, birth_date TEXT, road TEXT, post_code INTEGER, city TEXT, membership TEXT, comments TEXT);";
+    }
 };
 
-struct Round
+struct Match
 {
     int id;
     QString date;
+
+    static QString Table() {
+        return "CREATE TABLE IF NOT EXISTS matchs (id INTEGER PRIMARY KEY, date TEXT);";
+    }
 };
 
 struct Team
 {
     int id;
     int roundId;
-    QString player1Uuid;
-    QString player2Uuid;
-    QString player3Uuid;
+    int player1Id;
+    int player2Id;
+    int player3Id;
+
+    static QString Table() {
+        return "CREATE TABLE IF NOT EXISTS teams (id INTEGER PRIMARY KEY, round_id INTEGER, player1_id INTEGER, player2_id INTEGER, player3_id INTEGER);";
+    }
 };
 
-struct Match
+struct Round
 {
     int id;
     int team1Id;
     int team2Id;
-    int scoreTeam1;
-    int scoreTeam2;
+    int team1Score;
+    int team2Score;
+
+    static QString Table() {
+        return "CREATE TABLE IF NOT EXISTS teams (id INTEGER PRIMARY KEY, team1_id INTEGER, team2_id INTEGER, team1_score INTEGER, team2_score INTEGER);";
+    }
 };
 
 class ICities
@@ -63,8 +79,8 @@ public:
     DbManager(const QString& path);
     ~DbManager();
 
-    static bool IsValid(const Person &person);
-    bool AddPerson(const Person &person);
+    static bool IsValid(const Player &person);
+    bool AddPerson(const Player &person);
     void Initialize();
     QSqlTableModel *GetPlayersModel() { return mPlayersModel; }
 

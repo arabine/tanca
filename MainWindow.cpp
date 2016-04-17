@@ -16,11 +16,15 @@ MainWindow::MainWindow(QWidget *parent)
     playerWindow = new PlayerWindow(this);
     playerWindow->hide();
 
-    roundWindow = new RoundWindow(this);
-    roundWindow->hide();
+    matchWindow = new MatchWindow(this);
+    matchWindow->hide();
+
+    bracketWindow = new BracketWindow(this);
+    bracketWindow->hide();
 
     // Setup signals
     connect(ui->buttonAddPlayer, &QPushButton::clicked, this, &MainWindow::slotAddPlayer);
+    connect(ui->buttonAddMatch, &QPushButton::clicked, this, &MainWindow::slotAddMatch);
     connect(ui->buttonShowRounds, &QPushButton::clicked, this, &MainWindow::slotShowRounds);
 
     // Setup other stuff
@@ -44,10 +48,23 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::slotAddMatch()
+{
+    if (matchWindow->exec() == QDialog::Accepted)
+    {
+        //mDatabase.AddMatch(playerWindow->GetPerson());
+    }
+}
+
+void MainWindow::slotAddTeam()
+{
+
+}
+
 void MainWindow::slotShowRounds()
 {
-    roundWindow->setWindowModality(Qt::NonModal);
-    roundWindow->show();
+    bracketWindow->setWindowModality(Qt::NonModal);
+    bracketWindow->show();
 }
 
 void MainWindow::slotAddPlayer()

@@ -12,17 +12,19 @@ TEMPLATE = app
 SOURCES += main.cpp MainWindow.cpp \
     DbManager.cpp \
     PlayerWindow.cpp \
-    RoundWindow.cpp \
     TeamWindow.cpp \
-    MatchWindow.cpp
+    MatchWindow.cpp \
+    BracketWindow.cpp
 
 HEADERS  += MainWindow.h \
     DbManager.h \
     PlayerWindow.h \
-    RoundWindow.h \
     TeamWindow.h \
-    MatchWindow.h
+    MatchWindow.h \
+    BracketWindow.h
+
 FORMS    += MainWindow.ui \
     PlayerWindow.ui \
-    Matchwindow.ui \
-    RoundWindow.ui
+    Matchwindow.ui
+
+OTHER_FILES += README.md LICENSE

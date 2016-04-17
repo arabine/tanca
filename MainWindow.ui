@@ -113,7 +113,7 @@
              <item>
               <widget class="QLabel" name="label_2">
                <property name="text">
-                <string>Liste des manches</string>
+                <string>Liste des rencontres</string>
                </property>
               </widget>
              </item>
@@ -137,14 +137,14 @@
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_3">
                <item>
-                <widget class="QPushButton" name="pushButton">
+                <widget class="QPushButton" name="buttonAddMatch">
                  <property name="text">
                   <string>Ajouter</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_3">
+                <widget class="QPushButton" name="buttonEditMatch">
                  <property name="text">
                   <string>Editer</string>
                  </property>
@@ -169,14 +169,14 @@
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_4">
                <item>
-                <widget class="QPushButton" name="pushButton_4">
+                <widget class="QPushButton" name="buttonAddTeam">
                  <property name="text">
                   <string>Ajouter</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_5">
+                <widget class="QPushButton" name="buttonEditTeam">
                  <property name="text">
                   <string>Editer</string>
                  </property>

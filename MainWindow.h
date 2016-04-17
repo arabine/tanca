@@ -4,7 +4,8 @@
 #include <QMainWindow>
 #include "DbManager.h"
 #include "PlayerWindow.h"
-#include "RoundWindow.h"
+#include "MatchWindow.h"
+#include "BracketWindow.h"
 
 namespace Ui {
 class MainWindow;
@@ -22,14 +23,16 @@ public:
 private slots:
     void slotAddPlayer();
      void slotShowRounds();
-
+     void slotAddTeam();
+     void slotAddMatch();
 private:
     void InitializePlayers();
 
     // Windows
     Ui::MainWindow *ui;
     PlayerWindow *playerWindow;
-    RoundWindow *roundWindow;
+    BracketWindow *bracketWindow;
+    MatchWindow *matchWindow;
 
     // other stuff
     DbManager mDatabase;
