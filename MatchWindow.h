@@ -16,6 +16,9 @@ public:
 
     Match GetMatch() { return mMatch; }
 
+private slots:
+    void slotAccept();
+
 private:
     QDateEdit *mDate;
     QDialogButtonBox *mButtons;

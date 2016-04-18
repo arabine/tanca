@@ -25,6 +25,10 @@ HEADERS  += MainWindow.h \
 
 FORMS    += MainWindow.ui \
     PlayerWindow.ui \
-    Matchwindow.ui
+    TeamWindow.ui \
+    ResultWindow.ui
 
 OTHER_FILES += README.md LICENSE
+
+RESOURCES += \
+    tanca.qrc

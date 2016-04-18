@@ -6,11 +6,11 @@ PlayerWindow::PlayerWindow(QWidget *parent)
 {
     ui.setupUi(this);
 
-    mPerson.name = "zozo";
+    mPlayer.name = "zozo";
 }
 
-Player PlayerWindow::GetPerson()
+Player PlayerWindow::GetPlayer()
 {
-    return mPerson;
+    return mPlayer;
 }
 

@@ -6,6 +6,7 @@
 #include "PlayerWindow.h"
 #include "MatchWindow.h"
 #include "BracketWindow.h"
+#include "TeamWindow.h"
 
 namespace Ui {
 class MainWindow;
@@ -25,6 +26,7 @@ private slots:
      void slotShowRounds();
      void slotAddTeam();
      void slotAddMatch();
+     void slotSeasonChanged(int index);
 private:
     void InitializePlayers();
 
@@ -33,6 +35,7 @@ private:
     PlayerWindow *playerWindow;
     BracketWindow *bracketWindow;
     MatchWindow *matchWindow;
+    TeamWindow *teamWindow;
 
     // other stuff
     DbManager mDatabase;

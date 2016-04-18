@@ -27,10 +27,19 @@ void DbManager::Initialize()
         QStringList gTables = MakeTables();
         for (int i = 0; i < gTables.size(); i++)
         {
-            QSqlQuery query(gTables[i]);
+            QSqlQuery query(gTables[i], mDb);
             if(!query.exec())
             {
                 qDebug() << "Create table failed: " << query.lastError();
+            }
+            else
+            {
+                QRegularExpression re("EXISTS (\\w+) \\(");
+                QRegularExpressionMatch match = re.match(gTables[i]);
+                if (match.hasMatch())
+                {
+                    qDebug() << "Created table: " << match.captured(1);
+                }
             }
         }
 
@@ -58,6 +67,36 @@ void DbManager::Initialize()
     // Initialize the Cities DB
     mCities = QSqlDatabase::addDatabase("QSQLITE", "cities");
     mCities.setDatabaseName("~/Tanca/villes.db"); // FIXME: use the executable path
+}
+
+QStringList DbManager::GetSeasons()
+{
+    QSqlQuery query("SELECT DISTINCT year FROM matches", mDb);
+    QStringList result;
+
+    while (query.next())
+    {
+        result.append(query.value(0).toString());
+    }
+    return result;
+}
+
+QStringList DbManager::GetMatches(int year)
+{
+    QSqlQuery query(mDb);
+    query.prepare("SELECT date FROM matches WHERE year = :year");
+    query.bindValue(":year", year);
+
+    QStringList result;
+
+    if(query.exec())
+    {
+        while (query.next())
+        {
+            result.append(query.value(0).toString());
+        }
+    }
+    return result;
 }
 
 QStringList DbManager::GetCities(int postCode)
@@ -90,24 +129,46 @@ bool DbManager::IsValid(const Player& person)
     return true;
 }
 
-bool DbManager::AddPerson(const Player& person)
+bool DbManager::AddMatch(const Match& match)
 {
     bool success = false;
 
-    if (IsValid(person))
+    QSqlQuery queryAdd(mDb);
+    queryAdd.prepare("INSERT INTO matches (date, year) VALUES (:date, :year)");
+    queryAdd.bindValue(":date", match.date);
+    queryAdd.bindValue(":year", match.year);
+
+    if(queryAdd.exec())
+    {
+        qDebug() << "Add match success";
+        success = true;
+    }
+    else
+    {
+        qDebug() << "Add match failed: " << queryAdd.lastError();
+    }
+
+    return success;
+}
+
+bool DbManager::AddPlayer(const Player& player)
+{
+    bool success = false;
+
+    if (IsValid(player))
     {
         QSqlQuery queryAdd(mDb);
         queryAdd.prepare("INSERT INTO players (uuid, name, last_name, birth_date, road, post_code, city, membership, comments) "
                          "VALUES (:uuid, :name, :last_name, :birth_date, :road, :post_code, :city, :membership, :comments)");
         queryAdd.bindValue(":uuid", QUuid::createUuid().toString());
-        queryAdd.bindValue(":name", person.name);
-        queryAdd.bindValue(":last_name", person.lastName);
-        queryAdd.bindValue(":birth_date", person.birthDate);
-        queryAdd.bindValue(":road", person.road);
-        queryAdd.bindValue(":post_code", person.postCode);
-        queryAdd.bindValue(":city", person.city);
+        queryAdd.bindValue(":name", player.name);
+        queryAdd.bindValue(":last_name", player.lastName);
+        queryAdd.bindValue(":birth_date", player.birthDate);
+        queryAdd.bindValue(":road", player.road);
+        queryAdd.bindValue(":post_code", player.postCode);
+        queryAdd.bindValue(":city", player.city);
         queryAdd.bindValue(":membership", "");
-        queryAdd.bindValue(":comments", person.comments);
+        queryAdd.bindValue(":comments", player.comments);
 
         if(queryAdd.exec())
         {

@@ -22,16 +22,23 @@ MainWindow::MainWindow(QWidget *parent)
     bracketWindow = new BracketWindow(this);
     bracketWindow->hide();
 
+    teamWindow = new TeamWindow(this);
+    teamWindow->hide();
+
     // Setup signals
     connect(ui->buttonAddPlayer, &QPushButton::clicked, this, &MainWindow::slotAddPlayer);
     connect(ui->buttonAddMatch, &QPushButton::clicked, this, &MainWindow::slotAddMatch);
+    connect(ui->buttonAddTeam, &QPushButton::clicked, this, &MainWindow::slotAddTeam);
+
     connect(ui->buttonShowRounds, &QPushButton::clicked, this, &MainWindow::slotShowRounds);
+    connect(ui->comboSeasons, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSeasonChanged(int)));
 
     // Setup other stuff
     mDatabase.Initialize();
 
     // Initialize views
     InitializePlayers();
+    ui->comboSeasons->addItems(mDatabase.GetSeasons());
 }
 
 void MainWindow::InitializePlayers()
@@ -48,12 +55,30 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::slotAddTeam()
+{
+    if (teamWindow->exec() == QDialog::Accepted)
+    {
+
+    }
+}
+
 void MainWindow::slotAddMatch()
 {
     if (matchWindow->exec() == QDialog::Accepted)
     {
-        //mDatabase.AddMatch(playerWindow->GetPerson());
+        if (mDatabase.AddMatch(matchWindow->GetMatch()))
+        {
+            ui->comboSeasons->clear();
+            ui->comboSeasons->addItems(mDatabase.GetSeasons());
+        }
     }
+}
+
+void MainWindow::slotSeasonChanged(int index)
+{
+    ui->matchList->clear();
+    ui->matchList->addItems(mDatabase.GetMatches(ui->comboSeasons->itemText(index).toInt()));
 }
 
 void MainWindow::slotAddTeam()
@@ -71,7 +96,7 @@ void MainWindow::slotAddPlayer()
 {
     if (playerWindow->exec() == QDialog::Accepted)
     {
-        mDatabase.AddPerson(playerWindow->GetPerson());
+        mDatabase.AddPlayer(playerWindow->GetPlayer());
     }
 }
 

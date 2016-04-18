@@ -11,7 +11,7 @@ MatchWindow::MatchWindow(QWidget *parent)
     mButtons = new QDialogButtonBox(QDialogButtonBox::Ok
                                          | QDialogButtonBox::Cancel);
 
-    connect(mButtons, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(mButtons, SIGNAL(accepted()), this, SLOT(slotAccept()));
     connect(mButtons, SIGNAL(rejected()), this, SLOT(reject()));
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -20,5 +20,13 @@ MatchWindow::MatchWindow(QWidget *parent)
     mainLayout->addWidget(mButtons);
 
     setLayout(mainLayout);
+}
+
+void MatchWindow::slotAccept()
+{
+    QDate date = mDate->date();
+    mMatch.date = date.toString(Qt::ISODate);
+    mMatch.year = date.year();
+    accept();
 }
 

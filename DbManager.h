@@ -26,10 +26,11 @@ struct Player
 struct Match
 {
     int id;
-    QString date;
+    int year;
+    QString date; // full date
 
     static QString Table() {
-        return "CREATE TABLE IF NOT EXISTS matchs (id INTEGER PRIMARY KEY, date TEXT);";
+        return "CREATE TABLE IF NOT EXISTS matches (id INTEGER PRIMARY KEY, date TEXT, year INTEGER);";
     }
 };
 
@@ -55,7 +56,7 @@ struct Round
     int team2Score;
 
     static QString Table() {
-        return "CREATE TABLE IF NOT EXISTS teams (id INTEGER PRIMARY KEY, team1_id INTEGER, team2_id INTEGER, team1_score INTEGER, team2_score INTEGER);";
+        return "CREATE TABLE IF NOT EXISTS rounds (id INTEGER PRIMARY KEY, team1_id INTEGER, team2_id INTEGER, team1_score INTEGER, team2_score INTEGER);";
     }
 };
 
@@ -79,19 +80,26 @@ public:
     DbManager(const QString& path);
     ~DbManager();
 
-    static bool IsValid(const Player &person);
-    bool AddPerson(const Player &person);
     void Initialize();
+
+    static bool IsValid(const Player &person);
+    bool AddPlayer(const Player &player);
+    bool AddMatch(const Match &match);
+
+
     QSqlTableModel *GetPlayersModel() { return mPlayersModel; }
+
+    QStringList GetSeasons();
 
     // From ICities
     virtual QStringList GetCities(int postCode);
 
+    QStringList GetMatches(int year);
 private:
     QSqlDatabase mDb;
-    QSqlTableModel *mPlayersModel;
-
     QSqlDatabase mCities;
+
+    QSqlTableModel *mPlayersModel;
 };
 
 #endif // DBMANAGER_H

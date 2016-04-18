@@ -127,12 +127,12 @@
                 </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="comboBox"/>
+                <widget class="QComboBox" name="comboSeasons"/>
                </item>
               </layout>
              </item>
              <item>
-              <widget class="QListView" name="listView"/>
+              <widget class="QListWidget" name="matchList"/>
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_3">
