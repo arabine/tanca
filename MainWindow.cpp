@@ -81,10 +81,6 @@ void MainWindow::slotSeasonChanged(int index)
     ui->matchList->addItems(mDatabase.GetMatches(ui->comboSeasons->itemText(index).toInt()));
 }
 
-void MainWindow::slotAddTeam()
-{
-
-}
 
 void MainWindow::slotShowRounds()
 {

@@ -58,7 +58,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QListWidget" name="listWidget_2"/>
+        <widget class="QListWidget" name="memberList"/>
        </item>
       </layout>
      </item>
@@ -86,7 +86,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QListWidget" name="listWidget"/>
+        <widget class="QListWidget" name="teamList"/>
        </item>
       </layout>
      </item>

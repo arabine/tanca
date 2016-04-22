@@ -95,6 +95,7 @@ public:
     virtual QStringList GetCities(int postCode);
 
     QStringList GetMatches(int year);
+    QList<Player> GetPlayerList();
 private:
     QSqlDatabase mDb;
     QSqlDatabase mCities;

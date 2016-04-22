@@ -11,7 +11,7 @@ TeamWindow::TeamWindow(QWidget *parent)
 
 void TeamWindow::slotAccept()
 {
-    mTeam
+
     accept();
 }
 

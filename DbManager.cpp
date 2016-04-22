@@ -69,6 +69,24 @@ void DbManager::Initialize()
     mCities.setDatabaseName("~/Tanca/villes.db"); // FIXME: use the executable path
 }
 
+QList<Player> DbManager::GetPlayerList()
+{
+    QSqlQuery query("SELECT * FROM players", mDb);
+    QList<Player> result;
+
+    while (query.next())
+    {
+        Player player;
+
+        player.id = query.value("id").toInt();
+        player.name = query.value("name").toString();
+        player.lastName = query.value("last_name").toString();
+
+        result.append(player);
+    }
+    return result;
+}
+
 QStringList DbManager::GetSeasons()
 {
     QSqlQuery query("SELECT DISTINCT year FROM matches", mDb);
