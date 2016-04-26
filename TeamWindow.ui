@@ -58,12 +58,16 @@
         </widget>
        </item>
        <item>
-        <widget class="QListWidget" name="memberList"/>
+        <widget class="QListWidget" name="memberList">
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="buttonSwap">
        <property name="text">
         <string/>
        </property>
@@ -86,7 +90,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QListWidget" name="teamList"/>
+        <widget class="QListWidget" name="teamList">
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

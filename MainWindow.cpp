@@ -57,9 +57,20 @@ MainWindow::~MainWindow()
 
 void MainWindow::slotAddTeam()
 {
-    if (teamWindow->exec() == QDialog::Accepted)
+    int match = ui->matchList->currentRow();
+    if (match > -1)
     {
+        // Prepare widget contents
+        teamWindow->SetPlayers(mDatabase.GetPlayerList());
 
+        if (teamWindow->exec() == QDialog::Accepted)
+        {
+            if (mDatabase.AddTeam(teamWindow->GetTeam()))
+            {
+                ui->teamList->clear();
+                ui->teamList->addItems(mDatabase.GetTeams());
+            }
+        }
     }
 }
 

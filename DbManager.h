@@ -85,11 +85,12 @@ public:
     static bool IsValid(const Player &person);
     bool AddPlayer(const Player &player);
     bool AddMatch(const Match &match);
-
+    bool AddTeam(const Team &team);
 
     QSqlTableModel *GetPlayersModel() { return mPlayersModel; }
 
     QStringList GetSeasons();
+    QStringList GetTeams(QString match_date);
 
     // From ICities
     virtual QStringList GetCities(int postCode);

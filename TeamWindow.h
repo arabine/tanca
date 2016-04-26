@@ -14,12 +14,21 @@ public:
 
     Team GetTeam() { return mTeam; }
 
+    void SetPlayers(const QList<Player> &players);
+
 private slots:
     void slotAccept();
 
+    void slotClicked();
+    void slotMemberItemActivated(QListWidgetItem *item);
+    void slotTeamItemActivated(QListWidgetItem *item);
 private:
     Ui::TeamWindow ui;
     Team mTeam;
+
+    QList<Player> mList;
+    QList<Player> mSelection;
+    void Update();
 };
 
 #endif // TEAMWINDOW_H

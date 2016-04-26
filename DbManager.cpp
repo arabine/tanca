@@ -99,6 +99,11 @@ QStringList DbManager::GetSeasons()
     return result;
 }
 
+QStringList DbManager::GetTeams(QString match_date)
+{
+
+}
+
 QStringList DbManager::GetMatches(int year)
 {
     QSqlQuery query(mDb);
@@ -159,6 +164,30 @@ bool DbManager::AddMatch(const Match& match)
     if(queryAdd.exec())
     {
         qDebug() << "Add match success";
+        success = true;
+    }
+    else
+    {
+        qDebug() << "Add match failed: " << queryAdd.lastError();
+    }
+
+    return success;
+}
+
+bool DbManager::AddTeam(const Team &team)
+{
+    bool success = false;
+
+    QSqlQuery queryAdd(mDb);
+    queryAdd.prepare("INSERT INTO teams (round_id, player1_id, player2_id, player3_id) VALUES (:round_id, :player1_id, :player21_id, :player3_id)");
+    queryAdd.bindValue(":round_id", team.roundId);
+    queryAdd.bindValue(":player1_id", team.player1Id);
+    queryAdd.bindValue(":player2_id", team.player2Id);
+    queryAdd.bindValue(":player3_id", team.player3Id);
+
+    if(queryAdd.exec())
+    {
+        qDebug() << "Add team success";
         success = true;
     }
     else
