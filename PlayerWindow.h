@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "ui_PlayerWindow.h"
+#include "DatePickerWindow.h"
 #include "DbManager.h"
 
 class PlayerWindow : public QDialog
@@ -11,11 +12,15 @@ class PlayerWindow : public QDialog
 public:
     explicit PlayerWindow(QWidget *parent = 0);
 
-    Player GetPlayer();
+    void GetPlayer(Player &player);
+    void SetPlayer(const Player &player);
 
+private slots:
+    void slotAddLicence();
 private:
+    DatePickerWindow *datePickerWindow;
+
     Ui::PlayerWindow ui;
-    Player mPlayer;
 };
 
 #endif // PLAYERWINDOW_H

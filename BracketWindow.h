@@ -3,8 +3,11 @@
 
 #include <QDialog>
 #include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QGraphicsSceneMouseEvent>
+#include <iostream>
 #include <QGraphicsRectItem>
-#include "ui_RoundWindow.h"
+#include "DbManager.h"
 
 class BaseRect : public QGraphicsRectItem
 {
@@ -53,11 +56,11 @@ public:
         BOTTOM
     };
 
-    static const qreal cHeight = 20.0f;
-    static const qreal cWidth = 250.0f;
+    static const int cHeight = 20;
+    static const int cWidth = 250;
 
-    BracketBox(Position pos)
-        : mColumn(0)
+    BracketBox(Position pos, QGraphicsItem *parent)
+        : QGraphicsItem(parent)
         , mPosition(pos)
         , mLeft((pos == TOP) ? BaseRect::TOP_LEFT : BaseRect::BOTTOM_LEFT, this)
         , mMiddle(BaseRect::NO_ROUND, this)
@@ -98,7 +101,6 @@ protected:
     }
 
 private:
-    int mColumn;
     Position mPosition;
 
     // The bracket is composed by three rectangles:
@@ -111,7 +113,14 @@ private:
 class MatchGroup
 {
 public:
-    MatchGroup(QGraphicsScene *scene);
+    static const int cSpacer = 2;
+    static const int cGroupHeight = 2 * BracketBox::cHeight + cSpacer;
+
+    MatchGroup(QGraphicsScene *scene, QGraphicsItem *parent);
+
+    void SetTeam(BracketBox::Position position, const Team &team);
+    void Move(const QPointF &origin);
+
 
 private:
     BracketBox *boxTop;
@@ -126,14 +135,22 @@ public:
     static const qreal cWidth = 300.0f;
 
     RoundBox(int column)
-        : BaseRect(0, this)
+        : BaseRect(NO_ROUND, NULL)
     {
         setBrush(QColor(62, 62, 62));
         setRect(0, 0, cWidth, cHeight);
         SetText(QObject::tr("Partie %1").arg(column));
     }
 
-    void AddMatch(MatchGroup *match) { mList.append(match); }
+
+
+    ~RoundBox()
+    {
+        qDeleteAll(mList.begin(), mList.end());
+        mList.clear();
+    }
+
+    void AddMatch(MatchGroup *match);
 
 private:
     QList<MatchGroup *> mList;
@@ -151,6 +168,19 @@ public:
 };
 
 
+class Scene : public QGraphicsScene
+{
+
+public:
+
+    Scene(qreal x, qreal y, qreal width, qreal height, QObject *parent = 0)
+        : QGraphicsScene(x, y, width, height, parent)
+    {
+
+    }
+
+};
+
 
 class BracketWindow : public QDialog
 {
@@ -158,9 +188,13 @@ class BracketWindow : public QDialog
 public:
     explicit BracketWindow(QWidget *parent = 0);
 
+    bool SetTeams(const QList<Team> &teams);
 private:
-    QGraphicsScene *mScene;
+    Scene *mScene;
     View *mView;
+    QList<Team> mTeams;
+    QList<RoundBox *> mBoxes;
+    int mRounds;
 };
 
 #endif // ROUNDWINDOW_H

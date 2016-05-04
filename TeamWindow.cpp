@@ -5,17 +5,28 @@ TeamWindow::TeamWindow(QWidget *parent)
 {
     ui.setupUi(this);
 
-    connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(slotAccept()));
-    connect(ui.buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(ui.buttonOk, SIGNAL(clicked(bool)), this, SLOT(slotAccept()));
+    connect(ui.buttonCancel, SIGNAL(clicked(bool)), this, SLOT(reject()));
     connect(ui.buttonSwap, &QPushButton::clicked, this, &TeamWindow::slotClicked);
 
     connect(ui.memberList, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(slotMemberItemActivated(QListWidgetItem*)));
     connect(ui.teamList, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(slotTeamItemActivated(QListWidgetItem*)));
 }
 
-void TeamWindow::SetPlayers(const QList<Player> &players)
+void TeamWindow::Initialize(const QList<Player> &players, const QList<int> &inTeams)
 {
-    mList = players;
+    // Create a list of players that are still alone
+    mList.clear();
+    foreach (Player p, players)
+    {
+        // This player has no team, add it to the list of available players
+        if (!inTeams.contains(p.id))
+        {
+            mList.append(p);
+        }
+    }
+
+    mSelection.clear();
     Update();
 }
 

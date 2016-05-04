@@ -14,7 +14,7 @@ public:
 
     Team GetTeam() { return mTeam; }
 
-    void SetPlayers(const QList<Player> &players);
+    void Initialize(const QList<Player> &players, const QList<int> &inTeams);
 
 private slots:
     void slotAccept();

@@ -13,15 +13,15 @@ SOURCES += main.cpp MainWindow.cpp \
     DbManager.cpp \
     PlayerWindow.cpp \
     TeamWindow.cpp \
-    MatchWindow.cpp \
-    BracketWindow.cpp
+    BracketWindow.cpp \
+    DatePickerWindow.cpp
 
 HEADERS  += MainWindow.h \
     DbManager.h \
     PlayerWindow.h \
     TeamWindow.h \
-    MatchWindow.h \
-    BracketWindow.h
+    BracketWindow.h \
+    DatePickerWindow.h
 
 FORMS    += MainWindow.ui \
     PlayerWindow.ui \

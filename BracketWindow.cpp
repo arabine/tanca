@@ -1,6 +1,9 @@
 #include "BracketWindow.h"
 
+#include <QVBoxLayout>
 #include <QRadialGradient>
+#include <QMessageBox>
+#include <iostream>
 
 void BaseRect::SetText(const QString &s)
 {
@@ -85,44 +88,155 @@ View::View(QGraphicsScene *scene, QWidget *parent)
 
 void View::resizeEvent(QResizeEvent *event)
 {
-    QGraphicsView::resizeEvent(event);
-    fitInView(sceneRect(), Qt::KeepAspectRatio);
+    (void) event;
+ //   QGraphicsView::resizeEvent(event);
+ //   fitInView(sceneRect(), Qt::KeepAspectRatio);
 }
 
-BracketWindow::BracketWindow(QWidget *parent)
-    : QDialog(parent)
+/*****************************************************************************/
+
+MatchGroup::MatchGroup(QGraphicsScene *scene, QGraphicsItem *parent)
 {
-    mScene = new QGraphicsScene(0, 0, 400, 320, this);
+    boxTop = new BracketBox(BracketBox::TOP, parent);
+    boxBottom = new BracketBox(BracketBox::BOTTOM, parent);
+
+    Move(QPointF(0, 0));
+
+    scene->addItem(boxTop);
+    scene->addItem(boxBottom);
+}
+
+void MatchGroup::SetTeam(BracketBox::Position position, const Team &team)
+{
+    if (position == BracketBox::TOP)
+    {
+        boxTop->SetPlayerName(team.teamName);
+    }
+    else
+    {
+        boxBottom->SetPlayerName(team.teamName);
+    }
+}
+
+void MatchGroup::Move(const QPointF &origin)
+{
+    boxTop->setPos(origin);
+    boxBottom->setPos(origin.x(), origin.y() + BracketBox::cHeight + cSpacer); // 2 pixels between boxes
+}
+
+/*****************************************************************************/
+
+BracketWindow::BracketWindow(QWidget *parent)
+    : QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint)
+    , mRounds(3)
+{
+    mScene = new Scene(0, 0, 950, 400, this);
     mView = new View(mScene, this);
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->addWidget(mView);
 
     setLayout(mainLayout);
-    resize(400, 320);
 
     // a blue background
     mScene->setBackgroundBrush(QColor(68,68,68));
-
-    MatchGroup *match = new MatchGroup(mScene);
-    RoundBox *roundBox1 = new RoundBox(1);
-    roundBox1->AddMatch(match);
-
-    mScene->addItem(roundBox1);
-
 }
 
-MatchGroup::MatchGroup(QGraphicsScene *scene)
+bool BracketWindow::SetTeams(const QList<Team> &teams)
 {
-    boxTop = new BracketBox(BracketBox::TOP);
-    boxBottom = new BracketBox(BracketBox::BOTTOM);
-    scene->addItem(boxTop);
-    scene->addItem(boxBottom);
+    bool ok = false;
+    mTeams = teams;
 
-    boxTop->setPos(10, 20);
-    boxBottom->setPos(10, BracketBox::cHeight + 22);
+    qDeleteAll(mBoxes.begin(), mBoxes.end());
+    mBoxes.clear();
 
-    boxTop->SetPlayerName("Anthony Rabine / Kévin Machin");
+    for (int i = 0; i < mTeams.size(); i++)
+    {
+        mTeams[i].opponents.clear();
+    }
+
+    // Check if there is enough teams for the desired number of rounds
+    if (mTeams.size() > mRounds)
+    {
+        for (int i = 0; i < mRounds; i++)
+        {
+            RoundBox *roundBox = new RoundBox(i+1);
+            QPointF pos;
+
+            pos.setX(20 + (i * RoundBox::cWidth));
+            pos.setY(0);
+
+            roundBox->setPos(pos);
+            mBoxes.append(roundBox);
+            mScene->addItem(roundBox);
+
+            // Create matches for all teams
+            for (int j = 0; j < mTeams.size(); j++)
+            {
+                Team &team = mTeams[j];
+
+                // Test if we have been already assigned to a match
+                if (team.opponents.size() != (i+1))
+                {
+                    int k;
+                    // Find opponents for that round
+                    for (k = 0; k < mTeams.size(); k++)
+                    {
+                        Team &opp = mTeams[k];
+                        if ((opp.id != team.id) &&
+                            (!team.opponents.contains(opp.id)) &&
+                            (!opp.opponents.contains(team.id)) &&
+                            (opp.opponents.size() != (i+1)))
+                        {
+                            // Found free oponent, memorize it for that round
+                            team.opponents.append(opp.id);
+                            opp.opponents.append(team.id);
+                            break;
+                        }
+                    }
+
+                    if (k != mTeams.size())
+                    {
+                        Team &opp = mTeams[k];
+                        std::cout << "Round: " << (i+1) << ", Match: " << team.teamName.toStdString() << " <- vs -> " << opp.teamName.toStdString() << std::endl;
+
+                        MatchGroup *match = new MatchGroup(mScene, roundBox);
+                        match->SetTeam(BracketBox::TOP, team);
+                        match->SetTeam(BracketBox::BOTTOM, opp);
+
+                        roundBox->AddMatch(match);
+                    }
+                    else
+                    {
+                        std::cout << "Cannot find opponent!" << std::endl;
+                    }
+                }
+            } // end for rounds
+        }
+
+        ok = true;
+    }
+    else
+    {
+        (void) QMessageBox::warning(this, tr("Tanca"),
+                                    tr("Il n'y a pas assez d'équipes pour jouer %1 parties.").arg(mRounds),
+                                    QMessageBox::Ok);
+    }
+
+    return ok;
+}
 
 
+void RoundBox::AddMatch(MatchGroup *match)
+{
+    int offset = mList.size() * (MatchGroup::cGroupHeight + (MatchGroup::cSpacer *4)); // bigger spacer between match groups
+
+    QPointF round = pos();
+
+    round.setX(10);
+    round.setY(round.y() + offset + RoundBox::cHeight + (MatchGroup::cSpacer * 4));
+
+    match->Move(round);
+
+    mList.append(match);
 }
