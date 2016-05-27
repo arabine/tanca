@@ -4,6 +4,7 @@
 #include <QRadialGradient>
 #include <QMessageBox>
 #include <iostream>
+#include <algorithm>
 
 void BaseRect::SetText(const QString &s)
 {
@@ -102,8 +103,8 @@ MatchGroup::MatchGroup(QGraphicsScene *scene, QGraphicsItem *parent)
 
     Move(QPointF(0, 0));
 
-    scene->addItem(boxTop);
-    scene->addItem(boxBottom);
+   // scene->addItem(boxTop);
+  //  scene->addItem(boxBottom);
 }
 
 void MatchGroup::SetTeam(BracketBox::Position position, const Team &team)
@@ -128,7 +129,7 @@ void MatchGroup::Move(const QPointF &origin)
 
 BracketWindow::BracketWindow(QWidget *parent)
     : QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint)
-    , mRounds(3)
+    , mTurns(3)
 {
     mScene = new Scene(0, 0, 950, 400, this);
     mView = new View(mScene, this);
@@ -140,90 +141,6 @@ BracketWindow::BracketWindow(QWidget *parent)
 
     // a blue background
     mScene->setBackgroundBrush(QColor(68,68,68));
-}
-
-bool BracketWindow::SetTeams(const QList<Team> &teams)
-{
-    bool ok = false;
-    mTeams = teams;
-
-    qDeleteAll(mBoxes.begin(), mBoxes.end());
-    mBoxes.clear();
-
-    for (int i = 0; i < mTeams.size(); i++)
-    {
-        mTeams[i].opponents.clear();
-    }
-
-    // Check if there is enough teams for the desired number of rounds
-    if (mTeams.size() > mRounds)
-    {
-        for (int i = 0; i < mRounds; i++)
-        {
-            RoundBox *roundBox = new RoundBox(i+1);
-            QPointF pos;
-
-            pos.setX(20 + (i * RoundBox::cWidth));
-            pos.setY(0);
-
-            roundBox->setPos(pos);
-            mBoxes.append(roundBox);
-            mScene->addItem(roundBox);
-
-            // Create matches for all teams
-            for (int j = 0; j < mTeams.size(); j++)
-            {
-                Team &team = mTeams[j];
-
-                // Test if we have been already assigned to a match
-                if (team.opponents.size() != (i+1))
-                {
-                    int k;
-                    // Find opponents for that round
-                    for (k = 0; k < mTeams.size(); k++)
-                    {
-                        Team &opp = mTeams[k];
-                        if ((opp.id != team.id) &&
-                            (!team.opponents.contains(opp.id)) &&
-                            (!opp.opponents.contains(team.id)) &&
-                            (opp.opponents.size() != (i+1)))
-                        {
-                            // Found free oponent, memorize it for that round
-                            team.opponents.append(opp.id);
-                            opp.opponents.append(team.id);
-                            break;
-                        }
-                    }
-
-                    if (k != mTeams.size())
-                    {
-                        Team &opp = mTeams[k];
-                        std::cout << "Round: " << (i+1) << ", Match: " << team.teamName.toStdString() << " <- vs -> " << opp.teamName.toStdString() << std::endl;
-
-                        MatchGroup *match = new MatchGroup(mScene, roundBox);
-                        match->SetTeam(BracketBox::TOP, team);
-                        match->SetTeam(BracketBox::BOTTOM, opp);
-
-                        roundBox->AddMatch(match);
-                    }
-                    else
-                    {
-                        std::cout << "Cannot find opponent!" << std::endl;
-                    }
-                }
-            } // end for rounds
-        }
-
-        ok = true;
-    }
-    else
-    {
-        (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Il n'y a pas assez d'équipes pour jouer %1 parties.").arg(mRounds),
-                                    QMessageBox::Ok);
-    }
-
-    return ok;
 }
 
 
@@ -240,3 +157,208 @@ void RoundBox::AddMatch(MatchGroup *match)
 
     mList.append(match);
 }
+
+/*****************************************************************************/
+
+// Return true if there is no round assigned to this team for this turn
+bool BracketWindow::IsFree(const int id, const int turn)
+{
+    bool isFree = true;
+
+    for (int i = 0; i < mGames.size(); i++)
+    {
+        const Game &round = mGames.at(i);
+        if (round.turn == turn)
+        {
+            if ((round.team1Id == id) ||
+                (round.team2Id == id))
+            {
+                isFree = false;
+            }
+        }
+    }
+    return isFree;
+}
+
+bool BracketWindow::HasAlreadyPlayed(const int id1, const int id2)
+{
+    bool alreadyPlayed = false;
+
+    for (int i = 0; i < mGames.size(); i++)
+    {
+        const Game &round = mGames.at(i);
+        if (((round.team1Id == id1) &&
+             (round.team2Id == id2)) ||
+            ((round.team1Id == id2) &&
+             (round.team2Id == id1)))
+        {
+            alreadyPlayed = true;
+        }
+    }
+    return alreadyPlayed;
+}
+
+
+int BracketWindow::Randomize(const Team &team, int turn)
+{
+    bool found = false;
+    int k = -1;
+
+    do
+    {
+        // Find opponents for that round
+        k = qrand()%mTeams.size();
+    //    std::cout << "Trying: " << k << std::endl;
+        Team &opp = mTeams[k];
+        if ((opp.id != team.id) &&
+            IsFree(opp.id, turn) &&
+            !HasAlreadyPlayed(opp.id, team.id))
+        {
+            // Found free oponent, memorize it for that round
+            found = true;
+        }
+    }
+    while(!found);
+
+    return k;
+}
+
+
+QList<Game> BracketWindow::BuildRounds(const QList<Team> &teams)
+{
+    mTeams = teams;
+    mGames.clear();
+
+    // Check if there is enough teams for the desired number of rounds
+    if (mTeams.size() > mTurns)
+    {
+        for (int i = 0; i < mTurns; i++)
+        {
+            // Create fuzzy, never start with the same team
+            std::random_shuffle(mTeams.begin(), mTeams.end());
+
+            // Don't manage odd number of teams
+            int max_games = mTeams.size() / 2;
+            int games = 0;
+
+            // Create matches for all teams
+            for (int j = 0; j < mTeams.size(); j++)
+            {
+                Team &team = mTeams[j];
+
+                // Test if we have been already assigned to a match
+                if (IsFree(team.id, i))
+                {
+                    int k = Randomize(team, i);
+
+                    // Valid team id, create the round
+                    if ((k != mTeams.size()) && (k >= 0))
+                    {
+                        Team &opp = mTeams[k];
+                        Game game;
+
+                        game.eventId = opp.eventId;
+                        game.turn = i;
+                        game.team1Id = team.id;
+                        game.team2Id = opp.id;
+
+                        mGames.append(game);
+
+                        games++;
+
+                        std::cout << "Turn: " << (i+1) << ", Game: " << team.teamName.toStdString() << " <- vs -> " << opp.teamName.toStdString() << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << "Cannot find opponent!" << std::endl;
+                    }
+                }
+
+                // Exit if we reachs the number of games
+                // We will artificially exit when there is an odd number of teams
+                if (games >= max_games)
+                {
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        (void) QMessageBox::warning(this, tr("Tanca"),
+                                    tr("Il n'y a pas assez d'équipes pour jouer %1 parties.").arg(mTurns),
+                                    QMessageBox::Ok);
+    }
+
+    return mGames;
+}
+
+
+bool BracketWindow::FindTeam(const int id, Team &team)
+{
+    bool found = false;
+    for (int i = 0; i < mTeams.size(); i++)
+    {
+        if (mTeams[i].id == id)
+        {
+            found = true;
+            team = mTeams[i];
+            break;
+        }
+    }
+
+    return found;
+}
+
+void BracketWindow::SetGames(const QList<Game>& games)
+{
+    mGames = games;
+    qDeleteAll(mBoxes.begin(), mBoxes.end());
+    mBoxes.clear();
+
+    for (int i = 0; i < mTurns; i++)
+    {
+        RoundBox *roundBox = new RoundBox(i+1);
+        QPointF pos;
+
+        pos.setX(20 + (i * RoundBox::cWidth));
+        pos.setY(0);
+
+        roundBox->setPos(pos);
+        mBoxes.append(roundBox);
+        mScene->addItem(roundBox);
+
+        // Create matche boxes for that turn
+        for (int j = 0; j < mGames.size(); j++)
+        {
+            const Game &round = mGames.at(j);
+            if (round.turn == i)
+            {
+                MatchGroup *match = new MatchGroup(mScene, roundBox);
+
+                Team team;
+                if (FindTeam(round.team1Id, team))
+                {
+                    match->SetTeam(BracketBox::TOP, team);
+                }
+                else
+                {
+                    std::cout << "Impossible de trouver l'équipe !" << std::endl;
+                }
+
+                if (FindTeam(round.team2Id, team))
+                {
+                    match->SetTeam(BracketBox::BOTTOM, team);
+                }
+                else
+                {
+                    std::cout << "Impossible de trouver l'équipe !" << std::endl;
+                }
+
+                roundBox->AddMatch(match);
+            }
+        }
+    }
+
+}
+

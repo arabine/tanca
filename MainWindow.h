@@ -23,12 +23,14 @@ public:
 
 private slots:
     void slotAddPlayer();
-     void slotShowRounds();
+     void slotShowGames();
      void slotAddTeam();
-     void slotAddMatch();
+     void slotAddEvent();
      void slotSeasonChanged(int index);
      void slotMatchItemActivated();
      void slotEditPlayer();
+     void slotStartRounds();
+     void slotEditGame();
 private:
     void InitializePlayers();
 
@@ -42,11 +44,14 @@ private:
     // other stuff
     DbManager mDatabase;
     QList<int>  mPlayersInTeams; // Players already in teams
-    QList<Match> mMatches;
+    QList<Event> mMatches;
     QList<Team> mTeams;
+    Event mCurrentEvent;
 
-    void UpdateTeamList(int matchId);
+    void UpdateTeamList(int eventId);
     bool FindPlayer(int id, Player &player);
+    void UpdateGameList();
+    bool FindTeam(const int id, Team &team);
 };
 
 #endif // MAINWINDOW_H

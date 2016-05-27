@@ -131,8 +131,8 @@ class RoundBox : public BaseRect
 {
 public:
 
-    static const qreal cHeight = 20.0f;
-    static const qreal cWidth = 300.0f;
+    static const int cHeight = 20;
+    static const int cWidth = 300;
 
     RoundBox(int column)
         : BaseRect(NO_ROUND, NULL)
@@ -188,13 +188,22 @@ class BracketWindow : public QDialog
 public:
     explicit BracketWindow(QWidget *parent = 0);
 
-    bool SetTeams(const QList<Team> &teams);
+    QList<Game> BuildRounds(const QList<Team> &teams);
+    void SetGames(const QList<Game> &games);
+
 private:
     Scene *mScene;
     View *mView;
     QList<Team> mTeams;
+    QList<Game> mGames;
     QList<RoundBox *> mBoxes;
-    int mRounds;
+    int mTurns;
+
+
+    int Randomize(const Team &team, int turn);
+    bool IsFree(const int id, const int turn);
+    bool FindTeam(const int id, Team &team);
+    bool HasAlreadyPlayed(const int id1, const int id2);
 };
 
 #endif // ROUNDWINDOW_H

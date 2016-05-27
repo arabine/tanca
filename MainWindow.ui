@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>833</width>
-    <height>635</height>
+    <width>1045</width>
+    <height>744</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="1">
+   <layout class="QGridLayout" name="gridLayout_5">
+    <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -83,8 +83,8 @@
        <attribute name="title">
         <string>Championnat du Club</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
          <widget class="QGroupBox" name="groupBox">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
@@ -109,7 +109,7 @@
           </layout>
          </widget>
         </item>
-        <item>
+        <item row="1" column="0">
          <widget class="QGroupBox" name="groupBox_2">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -120,8 +120,8 @@
           <property name="title">
            <string>Championnat</string>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_10">
-           <item>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="0" column="0">
             <layout class="QVBoxLayout" name="verticalLayout_3">
              <item>
               <widget class="QLabel" name="label_2">
@@ -167,7 +167,7 @@
              </item>
             </layout>
            </item>
-           <item>
+           <item row="0" column="1">
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
               <widget class="QLabel" name="label_3">
@@ -199,13 +199,13 @@
              </item>
             </layout>
            </item>
-           <item>
+           <item row="0" column="2">
             <widget class="QGroupBox" name="groupBox_3">
              <property name="title">
-              <string>Gestion &amp; informations</string>
+              <string>Gestion des parties</string>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_5">
-              <item>
+             <layout class="QGridLayout" name="gridLayout">
+              <item row="0" column="0">
                <layout class="QHBoxLayout" name="horizontalLayout_5">
                 <item>
                  <widget class="QLabel" name="label_5">
@@ -217,13 +217,13 @@
                 <item>
                  <widget class="QLabel" name="label_8">
                   <property name="text">
-                   <string>TextLabel</string>
+                   <string>-</string>
                   </property>
                  </widget>
                 </item>
                </layout>
               </item>
-              <item>
+              <item row="1" column="0">
                <layout class="QHBoxLayout" name="horizontalLayout_6">
                 <item>
                  <widget class="QLabel" name="label_6">
@@ -235,13 +235,13 @@
                 <item>
                  <widget class="QLabel" name="label_9">
                   <property name="text">
-                   <string>TextLabel</string>
+                   <string>-</string>
                   </property>
                  </widget>
                 </item>
                </layout>
               </item>
-              <item>
+              <item row="2" column="0">
                <layout class="QHBoxLayout" name="horizontalLayout_7">
                 <item>
                  <widget class="QLabel" name="label_7">
@@ -253,13 +253,13 @@
                 <item>
                  <widget class="QLabel" name="label_10">
                   <property name="text">
-                   <string>TextLabel</string>
+                   <string>-</string>
                   </property>
                  </widget>
                 </item>
                </layout>
               </item>
-              <item>
+              <item row="3" column="0">
                <layout class="QHBoxLayout" name="horizontalLayout_8">
                 <item>
                  <widget class="QLabel" name="label_11">
@@ -271,38 +271,35 @@
                 <item>
                  <widget class="QLabel" name="label_12">
                   <property name="text">
-                   <string>TextLabel</string>
+                   <string>-</string>
                   </property>
                  </widget>
                 </item>
                </layout>
               </item>
-              <item>
-               <spacer name="verticalSpacer">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>200</height>
-                 </size>
-                </property>
-               </spacer>
+              <item row="4" column="0">
+               <widget class="QListWidget" name="gameList"/>
               </item>
-              <item>
+              <item row="5" column="0">
                <layout class="QHBoxLayout" name="horizontalLayout_9">
                 <item>
-                 <widget class="QPushButton" name="buttonStart">
+                 <widget class="QPushButton" name="buttonAddGame">
                   <property name="text">
-                   <string>Démarrer</string>
+                   <string>Ajouter</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_7">
+                 <widget class="QPushButton" name="buttonEditGame">
                   <property name="text">
                    <string>Pointage</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="buttonStart">
+                  <property name="text">
+                   <string>Démarrer</string>
                   </property>
                  </widget>
                 </item>
@@ -332,7 +329,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>833</width>
+     <width>1045</width>
      <height>21</height>
     </rect>
    </property>
