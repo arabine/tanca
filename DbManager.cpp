@@ -307,7 +307,7 @@ bool DbManager::AddEvent(const Event& event)
 
     QSqlQuery queryAdd(mDb);
     queryAdd.prepare("INSERT INTO events (date, year, state, type, document) VALUES (:date, :year, :state, :type, :document)");
-    queryAdd.bindValue(":date", event.date);
+    queryAdd.bindValue(":date", event.date.toString(Qt::ISODate));
     queryAdd.bindValue(":year", event.year);
     queryAdd.bindValue(":state", event.state);
     queryAdd.bindValue(":type", event.type);
@@ -339,11 +339,15 @@ Event DbManager::GetEvent(const QString &date)
         if (query.next())
         {
             event.id = query.value("id").toInt();
-            event.date = query.value("date").toDate();
+            event.date = query.value("date").toDateTime();
             event.state = query.value("state").toInt();
             event.year = query.value("year").toInt();
             event.type = query.value("type").toInt();
             event.document = query.value("document").toString();
+        }
+        else
+        {
+            TLogError("Cannot find any event for that date");
         }
     }
 
@@ -364,7 +368,7 @@ QList<Event> DbManager::GetEvents(int year)
         {
             Event event;
             event.id = query.value("id").toInt();
-            event.date = query.value("date").toDate();
+            event.date = query.value("date").toDateTime();
             event.year = query.value("year").toInt();
             event.state = query.value("state").toInt();
             event.type = query.value("type").toInt();
@@ -436,6 +440,39 @@ QList<Game> DbManager::GetGames(int event_id)
         }
     }
     return result;
+}
+
+bool DbManager::EditGame(const Game& game)
+{
+    bool success = false;
+
+    QSqlQuery queryEdit(mDb);
+    queryEdit.prepare("UPDATE games SET event_id = :event_id, "
+                     "SET turn = :turn, SET team1_id = :team1_id, SET team2_id = :team2_id, "
+                     "SET team1_score = :team1_score, SET team2_score = :team2_score, "
+                     "SET state = :state, SET document = :document "
+                     "WHERE id = :id");
+
+    queryEdit.bindValue(":id", game.id);
+    queryEdit.bindValue(":event_id", game.eventId);
+    queryEdit.bindValue(":turn", game.turn);
+    queryEdit.bindValue(":team1_id", game.team1Id);
+    queryEdit.bindValue(":team2_id", game.team2Id);
+    queryEdit.bindValue(":team1_score", game.team1Score);
+    queryEdit.bindValue(":team2_score", game.team2Score);
+    queryEdit.bindValue(":state", game.state);
+    queryEdit.bindValue(":document", game.document);
+
+    if(queryEdit.exec())
+    {
+        qDebug() << "Edit game success";
+        success = true;
+    }
+    else
+    {
+        TLogError("Edit game failed: " + queryEdit.lastError().text().toStdString());
+    }
+    return success;
 }
 
 bool DbManager::AddTeam(const Team &team)

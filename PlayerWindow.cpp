@@ -17,7 +17,7 @@ void PlayerWindow::slotAddLicence()
 {
     if (datePickerWindow->exec() == QDialog::Accepted)
     {
-        QDate date = datePickerWindow->GetDate();
+        QDateTime date = datePickerWindow->GetDateTime();
         ui.listLicences->addItem(date.toString());
     }
 }

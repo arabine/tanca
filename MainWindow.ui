@@ -78,6 +78,38 @@
        <attribute name="title">
         <string>Classement saison</string>
        </attribute>
+       <layout class="QGridLayout" name="gridLayout_6">
+        <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Saison :</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBox"/>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <widget class="QTableWidget" name="tableContest"/>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
@@ -145,7 +177,7 @@
               </layout>
              </item>
              <item>
-              <widget class="QListWidget" name="matchList"/>
+              <widget class="QListWidget" name="eventList"/>
              </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_3">

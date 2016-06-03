@@ -60,7 +60,8 @@ struct Event
 {
     int id;
     int year;
-    QDate date; // full date
+    QDateTime date;
+    QString title;
     int state;
     int type;
     QString document;  // JSON document, reserved to store anything in the future
@@ -79,11 +80,11 @@ struct Event
         , state(cNotStarted)
         , type(cClubContest)
     {
-        date = QDate::currentDate();
+        date = QDateTime::currentDateTime();
     }
 
     static QString Table() {
-        return "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY, date TEXT, year INTEGER, state INTEGER, type INTEGER, document TEXT);";
+        return "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY, date TEXT, year INTEGER, title TEXT, state INTEGER, type INTEGER, document TEXT);";
     }
 };
 
@@ -107,6 +108,23 @@ struct Team
         , state(-1)
     {
 
+    }
+
+
+    static bool Find(const QList<Team> &teams, const int id, Team &team)
+    {
+        bool found = false;
+        for (int i = 0; i < teams.size(); i++)
+        {
+            if (teams[i].id == id)
+            {
+                found = true;
+                team = teams[i];
+                break;
+            }
+        }
+
+        return found;
     }
 
     static QString Table() {
@@ -208,6 +226,7 @@ public:
     QList<Player> &GetPlayerList();
 
     bool AddGames(const QList<Game> &games);
+    bool EditGame(const Game &game);
 private:
     QSqlDatabase mDb;
     QSqlDatabase mCities;

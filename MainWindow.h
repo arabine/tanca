@@ -7,6 +7,7 @@
 #include "DatePickerWindow.h"
 #include "BracketWindow.h"
 #include "TeamWindow.h"
+#include "GameWindow.h"
 
 namespace Ui {
 class MainWindow;
@@ -27,7 +28,7 @@ private slots:
      void slotAddTeam();
      void slotAddEvent();
      void slotSeasonChanged(int index);
-     void slotMatchItemActivated();
+     void slotEventItemActivated();
      void slotEditPlayer();
      void slotStartRounds();
      void slotEditGame();
@@ -40,18 +41,21 @@ private:
     BracketWindow *bracketWindow;
     DatePickerWindow *datePickerWindow;
     TeamWindow *teamWindow;
+    GameWindow *gameWindow;
 
     // other stuff
     DbManager mDatabase;
     QList<int>  mPlayersInTeams; // Players already in teams
-    QList<Event> mMatches;
+    QList<Event> mEvents;
     QList<Team> mTeams;
+    QList<Game> mGames;
     Event mCurrentEvent;
 
     void UpdateTeamList(int eventId);
     bool FindPlayer(int id, Player &player);
     void UpdateGameList();
-    bool FindTeam(const int id, Team &team);
+
+    bool FindGame(const int id, Game &game);
 };
 
 #endif // MAINWINDOW_H

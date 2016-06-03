@@ -188,21 +188,19 @@ class BracketWindow : public QDialog
 public:
     explicit BracketWindow(QWidget *parent = 0);
 
-    QList<Game> BuildRounds(const QList<Team> &teams);
-    void SetGames(const QList<Game> &games);
+    QList<Game> BuildRounds(const QList<Team> &tlist);
+    void SetGames(const QList<Game> &games, const QList<Team> &teams);
 
 private:
     Scene *mScene;
     View *mView;
-    QList<Team> mTeams;
     QList<Game> mGames;
     QList<RoundBox *> mBoxes;
     int mTurns;
 
 
-    int Randomize(const Team &team, int turn);
+    int Randomize(const QList<Team> &teams, const Team &team, int turn);
     bool IsFree(const int id, const int turn);
-    bool FindTeam(const int id, Team &team);
     bool HasAlreadyPlayed(const int id1, const int id2);
 };
 

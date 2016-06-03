@@ -50,7 +50,7 @@ Source: "C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\Qt5Widgets.dll"; DestDir: "{app}"; Fla
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{userappdata}\Roaming\tanca"; Filename: "Tanca"
+Name: "{userappdata}\Roaming\tanca"; Filename: "Tanca (fichiers)"; Flags: foldershortcut
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]

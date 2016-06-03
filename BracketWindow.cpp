@@ -199,7 +199,7 @@ bool BracketWindow::HasAlreadyPlayed(const int id1, const int id2)
 }
 
 
-int BracketWindow::Randomize(const Team &team, int turn)
+int BracketWindow::Randomize(const QList<Team>& teams, const Team &team, int turn)
 {
     bool found = false;
     int k = -1;
@@ -207,9 +207,9 @@ int BracketWindow::Randomize(const Team &team, int turn)
     do
     {
         // Find opponents for that round
-        k = qrand()%mTeams.size();
+        k = qrand()%teams.size();
     //    std::cout << "Trying: " << k << std::endl;
-        Team &opp = mTeams[k];
+        const Team &opp = teams[k];
         if ((opp.id != team.id) &&
             IsFree(opp.id, turn) &&
             !HasAlreadyPlayed(opp.id, team.id))
@@ -224,37 +224,37 @@ int BracketWindow::Randomize(const Team &team, int turn)
 }
 
 
-QList<Game> BracketWindow::BuildRounds(const QList<Team> &teams)
+QList<Game> BracketWindow::BuildRounds(const QList<Team> &tlist)
 {
-    mTeams = teams;
     mGames.clear();
+    QList<Team> teams = tlist; // Local copy to manipulate the list
 
     // Check if there is enough teams for the desired number of rounds
-    if (mTeams.size() > mTurns)
+    if (teams.size() > mTurns)
     {
         for (int i = 0; i < mTurns; i++)
         {
             // Create fuzzy, never start with the same team
-            std::random_shuffle(mTeams.begin(), mTeams.end());
+            std::random_shuffle(teams.begin(), teams.end());
 
             // Don't manage odd number of teams
-            int max_games = mTeams.size() / 2;
+            int max_games = teams.size() / 2;
             int games = 0;
 
             // Create matches for all teams
-            for (int j = 0; j < mTeams.size(); j++)
+            for (int j = 0; j < teams.size(); j++)
             {
-                Team &team = mTeams[j];
+                const Team &team = teams[j];
 
                 // Test if we have been already assigned to a match
                 if (IsFree(team.id, i))
                 {
-                    int k = Randomize(team, i);
+                    int k = Randomize(teams, team, i);
 
                     // Valid team id, create the round
-                    if ((k != mTeams.size()) && (k >= 0))
+                    if ((k != teams.size()) && (k >= 0))
                     {
-                        Team &opp = mTeams[k];
+                        const Team &opp = teams[k];
                         Game game;
 
                         game.eventId = opp.eventId;
@@ -294,23 +294,7 @@ QList<Game> BracketWindow::BuildRounds(const QList<Team> &teams)
 }
 
 
-bool BracketWindow::FindTeam(const int id, Team &team)
-{
-    bool found = false;
-    for (int i = 0; i < mTeams.size(); i++)
-    {
-        if (mTeams[i].id == id)
-        {
-            found = true;
-            team = mTeams[i];
-            break;
-        }
-    }
-
-    return found;
-}
-
-void BracketWindow::SetGames(const QList<Game>& games)
+void BracketWindow::SetGames(const QList<Game>& games, const QList<Team> &teams)
 {
     mGames = games;
     qDeleteAll(mBoxes.begin(), mBoxes.end());
@@ -337,7 +321,7 @@ void BracketWindow::SetGames(const QList<Game>& games)
                 MatchGroup *match = new MatchGroup(mScene, roundBox);
 
                 Team team;
-                if (FindTeam(round.team1Id, team))
+                if (Team::Find(teams, round.team1Id, team))
                 {
                     match->SetTeam(BracketBox::TOP, team);
                 }
@@ -346,7 +330,7 @@ void BracketWindow::SetGames(const QList<Game>& games)
                     std::cout << "Impossible de trouver l'équipe !" << std::endl;
                 }
 
-                if (FindTeam(round.team2Id, team))
+                if (Team::Find(teams, round.team2Id, team))
                 {
                     match->SetTeam(BracketBox::BOTTOM, team);
                 }

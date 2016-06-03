@@ -13,10 +13,10 @@ class DatePickerWindow : public QDialog
 public:
     DatePickerWindow(QWidget *parent = 0);
 
-    QDate GetDate() { return mDate->date(); }
+    QDateTime GetDateTime() { return mDate->dateTime(); }
 
 private:
-    QDateEdit *mDate;
+    QDateTimeEdit *mDate;
     QDialogButtonBox *mButtons;
 
 };

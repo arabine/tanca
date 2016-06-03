@@ -4,9 +4,9 @@
 DatePickerWindow::DatePickerWindow(QWidget *parent)
     : QDialog(parent)
 {
-    mDate = new QDateEdit(this);
+    mDate = new QDateTimeEdit(this);
     mDate->setCalendarPopup(true);
-    mDate->setDate(QDate::currentDate());
+    mDate->setDateTime(QDateTime::currentDateTime());
 
     mButtons = new QDialogButtonBox(QDialogButtonBox::Ok
                                          | QDialogButtonBox::Cancel);
