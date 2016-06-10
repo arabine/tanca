@@ -27,7 +27,7 @@
       <enum>QFrame::Box</enum>
      </property>
      <property name="text">
-      <string>AJOUTER / EDITER UN JOUEUR</string>
+      <string>AJOUTER / ÉDITER UN JOUEUR</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

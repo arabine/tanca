@@ -98,13 +98,11 @@ void View::resizeEvent(QResizeEvent *event)
 
 MatchGroup::MatchGroup(QGraphicsScene *scene, QGraphicsItem *parent)
 {
+    Q_UNUSED(scene);
     boxTop = new BracketBox(BracketBox::TOP, parent);
     boxBottom = new BracketBox(BracketBox::BOTTOM, parent);
 
     Move(QPointF(0, 0));
-
-   // scene->addItem(boxTop);
-  //  scene->addItem(boxBottom);
 }
 
 void MatchGroup::SetTeam(BracketBox::Position position, const Team &team)

@@ -8,6 +8,7 @@
 #include "BracketWindow.h"
 #include "TeamWindow.h"
 #include "GameWindow.h"
+#include "EventWindow.h"
 
 namespace Ui {
 class MainWindow;
@@ -32,6 +33,7 @@ private slots:
      void slotEditPlayer();
      void slotStartRounds();
      void slotEditGame();
+     void slotEditEvent();
 private:
     void InitializePlayers();
 
@@ -42,6 +44,7 @@ private:
     DatePickerWindow *datePickerWindow;
     TeamWindow *teamWindow;
     GameWindow *gameWindow;
+    EventWindow *eventWindow;
 
     // other stuff
     DbManager mDatabase;

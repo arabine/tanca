@@ -201,10 +201,9 @@ bool DbManager::EditPlayer(const Player& player)
     if (IsValid(player))
     {
         QSqlQuery queryEdit(mDb);
-        queryEdit.prepare("UPDATE players SET name = :name, "
-                         "SET last_name = :last_name, SET nick_name = :nick_name, SET email = :email, SET mobile_phone = :mobile_phone, SET home_phone = :home_phone, "
-                         "SET birth_date = :birth_date, SET road = :road, SET post_code = :post_code, "
-                         "SET city = :city, SET membership = :membership, SET comments = :comments, SET state = :state, SET document = :document "
+        queryEdit.prepare("UPDATE players SET name = :name, last_name = :last_name, nick_name = :nick_name, email = :email, "
+                          "mobile_phone = :mobile_phone, home_phone = :home_phone, birth_date = :birth_date, road = :road, post_code = :post_code, "
+                         "city = :city, membership = :membership, comments = :comments, state = :state, document = :document "
                          "WHERE id = :id");
 
         queryEdit.bindValue(":id", player.id);
@@ -306,9 +305,11 @@ bool DbManager::AddEvent(const Event& event)
     bool success = false;
 
     QSqlQuery queryAdd(mDb);
-    queryAdd.prepare("INSERT INTO events (date, year, state, type, document) VALUES (:date, :year, :state, :type, :document)");
-    queryAdd.bindValue(":date", event.date.toString(Qt::ISODate));
+    queryAdd.prepare("INSERT INTO events (year, date, title, state, type, document) VALUES (:year, :date, :title, :state, :type, :document)");
+
     queryAdd.bindValue(":year", event.year);
+    queryAdd.bindValue(":date", event.date.toString(Qt::ISODate));
+    queryAdd.bindValue(":title", event.title);
     queryAdd.bindValue(":state", event.state);
     queryAdd.bindValue(":type", event.type);
     queryAdd.bindValue(":document", event.document);
@@ -323,6 +324,34 @@ bool DbManager::AddEvent(const Event& event)
         TLogError("Add event failed: " + queryAdd.lastError().text().toStdString());
     }
 
+    return success;
+}
+
+bool DbManager::EditEvent(const Event& event)
+{
+    bool success = false;
+
+    QSqlQuery queryEdit(mDb);
+
+    queryEdit.prepare("UPDATE events SET year = :year, date = :date, title = :title, state = :state, type = :type, document = :document WHERE id = :id");
+
+    queryEdit.bindValue(":id", event.id);
+    queryEdit.bindValue(":year", event.year);
+    queryEdit.bindValue(":date", event.date.toString(Qt::ISODate));
+    queryEdit.bindValue(":title", event.title);
+    queryEdit.bindValue(":state", event.state);
+    queryEdit.bindValue(":type", event.type);
+    queryEdit.bindValue(":document", event.document);
+
+    if(queryEdit.exec())
+    {
+        qDebug() << "Edit game success";
+        success = true;
+    }
+    else
+    {
+        TLogError("Edit game failed: " + queryEdit.lastError().text().toStdString());
+    }
     return success;
 }
 
@@ -447,10 +476,11 @@ bool DbManager::EditGame(const Game& game)
     bool success = false;
 
     QSqlQuery queryEdit(mDb);
+
     queryEdit.prepare("UPDATE games SET event_id = :event_id, "
-                     "SET turn = :turn, SET team1_id = :team1_id, SET team2_id = :team2_id, "
-                     "SET team1_score = :team1_score, SET team2_score = :team2_score, "
-                     "SET state = :state, SET document = :document "
+                     "turn = :turn, team1_id = :team1_id, team2_id = :team2_id, "
+                     "team1_score = :team1_score, team2_score = :team2_score, "
+                     "state = :state, document = :document "
                      "WHERE id = :id");
 
     queryEdit.bindValue(":id", game.id);

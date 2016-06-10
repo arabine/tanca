@@ -67,9 +67,9 @@ struct Event
     QString document;  // JSON document, reserved to store anything in the future
 
     // State
-    static const int cNotStarted = -1;
-    static const int cStarted = 0;
-    static const int cCanceled = 1;
+    static const int cNotStarted = 0;
+    static const int cStarted = 1;
+    static const int cCanceled = 2;
 
     // Type
     static const int cClubContest = 0;
@@ -227,6 +227,7 @@ public:
 
     bool AddGames(const QList<Game> &games);
     bool EditGame(const Game &game);
+    bool EditEvent(const Event &event);
 private:
     QSqlDatabase mDb;
     QSqlDatabase mCities;

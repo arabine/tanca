@@ -51,6 +51,9 @@ MainWindow::MainWindow(QWidget *parent)
     gameWindow = new GameWindow(this);
     gameWindow->hide();
 
+    eventWindow = new EventWindow(this);
+    eventWindow->hide();
+
     // Setup signals for TAB 1: players management
     connect(ui->buttonAddPlayer, &QPushButton::clicked, this, &MainWindow::slotAddPlayer);
     connect(ui->buttonEditPlayer, &QPushButton::clicked, this, &MainWindow::slotEditPlayer);
@@ -171,6 +174,44 @@ void MainWindow::slotEventItemActivated()
     }
 }
 
+void MainWindow::slotAddEvent()
+{
+    Event event;
+    eventWindow->SetEvent(event);
+    if (eventWindow->exec() == QDialog::Accepted)
+    {
+        eventWindow->GetEvent(event);
+        event.year = event.date.date().year();
+        if (mDatabase.AddEvent(event))
+        {
+            ui->comboSeasons->clear();
+            ui->comboSeasons->addItems(mDatabase.GetSeasons());
+        }
+    }
+}
+
+
+void MainWindow::slotEditEvent()
+{
+    int index = ui->eventList->currentRow();
+    if (index >= 0)
+    {
+        eventWindow->SetEvent(mCurrentEvent);
+        if (eventWindow->exec() == QDialog::Accepted)
+        {
+            eventWindow->GetEvent(mCurrentEvent);
+            if (!mDatabase.EditEvent(mCurrentEvent))
+            {
+                TLogError("Cannot edit event!");
+            }
+            else
+            {
+                slotSeasonChanged(ui->comboSeasons->currentIndex());
+            }
+        }
+    }
+}
+
 void MainWindow::slotAddTeam()
 {
     int match = ui->eventList->currentRow();
@@ -191,21 +232,6 @@ void MainWindow::slotAddTeam()
     }
 }
 
-void MainWindow::slotAddEvent()
-{
-    if (datePickerWindow->exec() == QDialog::Accepted)
-    {
-        Event match;
-        QDateTime date = datePickerWindow->GetDateTime();
-        match.date = date;
-        match.year = date.date().year();
-        if (mDatabase.AddEvent(match))
-        {
-            ui->comboSeasons->clear();
-            ui->comboSeasons->addItems(mDatabase.GetSeasons());
-        }
-    }
-}
 
 void MainWindow::slotSeasonChanged(int index)
 {
@@ -318,7 +344,7 @@ void MainWindow::slotEditGame()
     int index = ui->gameList->currentRow();
     if (index >= 0)
     {
-        QRegularExpression re("\\.+(\\d)");
+        QRegularExpression re("\\.*(\\d+)");
         QRegularExpressionMatch match = re.match(ui->gameList->item(index)->text());
 
         if (match.hasMatch())
