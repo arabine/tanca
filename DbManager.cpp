@@ -368,9 +368,10 @@ Event DbManager::GetEvent(const QString &date)
         if (query.next())
         {
             event.id = query.value("id").toInt();
-            event.date = query.value("date").toDateTime();
-            event.state = query.value("state").toInt();
             event.year = query.value("year").toInt();
+            event.date = query.value("date").toDateTime();
+            event.title = query.value("title").toString();
+            event.state = query.value("state").toInt();
             event.type = query.value("type").toInt();
             event.document = query.value("document").toString();
         }
@@ -397,8 +398,9 @@ QList<Event> DbManager::GetEvents(int year)
         {
             Event event;
             event.id = query.value("id").toInt();
-            event.date = query.value("date").toDateTime();
             event.year = query.value("year").toInt();
+            event.date = query.value("date").toDateTime();
+            event.title = query.value("title").toString();
             event.state = query.value("state").toInt();
             event.type = query.value("type").toInt();
             event.document = query.value("document").toString();
