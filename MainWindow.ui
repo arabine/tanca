@@ -89,7 +89,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox"/>
+           <widget class="QComboBox" name="comboRankingSeasons"/>
           </item>
           <item>
            <spacer name="horizontalSpacer_2">
@@ -107,7 +107,23 @@
          </layout>
         </item>
         <item row="1" column="0">
-         <widget class="QTableWidget" name="tableContest"/>
+         <widget class="QTableWidget" name="tableContest">
+          <column>
+           <property name="text">
+            <string>Joueur</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Points</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Parties jouées</string>
+           </property>
+          </column>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -158,7 +174,7 @@
              <item>
               <widget class="QLabel" name="label_2">
                <property name="text">
-                <string>Liste des rencontres</string>
+                <string>Liste des événements</string>
                </property>
               </widget>
              </item>
@@ -369,8 +385,9 @@
     <property name="title">
      <string>Fichier</string>
     </property>
-    <addaction name="actionQuitter"/>
+    <addaction name="actionImporter"/>
     <addaction name="separator"/>
+    <addaction name="actionQuitter"/>
    </widget>
    <addaction name="menuFichier"/>
   </widget>
@@ -386,6 +403,11 @@
   <action name="actionQuitter">
    <property name="text">
     <string>Quitter</string>
+   </property>
+  </action>
+  <action name="actionImporter">
+   <property name="text">
+    <string>Importer une liste d'adhérents (CSV)</string>
    </property>
   </action>
  </widget>

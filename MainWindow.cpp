@@ -1,6 +1,7 @@
 #include <QStandardPaths>
 #include <iostream>
 #include <QMessageBox>
+#include <QFileDialog>
 #include "Log.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
@@ -54,9 +55,15 @@ MainWindow::MainWindow(QWidget *parent)
     eventWindow = new EventWindow(this);
     eventWindow->hide();
 
+    // Setup signals for the menu
+    connect(ui->actionImporter, &QAction::triggered, this, &MainWindow::slotImportFile);
+
     // Setup signals for TAB 1: players management
     connect(ui->buttonAddPlayer, &QPushButton::clicked, this, &MainWindow::slotAddPlayer);
     connect(ui->buttonEditPlayer, &QPushButton::clicked, this, &MainWindow::slotEditPlayer);
+
+    // Setup signals for TAB 2: club championship ranking
+    connect(ui->comboRankingSeasons, SIGNAL(currentIndexChanged(int)), this, SLOT(slotRankingSeasonChanged(int)));
 
     // Setup signals for TAB 3: club championship management
     connect(ui->buttonAddMatch, &QPushButton::clicked, this, &MainWindow::slotAddEvent);
@@ -72,7 +79,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Initialize views
     InitializePlayers();
-    ui->comboSeasons->addItems(mDatabase.GetSeasons());
+    UpdateSeasons();
 }
 
 MainWindow::~MainWindow()
@@ -94,6 +101,63 @@ void MainWindow::InitializePlayers()
         ui->eventList->setCurrentRow(count - 1);
     }
 }
+
+void MainWindow::slotImportFile()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+         tr("Ouvrir un fichier CSV"), QStandardPaths::displayName(QStandardPaths::DocumentsLocation), tr("Fichier CSV (*.csv)"));
+
+    QFile file(fileName);
+
+    if (file.exists())
+    {
+        while (!file.atEnd())
+        {
+            QString line = file.readLine();
+            QStringList exploded = line.split(";");
+
+            // We need at least 5 information for a player
+            if (exploded.size() >= 5)
+            {
+                // Add this new player, if not already exist in the database
+                Player p;
+
+                p.lastName = exploded.at(0);
+                p.name = exploded.at(1);
+                p.road = exploded.at(2);
+                p.email = exploded.at(3);
+                p.mobilePhone = exploded.at(4);
+
+                QString fullname = p.name + " " + p.lastName;
+
+                if (!mDatabase.PlayerExists(p) && mDatabase.IsValid(p))
+                {
+                    if (mDatabase.AddPlayer(p))
+                    {
+                        std::cout << "Imported player: " << fullname.toStdString() << std::endl;
+                    }
+                    else
+                    {
+                        TLogError("Import failed for player: " + fullname.toStdString());
+                    }
+                }
+                else
+                {
+                    TLogError("Player " + fullname.toStdString() + " is invalid or already exists in the database, cannot import it");
+                }
+            }
+            else
+            {
+                TLogError("Bad CSV file format");
+            }
+        }
+    }
+    else
+    {
+        TLogError("Cannot open CSV file: " + fileName.toStdString());
+    }
+}
+
 
 void MainWindow::slotAddPlayer()
 {
@@ -174,6 +238,17 @@ void MainWindow::slotEventItemActivated()
     }
 }
 
+void MainWindow::UpdateSeasons()
+{
+    QStringList seasons = mDatabase.GetSeasons();
+
+    ui->comboSeasons->clear();
+    ui->comboSeasons->addItems(seasons);
+
+    ui->comboRankingSeasons->clear();
+    ui->comboRankingSeasons->addItems(seasons);
+}
+
 void MainWindow::slotAddEvent()
 {
     Event event;
@@ -184,8 +259,7 @@ void MainWindow::slotAddEvent()
         event.year = event.date.date().year();
         if (mDatabase.AddEvent(event))
         {
-            ui->comboSeasons->clear();
-            ui->comboSeasons->addItems(mDatabase.GetSeasons());
+            UpdateSeasons();
         }
     }
 }
@@ -385,3 +459,31 @@ void MainWindow::slotEditGame()
         }
     }
 }
+
+void MainWindow::slotRankingSeasonChanged(int index)
+{
+    QList<Event> events = mDatabase.GetEvents(ui->comboRankingSeasons->itemText(index).toInt());
+/*
+    struct Rank
+    {
+        int points;
+        int playedGames;
+        Rank()
+            : points(0)
+            , playedGames(0)
+        {
+
+        }
+    };
+
+    QMap<int, Rank> ranking; // player id, Rank
+
+    foreach (Event event, events)
+    {
+        // Search for every game played for this event
+        QList<Game> games = mDatabase.GetGames(event.id);
+        dates.append(match.date.toString(Qt::ISODate));
+    }
+*/
+}
+

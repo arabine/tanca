@@ -102,6 +102,22 @@ QList<Player> &DbManager::GetPlayerList()
     return mPlayers;
 }
 
+bool DbManager::PlayerExists(const Player &player) const
+{
+    bool found = false;
+
+    foreach (Player p, mPlayers)
+    {
+        if ((p.lastName == player.lastName) &&
+            (p.name == player.name))
+        {
+            found = true;
+            break;
+        }
+    }
+    return found;
+}
+
 QList<Player> DbManager::UpdatePlayerList()
 {
     QSqlQuery query("SELECT * FROM players", mDb);
@@ -296,8 +312,13 @@ QStringList DbManager::GetCities(int postCode)
 bool DbManager::IsValid(const Player& player)
 {
     // FIXME: check the validity of the player parameters
-    (void) player;
-    return true;
+    bool valid = false;
+
+    if ((player.name != "") && (player.lastName != ""))
+    {
+        valid = true;
+    }
+    return valid;
 }
 
 bool DbManager::AddEvent(const Event& event)

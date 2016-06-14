@@ -34,6 +34,8 @@ private slots:
      void slotStartRounds();
      void slotEditGame();
      void slotEditEvent();
+     void slotRankingSeasonChanged(int index);
+     void slotImportFile();
 private:
     void InitializePlayers();
 
@@ -59,6 +61,7 @@ private:
     void UpdateGameList();
 
     bool FindGame(const int id, Game &game);
+    void UpdateSeasons();
 };
 
 #endif // MAINWINDOW_H

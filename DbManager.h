@@ -202,32 +202,35 @@ public:
 
     void Initialize();
 
+    // Player management
     static bool IsValid(const Player &player);
     bool AddPlayer(const Player &player);
-    bool AddEvent(const Event &event);
-    bool AddTeam(const Team &team);
-
-    QSqlTableModel *GetPlayersModel() { return mPlayersModel; }
-
-    Event GetEvent(const QString &date);
-    QStringList GetSeasons();
-    QList<Team> GetTeams(int eventId);
-
-    bool UpdateEventState(const Event &event);
-
-    // From ICities
-    virtual QStringList GetCities(int postCode);
-
-    QList<Event> GetEvents(int year);
-    QList<Game> GetGames(int event_id);
-
     bool EditPlayer(const Player &player);
     bool FindPlayer(int id, Player &player);
     QList<Player> &GetPlayerList();
+    bool PlayerExists(const Player &player) const;
+    QSqlTableModel *GetPlayersModel() { return mPlayersModel; }
 
+    // Events management
+    bool AddEvent(const Event &event);
+    Event GetEvent(const QString &date);
+    QStringList GetSeasons();
+    bool UpdateEventState(const Event &event);
+    QList<Event> GetEvents(int year);
+    bool EditEvent(const Event &event);
+
+    // Team management
+    bool AddTeam(const Team &team);
+    QList<Team> GetTeams(int eventId);  
+
+    // Game management
+    QList<Game> GetGames(int event_id);
     bool AddGames(const QList<Game> &games);
     bool EditGame(const Game &game);
-    bool EditEvent(const Event &event);
+
+    // From ICities
+    virtual QStringList GetCities(int postCode);  
+
 private:
     QSqlDatabase mDb;
     QSqlDatabase mCities;
