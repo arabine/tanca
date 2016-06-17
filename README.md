@@ -23,3 +23,8 @@ Tanca will help petanque clubs to follow subscribers and organize in-house conte
  - L'affichage du classement de la saison
  - L'ajout et l'édition manuel de parties
  - Edition d'un événement
+ - Affichage des points dans la fenêtre des matchs
+ - Exporter le classement
+ - Exporter la base de joueurs
+ - Imprimer le classement
+ - Imprimer les matches

@@ -23,7 +23,7 @@ DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=U:\tanca\LICENSE
-OutputBaseFilename=Tanca-setup
+OutputBaseFilename=Tanca-{#MyAppVersion}-setup
 Compression=lzma
 SolidCompression=yes
 
