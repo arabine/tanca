@@ -6,7 +6,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-static const QString gVersion = "1.0";
+static const QString gVersion = "1.1";
 
 QString gAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tanca";
 QString gDbFullPath = gAppDataPath + "/tanca.db";
@@ -111,50 +111,57 @@ void MainWindow::slotImportFile()
 
     if (file.exists())
     {
-        while (!file.atEnd())
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            QString line = file.readLine();
-            QStringList exploded = line.split(";");
-
-            // We need at least 5 information for a player
-            if (exploded.size() >= 5)
+            TLogError("Cannot open CSV file: " + fileName.toStdString());
+        }
+        else
+        {
+            while (!file.atEnd())
             {
-                // Add this new player, if not already exist in the database
-                Player p;
+                QString line = file.readLine();
+                QStringList exploded = line.split(";");
 
-                p.lastName = exploded.at(0);
-                p.name = exploded.at(1);
-                p.road = exploded.at(2);
-                p.email = exploded.at(3);
-                p.mobilePhone = exploded.at(4);
-
-                QString fullname = p.name + " " + p.lastName;
-
-                if (!mDatabase.PlayerExists(p) && mDatabase.IsValid(p))
+                // We need at least 5 information for a player
+                if (exploded.size() >= 5)
                 {
-                    if (mDatabase.AddPlayer(p))
+                    // Add this new player, if not already exist in the database
+                    Player p;
+
+                    p.lastName = exploded.at(0);
+                    p.name = exploded.at(1);
+                    p.road = exploded.at(2);
+                    p.email = exploded.at(3);
+                    p.mobilePhone = exploded.at(4);
+
+                    QString fullname = p.name + " " + p.lastName;
+
+                    if (!mDatabase.PlayerExists(p) && mDatabase.IsValid(p))
                     {
-                        std::cout << "Imported player: " << fullname.toStdString() << std::endl;
+                        if (mDatabase.AddPlayer(p))
+                        {
+                            std::cout << "Imported player: " << fullname.toStdString() << std::endl;
+                        }
+                        else
+                        {
+                            TLogError("Import failed for player: " + fullname.toStdString());
+                        }
                     }
                     else
                     {
-                        TLogError("Import failed for player: " + fullname.toStdString());
+                        TLogError("Player " + fullname.toStdString() + " is invalid or already exists in the database, cannot import it");
                     }
                 }
                 else
                 {
-                    TLogError("Player " + fullname.toStdString() + " is invalid or already exists in the database, cannot import it");
+                    TLogError("Bad CSV file format");
                 }
-            }
-            else
-            {
-                TLogError("Bad CSV file format");
             }
         }
     }
     else
     {
-        TLogError("Cannot open CSV file: " + fileName.toStdString());
+        TLogError("Cannot find CSV file: " + fileName.toStdString());
     }
 }
 

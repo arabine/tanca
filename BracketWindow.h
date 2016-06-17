@@ -197,11 +197,6 @@ private:
     QList<Game> mGames;
     QList<RoundBox *> mBoxes;
     int mTurns;
-
-
-    int Randomize(const QList<Team> &teams, const Team &team, int turn);
-    bool IsFree(const int id, const int turn);
-    bool HasAlreadyPlayed(const int id1, const int id2);
 };
 
 #endif // ROUNDWINDOW_H
