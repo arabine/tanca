@@ -5,7 +5,7 @@ Tanca will help petanque clubs to follow subscribers and organize in-house conte
 
 ## Historique des version
 
-# V1.1
+### V1.1
 
  - Le pointage des scores est possible
  - Nouvelles options lors de la création d'un événement
@@ -13,7 +13,7 @@ Tanca will help petanque clubs to follow subscribers and organize in-house conte
  - Correction de la génération des parties
  - Import des joueurs/adhérents à partir d'une liste CSV
 
-# V1.0
+### V1.0
 
  - Version initiale pour tests
 
