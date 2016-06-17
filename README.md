@@ -3,7 +3,7 @@
 Tanca est un logiciel permettant de gérer un club de pétanque et d'organiser des concours internes.
 Tanca will help petanque clubs to follow subscribers and organize in-house contests.
 
-## Historique des version
+## Historique des versions
 
 ### V1.1
 
