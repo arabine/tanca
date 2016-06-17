@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <iostream>
 #include <algorithm>
+#include "Log.h"
 
 void BaseRect::SetText(const QString &s)
 {
@@ -157,128 +158,55 @@ void RoundBox::AddMatch(MatchGroup *match)
 }
 
 /*****************************************************************************/
-
-// Return true if there is no round assigned to this team for this turn
-bool BracketWindow::IsFree(const int id, const int turn)
-{
-    bool isFree = true;
-
-    for (int i = 0; i < mGames.size(); i++)
-    {
-        const Game &round = mGames.at(i);
-        if (round.turn == turn)
-        {
-            if ((round.team1Id == id) ||
-                (round.team2Id == id))
-            {
-                isFree = false;
-            }
-        }
-    }
-    return isFree;
-}
-
-bool BracketWindow::HasAlreadyPlayed(const int id1, const int id2)
-{
-    bool alreadyPlayed = false;
-
-    for (int i = 0; i < mGames.size(); i++)
-    {
-        const Game &round = mGames.at(i);
-        if (((round.team1Id == id1) &&
-             (round.team2Id == id2)) ||
-            ((round.team1Id == id2) &&
-             (round.team2Id == id1)))
-        {
-            alreadyPlayed = true;
-        }
-    }
-    return alreadyPlayed;
-}
-
-
-int BracketWindow::Randomize(const QList<Team>& teams, const Team &team, int turn)
-{
-    bool found = false;
-    int k = -1;
-
-    do
-    {
-        // Find opponents for that round
-        k = qrand()%teams.size();
-    //    std::cout << "Trying: " << k << std::endl;
-        const Team &opp = teams[k];
-        if ((opp.id != team.id) &&
-            IsFree(opp.id, turn) &&
-            !HasAlreadyPlayed(opp.id, team.id))
-        {
-            // Found free oponent, memorize it for that round
-            found = true;
-        }
-    }
-    while(!found);
-
-    return k;
-}
-
-
 QList<Game> BracketWindow::BuildRounds(const QList<Team> &tlist)
 {
     mGames.clear();
     QList<Team> teams = tlist; // Local copy to manipulate the list
 
+    if (teams.size()%2)
+    {
+        // odd numeber of team, add dummy one
+        Team dummy;
+        teams.append(dummy);
+    }
+
+    int max_games = teams.size() / 2;
+
+    // Create fuzzy, never start with the same team
+    std::random_shuffle(teams.begin(), teams.end());
+
     // Check if there is enough teams for the desired number of rounds
+    // Swiss tournament algorithm
     if (teams.size() > mTurns)
     {
         for (int i = 0; i < mTurns; i++)
         {
-            // Create fuzzy, never start with the same team
-            std::random_shuffle(teams.begin(), teams.end());
-
-            // Don't manage odd number of teams
-            int max_games = teams.size() / 2;
-            int games = 0;
-
-            // Create matches for all teams
-            for (int j = 0; j < teams.size(); j++)
+            // Create matches for this turn
+            for (int j = 0; j < max_games; j++)
             {
                 const Team &team = teams[j];
+                const Team &opp = teams[teams.size() - j - 1];
 
-                // Test if we have been already assigned to a match
-                if (IsFree(team.id, i))
+                if ((team.id != -1) && (opp.id != -1))
                 {
-                    int k = Randomize(teams, team, i);
+                    Game game;
 
-                    // Valid team id, create the round
-                    if ((k != teams.size()) && (k >= 0))
-                    {
-                        const Team &opp = teams[k];
-                        Game game;
+                    game.eventId = opp.eventId;
+                    game.turn = i;
+                    game.team1Id = team.id;
+                    game.team2Id = opp.id;
 
-                        game.eventId = opp.eventId;
-                        game.turn = i;
-                        game.team1Id = team.id;
-                        game.team2Id = opp.id;
+                    mGames.append(game);
 
-                        mGames.append(game);
-
-                        games++;
-
-                        std::cout << "Turn: " << (i+1) << ", Game: " << team.teamName.toStdString() << " <- vs -> " << opp.teamName.toStdString() << std::endl;
-                    }
-                    else
-                    {
-                        std::cout << "Cannot find opponent!" << std::endl;
-                    }
-                }
-
-                // Exit if we reachs the number of games
-                // We will artificially exit when there is an odd number of teams
-                if (games >= max_games)
-                {
-                    break;
+                    std::cout << "Turn: " << (i+1) << ", Game: " << team.teamName.toStdString() << " <- vs -> " << opp.teamName.toStdString() << std::endl;
                 }
             }
+
+            // Then rotate, keep first player always at the first place
+            Team first = teams.takeFirst();
+            Team last = teams.takeLast();
+            teams.prepend(last);
+            teams.prepend(first);
         }
     }
     else
