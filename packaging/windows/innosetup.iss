@@ -35,22 +35,24 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "U:\build-tanca\release\Tanca.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\icudt54.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\icuin54.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\icuuc54.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\libwinpthread-1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\Qt5Core.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\Qt5Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\Qt5Sql.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\Qt5.6.0\5.6\mingw49_32\bin\Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.6\mingw49_32\bin\icudt54.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.6\mingw49_32\bin\icuin54.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.6\mingw49_32\bin\icuuc54.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.6\mingw49_32\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.6\mingw49_32\bin\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.6\mingw49_32\bin\libwinpthread-1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.6\mingw49_32\bin\Qt5Core.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.6\mingw49_32\bin\Qt5Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.6\mingw49_32\bin\Qt5Sql.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.6\mingw49_32\bin\Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.6\mingw49_32\plugins\platforms\qwindows.dll"; DestDir: "{app}/platforms"; Flags: ignoreversion
+
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{userappdata}\Roaming\tanca"; Filename: "Tanca (fichiers)"; Flags: foldershortcut
+Name: "{group}\{#MyAppName} (dossier)"; Filename: "{userappdata}\{#MyAppName}"; Flags: foldershortcut
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]

@@ -118,6 +118,30 @@ void MatchGroup::SetTeam(BracketBox::Position position, const Team &team)
     }
 }
 
+void MatchGroup::SetScore(BracketBox::Position position, int score)
+{
+    if (position == BracketBox::TOP)
+    {
+        boxTop->SetScore(score);
+    }
+    else
+    {
+        boxBottom->SetScore(score);
+    }
+}
+
+void MatchGroup::SetId(BracketBox::Position position, int id)
+{
+    if (position == BracketBox::TOP)
+    {
+        boxTop->SetId(id);
+    }
+    else
+    {
+        boxBottom->SetId(id);
+    }
+}
+
 void MatchGroup::Move(const QPointF &origin)
 {
     boxTop->setPos(origin);
@@ -250,6 +274,8 @@ void BracketWindow::SetGames(const QList<Game>& games, const QList<Team> &teams)
                 if (Team::Find(teams, round.team1Id, team))
                 {
                     match->SetTeam(BracketBox::TOP, team);
+                   // match->SetId(BracketBox::TOP, team.id);
+                    match->SetScore(BracketBox::TOP, round.team1Score);
                 }
                 else
                 {
@@ -259,6 +285,8 @@ void BracketWindow::SetGames(const QList<Game>& games, const QList<Team> &teams)
                 if (Team::Find(teams, round.team2Id, team))
                 {
                     match->SetTeam(BracketBox::BOTTOM, team);
+                  //  match->SetId(BracketBox::BOTTOM, team.id);
+                    match->SetScore(BracketBox::BOTTOM, round.team2Score);
                 }
                 else
                 {

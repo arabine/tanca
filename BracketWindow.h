@@ -84,6 +84,22 @@ public:
         mMiddle.SetText(name);
     }
 
+    void SetScore(const int score)
+    {
+        if (score >= 0)
+        {
+            mRight.SetText(QString::number(score));
+        }
+        else
+        {
+            mRight.SetText("");
+        }
+    }
+
+    void SetId(const int id)
+    {
+        mLeft.SetText(QString::number(id));
+    }
 
 protected:
 
@@ -119,6 +135,8 @@ public:
     MatchGroup(QGraphicsScene *scene, QGraphicsItem *parent);
 
     void SetTeam(BracketBox::Position position, const Team &team);
+    void SetScore(BracketBox::Position position, int score);
+    void SetId(BracketBox::Position position, int id);
     void Move(const QPointF &origin);
 
 

@@ -49,6 +49,27 @@ struct Player
         document = "";
     }
 
+    QString FullName()
+    {
+        return name + " " + lastName;
+    }
+
+    static bool Find(const QList<Player> &players, const int id, Player &player)
+    {
+        bool found = false;
+
+        foreach (Player p, players)
+        {
+            if (p.id == id)
+            {
+                player = p;
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
     static QString Table() {
         return "CREATE TABLE IF NOT EXISTS players (id INTEGER PRIMARY KEY, uuid TEXT, name TEXT, last_name TEXT, nick_name TEXT, "
                 "email TEXT, mobile_phone TEXT, home_phone TEXT, birth_date TEXT, road TEXT, post_code INTEGER, city TEXT, "
@@ -145,7 +166,7 @@ struct Game
     int state;
     QString document;  // JSON document, reserved to store anything in the future
 
-    bool IsActive()
+    bool IsPlayed()
     {
         bool active = false;
         if ((team1Score != -1) && (team2Score != -1))

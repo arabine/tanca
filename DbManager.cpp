@@ -136,6 +136,7 @@ QList<Player> DbManager::UpdatePlayerList()
         player.mobilePhone = query.value("mobile_phone").toString();
         player.homePhone = query.value("home_phone").toString();
         player.birthDate = query.value("birth_date").toDate();
+        player.road = query.value("road").toString();
         player.postCode = query.value("post_code").toInt();
         player.city = query.value("city").toString();
         player.membership = query.value("membership").toString();
@@ -150,18 +151,7 @@ QList<Player> DbManager::UpdatePlayerList()
 
 bool DbManager::FindPlayer(int id, Player &player)
 {
-    bool found = false;
-
-    foreach (Player p, mPlayers)
-    {
-        if (p.id == id)
-        {
-            player = p;
-            found = true;
-            break;
-        }
-    }
-    return found;
+    return Player::Find(mPlayers, id, player);
 }
 
 bool DbManager::AddPlayer(const Player& player)

@@ -5,6 +5,13 @@ Tanca will help petanque clubs to follow subscribers and organize in-house conte
 
 ## Historique des versions
 
+### V1.2
+
+ - Le classement par points de la saison est fonctionnel
+ - Affichage des points dans la fenêtre des rencontres
+ - Désactivation des boutons pas encore fonctionnels
+ - Export du classement de la saison en fichier CSV
+
 ### V1.1
 
  - Le pointage des scores est possible
@@ -20,15 +27,12 @@ Tanca will help petanque clubs to follow subscribers and organize in-house conte
 
 ## TODO
 
- - L'affichage du classement de la saison
- - L'ajout et l'édition manuel de parties
+ - Terminer l'édition d'un joueur
+ - L'ajout et l'édition de parties
  - Edition d'un événement
- - Affichage des points dans la fenêtre des matchs
- - Exporter le classement
  - Exporter la base de joueurs
- - Imprimer le classement
- - Imprimer les matches
-
+ - Imprimer ou Exporter les matches d'un événement
+ - Affichage du numéro des équipes dans la liste des matches
 
 ## Swisss tournament algorithm
 

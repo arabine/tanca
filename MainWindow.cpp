@@ -6,7 +6,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-static const QString gVersion = "1.1";
+static const QString gVersion = "1.2";
 
 QString gAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tanca";
 QString gDbFullPath = gAppDataPath + "/tanca.db";
@@ -29,8 +29,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     Log::SetLogPath(gAppDataPath.toStdString());
     Log::RegisterListener(consoleOutput);
-
-    setWindowTitle("Tanca " + gVersion + " - Logiciel de gestion de club et de concours de pétanque.");
 
     std::cout << "Application path set to: " << gAppDataPath.toStdString() << std::endl;
 
@@ -55,6 +53,8 @@ MainWindow::MainWindow(QWidget *parent)
     eventWindow = new EventWindow(this);
     eventWindow->hide();
 
+    setWindowTitle("Tanca " + gVersion + " - Logiciel de gestion de club et de concours de pétanque.");
+
     // Setup signals for the menu
     connect(ui->actionImporter, &QAction::triggered, this, &MainWindow::slotImportFile);
 
@@ -64,6 +64,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Setup signals for TAB 2: club championship ranking
     connect(ui->comboRankingSeasons, SIGNAL(currentIndexChanged(int)), this, SLOT(slotRankingSeasonChanged(int)));
+    connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(slotTabChanged(int)));
+    connect(ui->buttonExport, &QPushButton::clicked, this, &MainWindow::slotExport);
 
     // Setup signals for TAB 3: club championship management
     connect(ui->buttonAddMatch, &QPushButton::clicked, this, &MainWindow::slotAddEvent);
@@ -403,6 +405,15 @@ void MainWindow::UpdateGameList()
     mGames = mDatabase.GetGames(mCurrentEvent.id);
     bracketWindow->SetGames(mGames, mTeams);
 
+    if (mCurrentEvent.state == Event::cNotStarted)
+    {
+        ui->buttonStart->setEnabled(true);
+    }
+    else
+    {
+        ui->buttonStart->setEnabled(false);
+    }
+
     foreach (Game game, mGames)
     {
         Team t1, t2;
@@ -467,10 +478,67 @@ void MainWindow::slotEditGame()
     }
 }
 
+void MainWindow::slotTabChanged(int index)
+{
+    Q_UNUSED(index);
+    // Refresh ranking
+    slotRankingSeasonChanged(ui->comboRankingSeasons->currentIndex());
+}
+
+void MainWindow::slotExport()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le classement au format Excel (CSV)"),
+                                 QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
+                                 tr("Excel CSV (*.csv)"));
+    if (!fileName.isEmpty())
+    {
+        QFile f( fileName );
+        if (f.open(QFile::WriteOnly))
+        {
+            QTextStream data( &f );
+            QStringList strList;
+
+            // Export header title
+            for( int c = 0; c < ui->tableContest->columnCount(); ++c )
+            {
+                strList << ui->tableContest->horizontalHeaderItem(c)->data(Qt::DisplayRole).toString();
+            }
+
+            data << strList.join(";") << "\n";
+
+            // Export table contents
+            for( int r = 0; r < ui->tableContest->rowCount(); ++r )
+            {
+                strList.clear();
+                for( int c = 0; c < ui->tableContest->columnCount(); ++c )
+                {
+                    strList << ui->tableContest->item( r, c )->text();
+                }
+                data << strList.join( ";" ) + "\n";
+            }
+            f.close();
+        }
+    }
+}
+
 void MainWindow::slotRankingSeasonChanged(int index)
 {
     QList<Event> events = mDatabase.GetEvents(ui->comboRankingSeasons->itemText(index).toInt());
-/*
+
+    class MyTableWidgetItem : public QTableWidgetItem {
+        public:
+            MyTableWidgetItem(const QString &text)
+              : QTableWidgetItem(text)
+            {
+
+            }
+
+            bool operator <(const QTableWidgetItem &other) const
+            {
+                return text().toInt() < other.text().toInt();
+            }
+    };
+
     struct Rank
     {
         int points;
@@ -483,14 +551,102 @@ void MainWindow::slotRankingSeasonChanged(int index)
         }
     };
 
-    QMap<int, Rank> ranking; // player id, Rank
+    class Ranking
+    {
+    public:
+
+        void Add(int playerId, int score)
+        {
+            if (mList.contains(playerId))
+            {
+                score += mList[playerId].points;
+            }
+            mList[playerId].points = score;
+            mList[playerId].playedGames++;
+        }
+
+        void Show(QTableWidget *table, const QList<Player> &players)
+        {
+            QStringList header;
+            header << tr("Joueur") << tr("Points") << tr("Parties jouées");
+            table->clear();
+            table->setHorizontalHeaderLabels(header);
+            table->setRowCount(mList.size());
+
+            std::cout << "Filling contest table: " << mList.size() << " elements." << std::endl;
+
+            QMapIterator<int, Rank> i(mList);
+            int row = 0;
+            while (i.hasNext())
+            {
+                i.next();
+
+                // Fill the line
+                Rank rank = i.value();
+                int id = i.key();
+                Player player;
+                if (Player::Find(players, id, player))
+                {
+                    MyTableWidgetItem *col1 = new MyTableWidgetItem(player.FullName());
+                    MyTableWidgetItem *col2 = new MyTableWidgetItem(tr("%1").arg(rank.points));
+                    MyTableWidgetItem *col3 = new MyTableWidgetItem(tr("%1").arg(rank.playedGames));
+
+                    table->setItem(row, 0, col1);
+                    table->setItem(row, 1, col2);
+                    table->setItem(row, 2, col3);
+                    row++;
+                }
+                else
+                {
+                    TLogError("Cannot find player to create ranking!");
+                }
+            }
+        }
+
+    private:
+        QMap<int, Rank> mList;
+    };
+
+    Ranking ranking; // player id, Rank
 
     foreach (Event event, events)
     {
-        // Search for every game played for this event
-        QList<Game> games = mDatabase.GetGames(event.id);
-        dates.append(match.date.toString(Qt::ISODate));
+        if (event.state == Event::cStarted)
+        {
+            // Search for every game played for this event
+            QList<Game> games = mDatabase.GetGames(event.id);
+            QList<Team> teams = mDatabase.GetTeams(event.id);
+
+            foreach (Game game, games)
+            {
+                if (game.IsPlayed())
+                {
+                    Team team;
+                    if (Team::Find(teams, game.team1Id, team))
+                    {
+                        ranking.Add(team.player1Id, game.team1Score);
+                        ranking.Add(team.player2Id, game.team1Score);
+                    }
+                    else
+                    {
+                        TLogError("[RANKING] Algorithm problem, cannot find team!");
+                    }
+
+                    if (Team::Find(teams, game.team2Id, team))
+                    {
+                        ranking.Add(team.player1Id, game.team2Score);
+                        ranking.Add(team.player2Id, game.team2Score);
+                    }
+                    else
+                    {
+                        TLogError("[RANKING] Algorithm problem, cannot find team!");
+                    }
+                }
+            }
+        }
     }
-*/
+
+    ranking.Show(ui->tableContest, mDatabase.GetPlayerList());
+    ui->tableContest->sortByColumn(1, Qt::DescendingOrder);
 }
 

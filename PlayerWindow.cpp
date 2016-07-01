@@ -10,6 +10,8 @@ PlayerWindow::PlayerWindow(QWidget *parent)
     datePickerWindow->hide();
 
     connect(ui.buttonAddLicence, &QPushButton::clicked, this, &PlayerWindow::slotAddLicence);
+    connect(ui.buttonOk, &QPushButton::clicked, this, &PlayerWindow::accept);
+    connect(ui.buttonCancel, &QPushButton::clicked, this, &PlayerWindow::reject);
 }
 
 
@@ -28,12 +30,28 @@ void PlayerWindow::SetPlayer(const Player &player)
     ui.lineCity->setText(player.city);
     ui.plainComments->setPlainText(player.comments);
     ui.lineLastName->setText(player.lastName);
+
     ui.listLicences->clear();
-    ui.listLicences->addItems(player.membership.split(";"));
+    QStringList items = player.membership.split(";");
+    if (items.size() > 0)
+    {
+        // Manually add elements to be able to test each value
+        foreach (QString item, items)
+        {
+            if (!item.isEmpty())
+            {
+                ui.listLicences->addItem(item);
+            }
+        }
+    }
+
     ui.lineName->setText(player.name);
     ui.lineNickName->setText(player.nickName);
     ui.spinPostCode->setValue(player.postCode);
     ui.lineStreet->setText(player.road);
+    ui.lineMobilePhone->setText(player.mobilePhone);
+    ui.lineHomePhone->setText(player.homePhone);
+    ui.lineMail->setText(player.email);
 }
 
 void PlayerWindow::GetPlayer(Player &player)
@@ -59,6 +77,8 @@ void PlayerWindow::GetPlayer(Player &player)
     player.nickName = ui.lineNickName->text();
     player.postCode = ui.spinPostCode->value();
     player.road = ui.lineStreet->text();
-
+    player.mobilePhone = ui.lineMobilePhone->text();
+    player.homePhone = ui.lineHomePhone->text();
+    player.email = ui.lineMail->text();
 }
 
