@@ -27,9 +27,15 @@ RC_FILE = icon.rc
 TARGET = Tanca
 TEMPLATE = app
 
-LIBS += -lpsapi
+QMAKE_CXXFLAGS += -std=c++11
 
-DEFINES += USE_WINDOWS_OS
+win32 {
+    DEFINES += USE_WINDOWS_OS
+    LIBS += -lpsapi
+
+} else {
+    DEFINES += USE_UNIX_OS
+}
 
 SOURCES += main.cpp MainWindow.cpp \
     DbManager.cpp \

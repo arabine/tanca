@@ -8,7 +8,11 @@
 
 static const QString gVersion = "1.2";
 
+#ifdef USE_WINDOWS_OS
 QString gAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tanca";
+#else
+QString gAppDataPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/.tanca";
+#endif
 QString gDbFullPath = gAppDataPath + "/tanca.db";
 
 class Outputter : public Observer<std::string>
