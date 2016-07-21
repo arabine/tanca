@@ -63,28 +63,6 @@ void DbManager::Initialize()
             }
         }
 
-        // Init models
-        mPlayersModel = new QSqlTableModel(this, mDb);
-        mPlayersModel->setTable("players");
-        mPlayersModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
-        mPlayersModel->select();
-        mPlayersModel->setHeaderData(0, Qt::Horizontal, tr("Id"));
-        mPlayersModel->setHeaderData(1, Qt::Horizontal, tr("UUID"));
-        mPlayersModel->setHeaderData(2, Qt::Horizontal, tr("Prénom"));
-        mPlayersModel->setHeaderData(3, Qt::Horizontal, tr("Nom"));
-        mPlayersModel->setHeaderData(4, Qt::Horizontal, tr("Pseudonyme"));
-        mPlayersModel->setHeaderData(5, Qt::Horizontal, tr("E-mail"));
-        mPlayersModel->setHeaderData(6, Qt::Horizontal, tr("Téléphone (mobile)"));
-        mPlayersModel->setHeaderData(7, Qt::Horizontal, tr("Téléphone (maison)"));
-        mPlayersModel->setHeaderData(8, Qt::Horizontal, tr("Date de naissance"));
-        mPlayersModel->setHeaderData(9, Qt::Horizontal, tr("Rue"));
-        mPlayersModel->setHeaderData(10, Qt::Horizontal, tr("Code postal"));
-        mPlayersModel->setHeaderData(11, Qt::Horizontal, tr("Ville"));
-        mPlayersModel->setHeaderData(12, Qt::Horizontal, tr("Licences"));
-        mPlayersModel->setHeaderData(13, Qt::Horizontal, tr("Commentaires"));
-        mPlayersModel->setHeaderData(14, Qt::Horizontal, tr("Statut"));
-        mPlayersModel->setHeaderData(15, Qt::Horizontal, tr("Divers"));
-
         mPlayers = UpdatePlayerList();
     }
     else
@@ -108,8 +86,8 @@ bool DbManager::PlayerExists(const Player &player) const
 
     foreach (Player p, mPlayers)
     {
-        if ((p.lastName == player.lastName) &&
-            (p.name == player.name))
+        if ((p.lastName.toLower() == player.lastName.toLower()) &&
+            (p.name.toLower() == player.name.toLower()))
         {
             found = true;
             break;
@@ -183,8 +161,6 @@ bool DbManager::AddPlayer(const Player& player)
         {
             qDebug() << "Add player success";
             success = true;
-            mPlayersModel->select();
-
             mPlayers = UpdatePlayerList();
         }
         else
@@ -232,8 +208,6 @@ bool DbManager::EditPlayer(const Player& player)
         {
             qDebug() << "Edit player success";
             success = true;
-            mPlayersModel->select();
-
             mPlayers = UpdatePlayerList();
         }
         else
@@ -366,13 +340,13 @@ bool DbManager::EditEvent(const Event& event)
     return success;
 }
 
-Event DbManager::GetEvent(const QString &date)
+Event DbManager::GetEvent(int id)
 {
     Event event;
 
     QSqlQuery query(mDb);
-    query.prepare("SELECT * FROM events WHERE date = :date");
-    query.bindValue(":date", date);
+    query.prepare("SELECT * FROM events WHERE id = :id");
+    query.bindValue(":id", id);
 
     if(query.exec())
     {

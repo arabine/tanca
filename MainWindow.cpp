@@ -4,9 +4,17 @@
 #include <QFileDialog>
 #include "Log.h"
 #include "MainWindow.h"
+#include "TableHelper.h"
 #include "ui_MainWindow.h"
 
 static const QString gVersion = "1.2";
+
+
+// Table headers
+QStringList mGamesTableHeader;
+QStringList mEventsTableHeader;
+QStringList mPlayersTableHeader;
+QStringList mRankingTableHeader;
 
 #ifdef USE_WINDOWS_OS
 QString gAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tanca";
@@ -25,6 +33,7 @@ public:
 };
 
 Outputter consoleOutput;
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -61,6 +70,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Setup signals for the menu
     connect(ui->actionImporter, &QAction::triggered, this, &MainWindow::slotImportFile);
+    connect(ui->actionQuitter, &QAction::triggered, this, &QCoreApplication::quit);
 
     // Setup signals for TAB 1: players management
     connect(ui->buttonAddPlayer, &QPushButton::clicked, this, &MainWindow::slotAddPlayer);
@@ -72,9 +82,15 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->buttonExport, &QPushButton::clicked, this, &MainWindow::slotExport);
 
     // Setup signals for TAB 3: club championship management
-    connect(ui->buttonAddMatch, &QPushButton::clicked, this, &MainWindow::slotAddEvent);
+    connect(ui->buttonAddEvent, &QPushButton::clicked, this, &MainWindow::slotAddEvent);
+    connect(ui->buttonEditEvent, &QPushButton::clicked, this, &MainWindow::slotEditEvent);
+    connect(ui->buttonDeleteEvent, &QPushButton::clicked, this, &MainWindow::slotDeleteEvent);
+
     connect(ui->buttonAddTeam, &QPushButton::clicked, this, &MainWindow::slotAddTeam);
-    connect(ui->eventList, SIGNAL(itemSelectionChanged()), this, SLOT(slotEventItemActivated()));
+    connect(ui->buttonEditTeam, &QPushButton::clicked, this, &MainWindow::slotEditTeam);
+    connect(ui->buttonDeleteTeam, &QPushButton::clicked, this, &MainWindow::slotDeleteTeam);
+
+    connect(ui->eventTable, SIGNAL(itemSelectionChanged()), this, SLOT(slotEventItemActivated()));
     connect(ui->buttonShowRounds, &QPushButton::clicked, this, &MainWindow::slotShowGames);
     connect(ui->comboSeasons, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSeasonChanged(int)));
     connect(ui->buttonStart, &QPushButton::clicked, this, &MainWindow::slotStartRounds);
@@ -82,9 +98,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Setup other stuff
     mDatabase.Initialize();
+    mGamesTableHeader << tr("Id") << tr("Partie") << tr("Rencontre");
+    mEventsTableHeader << tr("Id") << tr("Date") << tr("Type") << tr("Statut");
+    mPlayersTableHeader << tr("Id") << tr("UUID") << tr("Prénom") << tr("Nom") << tr("Pseudonyme") << tr("E-mail") << tr("Téléphone (mobile)") << tr("Téléphone (maison)") << tr("Date de naissance") << tr("Rue") << tr("Code postal") << tr("Ville") << tr("Licences") << tr("Commentaires") << tr("Statut") << tr("Divers");
+    mRankingTableHeader << tr("Id") << tr("Joueur") << tr("Points") << tr("Parties jouées");
 
     // Initialize views
-    InitializePlayers();
+    UpdatePlayersTable();
     UpdateSeasons();
 }
 
@@ -93,19 +113,28 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::InitializePlayers()
+void MainWindow::UpdatePlayersTable()
 {
-    ui->playersWidget->setModel(mDatabase.GetPlayersModel());
+    TableHelper helper(ui->playersWidget);
+    QList<Player> &list = mDatabase.GetPlayerList();
+    helper.Initialize(mPlayersTableHeader, list.size());
+
+    foreach (Player p, list)
+    {
+        QList<QVariant> rowData;
+
+        rowData << p.id << p.uuid << p.name << p.lastName << p.nickName << p.email
+                << p.mobilePhone << p.homePhone << p.birthDate.toString(Qt::TextDate) << p.road << p.postCode
+                << p.city << p.membership << p.comments << p.state << p.document;
+
+        helper.AppendLine(rowData, false);
+    }
+
     ui->playersWidget->hideColumn(1); // don't show the UUID
     ui->playersWidget->hideColumn(14); // don't show the State
     ui->playersWidget->hideColumn(15); // don't show the Document
-    ui->playersWidget->show();
 
-    int count = ui->eventList->count();
-    if (count > 0)
-    {
-        ui->eventList->setCurrentRow(count - 1);
-    }
+    ui->eventTable->setSortingEnabled(true);
 }
 
 void MainWindow::slotImportFile()
@@ -179,7 +208,11 @@ void MainWindow::slotAddPlayer()
     if (playerWindow->exec() == QDialog::Accepted)
     {
         playerWindow->GetPlayer(newPlayer);
-        if (!mDatabase.AddPlayer(newPlayer))
+        if (mDatabase.AddPlayer(newPlayer))
+        {
+            UpdatePlayersTable();
+        }
+        else
         {
             TLogError("Cannot add player!");
         }
@@ -188,28 +221,25 @@ void MainWindow::slotAddPlayer()
 
 void MainWindow::slotEditPlayer()
 {
-    QModelIndexList indexes = ui->playersWidget->selectionModel()->selection().indexes();
+    TableHelper helper(ui->playersWidget);
 
-    if (indexes.size() > 1)
+    int id;
+    if (helper.GetFirstColumnValue(id))
     {
-        QModelIndex index = indexes.at(0);
-        QMap<int, QVariant> data = ui->playersWidget->model()->itemData(index);
-
-        if (data.contains(0))
+        Player p;
+        if (mDatabase.FindPlayer(id, p))
         {
-            int id = data[0].toInt();
-            std::cout << "Player ID: " << id << std::endl;
-            Player p;
-            if (mDatabase.FindPlayer(id, p))
+            playerWindow->SetPlayer(p);
+            if (playerWindow->exec() == QDialog::Accepted)
             {
-                playerWindow->SetPlayer(p);
-                if (playerWindow->exec() == QDialog::Accepted)
+                playerWindow->GetPlayer(p);
+                if (mDatabase.EditPlayer(p))
                 {
-                    playerWindow->GetPlayer(p);
-                    if (!mDatabase.EditPlayer(p))
-                    {
-                        TLogError("Cannot edit player!");
-                    }
+                    UpdatePlayersTable();
+                }
+                else
+                {
+                    TLogError("Cannot edit player!");
                 }
             }
         }
@@ -221,6 +251,15 @@ void MainWindow::UpdateTeamList(int eventId)
     ui->teamList->clear();
     mTeams = mDatabase.GetTeams(eventId);
     mPlayersInTeams.clear();
+
+    if (mCurrentEvent.state == Event::cNotStarted)
+    {
+        ui->buttonEditTeam->setEnabled(true);
+    }
+    else
+    {
+        ui->buttonEditTeam->setEnabled(false);
+    }
 
     foreach (Team team, mTeams)
     {
@@ -241,13 +280,23 @@ void MainWindow::UpdateTeamList(int eventId)
 
 void MainWindow::slotEventItemActivated()
 {
-    int match = ui->eventList->currentRow();
-    if (match > -1)
+    int row = ui->eventTable->currentRow();
+    if (row > -1)
     {
-        mCurrentEvent = mDatabase.GetEvent(ui->eventList->currentItem()->text());
-        std::cout << "Current match id: " << mCurrentEvent.id << std::endl;
-        UpdateTeamList(mCurrentEvent.id);
-        UpdateGameList();
+        int id;
+        TableHelper helper(ui->eventTable);
+
+        if (helper.GetFirstColumnValue(id))
+        {
+            mCurrentEvent = mDatabase.GetEvent(id);
+
+            if (mCurrentEvent.id != -1)
+            {
+                std::cout << "Current match id: " << mCurrentEvent.id << std::endl;
+                UpdateTeamList(mCurrentEvent.id);
+                UpdateGameList();
+            }
+        }
     }
 }
 
@@ -260,6 +309,8 @@ void MainWindow::UpdateSeasons()
 
     ui->comboRankingSeasons->clear();
     ui->comboRankingSeasons->addItems(seasons);
+
+    UpdateEventsTable();
 }
 
 void MainWindow::slotAddEvent()
@@ -277,11 +328,12 @@ void MainWindow::slotAddEvent()
     }
 }
 
-
 void MainWindow::slotEditEvent()
 {
-    int index = ui->eventList->currentRow();
-    if (index >= 0)
+    TableHelper helper(ui->playersWidget);
+
+    int id;
+    if (helper.GetFirstColumnValue(id))
     {
         eventWindow->SetEvent(mCurrentEvent);
         if (eventWindow->exec() == QDialog::Accepted)
@@ -299,9 +351,15 @@ void MainWindow::slotEditEvent()
     }
 }
 
+void MainWindow::slotDeleteEvent()
+{
+
+}
+
+
 void MainWindow::slotAddTeam()
 {
-    int match = ui->eventList->currentRow();
+    int match = ui->eventTable->currentRow();
     if (match > -1)
     {
         // Prepare widget contents
@@ -319,25 +377,41 @@ void MainWindow::slotAddTeam()
     }
 }
 
+void MainWindow::slotEditTeam()
+{
+
+}
+
+void MainWindow::slotDeleteTeam()
+{
+
+}
+
+void MainWindow::UpdateEventsTable()
+{
+    TableHelper helper(ui->eventTable);
+    helper.Initialize(mEventsTableHeader, mEvents.size());
+
+    foreach (Event event, mEvents)
+    {
+        QList<QVariant> rowData;
+        rowData << event.id << event.date.toString(Qt::TextDate);
+        helper.AppendLine(rowData, false);
+    }
+
+    ui->eventTable->setSortingEnabled(true);
+
+    if (mEvents.size() > 0)
+    {
+        ui->eventTable->selectRow(mEvents.size() - 1);
+    }
+}
+
 
 void MainWindow::slotSeasonChanged(int index)
 {
-    ui->eventList->clear();
     mEvents = mDatabase.GetEvents(ui->comboSeasons->itemText(index).toInt());
-
-    QStringList dates;
-    foreach (Event match, mEvents)
-    {
-        dates.append(match.date.toString(Qt::ISODate));
-    }
-
-    ui->eventList->addItems(dates);
-
-    int count = ui->eventList->count();
-    if (count > 0)
-    {
-        ui->eventList->setCurrentRow(count - 1);
-    }
+    UpdateEventsTable();
 }
 
 void MainWindow::slotStartRounds()
@@ -405,7 +479,6 @@ bool MainWindow::FindGame(const int id, Game &game)
 
 void MainWindow::UpdateGameList()
 {
-    ui->gameList->clear();
     mGames = mDatabase.GetGames(mCurrentEvent.id);
     bracketWindow->SetGames(mGames, mTeams);
 
@@ -418,6 +491,9 @@ void MainWindow::UpdateGameList()
         ui->buttonStart->setEnabled(false);
     }
 
+    TableHelper helper(ui->gameTable);
+    helper.Initialize(mGamesTableHeader, mGames.size());
+
     foreach (Game game, mGames)
     {
         Team t1, t2;
@@ -426,60 +502,76 @@ void MainWindow::UpdateGameList()
 
         if (valid)
         {
-            ui->gameList->addItem(t1.teamName + " <--> " + t2.teamName + "(" + QString("%1").arg(game.id) + ")");
+            QList<QVariant> gameData;
+            gameData << game.id << (int)(game.turn + 1) << (t1.teamName + " <--> " + t2.teamName);
+            helper.AppendLine(gameData, game.IsPlayed());
         }
         else
         {
             TLogError("Cannot update game list!");
         }
     }
+
+    ui->gameTable->setSortingEnabled(true);
+    ui->gameTable->sortByColumn(1, Qt::AscendingOrder);
 }
 
 void MainWindow::slotEditGame()
 {
-    int index = ui->gameList->currentRow();
-    if (index >= 0)
+    if (mCurrentEvent.state == Event::cNotStarted)
     {
-        QRegularExpression re("\\.*(\\d+)");
-        QRegularExpressionMatch match = re.match(ui->gameList->item(index)->text());
+        QModelIndexList indexes = ui->gameTable->selectionModel()->selection().indexes();
 
-        if (match.hasMatch())
+        if (indexes.size() > 1)
         {
-            int id = match.captured(1).toInt();
-            std::cout << "Found team id: " << id << std::endl;
-            Game game;
+            QModelIndex index = indexes.at(0);
+            QMap<int, QVariant> data = ui->gameTable->model()->itemData(index);
 
-            if (FindGame(id, game))
+            if (data.contains(0))
             {
-                Team team1;
-                Team team2;
+                int id = data[0].toInt();
+                std::cout << "Found team id: " << id << std::endl;
+                Game game;
 
-                bool valid = Team::Find(mTeams, game.team1Id, team1);
-                valid = valid && Team::Find(mTeams, game.team2Id, team2);
-
-                if (valid)
+                if (FindGame(id, game))
                 {
-                    gameWindow->SetGame(game, team1, team2);
-                    if (gameWindow->exec() == QDialog::Accepted)
+                    Team team1;
+                    Team team2;
+
+                    bool valid = Team::Find(mTeams, game.team1Id, team1);
+                    valid = valid && Team::Find(mTeams, game.team2Id, team2);
+
+                    if (valid)
                     {
-                        gameWindow->GetGame(game);
-                        if (!mDatabase.EditGame(game))
+                        gameWindow->SetGame(game, team1, team2);
+                        if (gameWindow->exec() == QDialog::Accepted)
                         {
-                            TLogError("Cannot edit game!");
-                        }
-                        else
-                        {
-                            UpdateGameList();
+                            gameWindow->GetGame(game);
+                            if (!mDatabase.EditGame(game))
+                            {
+                                TLogError("Cannot edit game!");
+                            }
+                            else
+                            {
+                                UpdateGameList();
+                            }
                         }
                     }
                 }
             }
-        }
-        else
-        {
-            TLogError("Cannot find any valid game in the list");
+            else
+            {
+                TLogError("Cannot find any valid game in the list");
+            }
         }
     }
+    else
+    {
+        (void) QMessageBox::warning(this, tr("Tanca"),
+                                    tr("Impossible de changer les équipes une fois\r\nles parties commencées."),
+                                    QMessageBox::Ok);
+    }
+
 }
 
 void MainWindow::slotTabChanged(int index)
@@ -529,20 +621,6 @@ void MainWindow::slotRankingSeasonChanged(int index)
 {
     QList<Event> events = mDatabase.GetEvents(ui->comboRankingSeasons->itemText(index).toInt());
 
-    class MyTableWidgetItem : public QTableWidgetItem {
-        public:
-            MyTableWidgetItem(const QString &text)
-              : QTableWidgetItem(text)
-            {
-
-            }
-
-            bool operator <(const QTableWidgetItem &other) const
-            {
-                return text().toInt() < other.text().toInt();
-            }
-    };
-
     struct Rank
     {
         int points;
@@ -571,16 +649,10 @@ void MainWindow::slotRankingSeasonChanged(int index)
 
         void Show(QTableWidget *table, const QList<Player> &players)
         {
-            QStringList header;
-            header << tr("Joueur") << tr("Points") << tr("Parties jouées");
-            table->clear();
-            table->setHorizontalHeaderLabels(header);
-            table->setRowCount(mList.size());
-
-            std::cout << "Filling contest table: " << mList.size() << " elements." << std::endl;
+            TableHelper helper(table);
+            helper.Initialize(mRankingTableHeader, mList.size());
 
             QMapIterator<int, Rank> i(mList);
-            int row = 0;
             while (i.hasNext())
             {
                 i.next();
@@ -591,14 +663,9 @@ void MainWindow::slotRankingSeasonChanged(int index)
                 Player player;
                 if (Player::Find(players, id, player))
                 {
-                    MyTableWidgetItem *col1 = new MyTableWidgetItem(player.FullName());
-                    MyTableWidgetItem *col2 = new MyTableWidgetItem(tr("%1").arg(rank.points));
-                    MyTableWidgetItem *col3 = new MyTableWidgetItem(tr("%1").arg(rank.playedGames));
-
-                    table->setItem(row, 0, col1);
-                    table->setItem(row, 1, col2);
-                    table->setItem(row, 2, col3);
-                    row++;
+                    QList<QVariant> rowData;
+                    rowData << player.id << player.FullName() << rank.points << rank.playedGames;
+                    helper.AppendLine(rowData, false);
                 }
                 else
                 {
@@ -651,6 +718,7 @@ void MainWindow::slotRankingSeasonChanged(int index)
     }
 
     ranking.Show(ui->tableContest, mDatabase.GetPlayerList());
-    ui->tableContest->sortByColumn(1, Qt::DescendingOrder);
+    ui->tableContest->setSortingEnabled(true);
+    ui->tableContest->sortByColumn(2, Qt::DescendingOrder);
 }
 

@@ -70,6 +70,23 @@ struct Player
         return found;
     }
 
+    static bool Index(const QList<Player> &players, const int id, int &index)
+    {
+        bool found = false;
+
+        index = 0;
+        foreach (Player p, players)
+        {
+            if (p.id == id)
+            {
+                found = true;
+                break;
+            }
+            index++;
+        }
+        return found;
+    }
+
     static QString Table() {
         return "CREATE TABLE IF NOT EXISTS players (id INTEGER PRIMARY KEY, uuid TEXT, name TEXT, last_name TEXT, nick_name TEXT, "
                 "email TEXT, mobile_phone TEXT, home_phone TEXT, birth_date TEXT, road TEXT, post_code INTEGER, city TEXT, "
@@ -171,7 +188,10 @@ struct Game
         bool active = false;
         if ((team1Score != -1) && (team2Score != -1))
         {
-            active = true;
+            if ((team1Score + team2Score) > 0)
+            {
+                active = true;
+            }
         }
         return active;
     }
@@ -230,11 +250,10 @@ public:
     bool FindPlayer(int id, Player &player);
     QList<Player> &GetPlayerList();
     bool PlayerExists(const Player &player) const;
-    QSqlTableModel *GetPlayersModel() { return mPlayersModel; }
 
     // Events management
     bool AddEvent(const Event &event);
-    Event GetEvent(const QString &date);
+    Event GetEvent(int id);
     QStringList GetSeasons();
     bool UpdateEventState(const Event &event);
     QList<Event> GetEvents(int year);
@@ -255,9 +274,7 @@ public:
 private:
     QSqlDatabase mDb;
     QSqlDatabase mCities;
-
     QList<Player> mPlayers; // Cached player list
-    QSqlTableModel *mPlayersModel;
 
     QList<Player> UpdatePlayerList();
 };

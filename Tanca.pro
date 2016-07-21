@@ -27,6 +27,10 @@ RC_FILE = icon.rc
 TARGET = Tanca
 TEMPLATE = app
 
+
+VPATH += src
+INCLUDEPATH += src
+
 QMAKE_CXXFLAGS += -std=c++11
 
 win32 {
@@ -45,7 +49,8 @@ SOURCES += main.cpp MainWindow.cpp \
     DatePickerWindow.cpp \
     Log.cpp Util.cpp \
     GameWindow.cpp \
-    EventWindow.cpp
+    EventWindow.cpp \
+    TableHelper.cpp
 
 HEADERS  += MainWindow.h \
     DbManager.h \
@@ -55,7 +60,8 @@ HEADERS  += MainWindow.h \
     DatePickerWindow.h \
     Log.h Util.h Observer.h \
     GameWindow.h \
-    EventWindow.h
+    EventWindow.h \
+    TableHelper.h
 
 FORMS    += MainWindow.ui \
     PlayerWindow.ui \

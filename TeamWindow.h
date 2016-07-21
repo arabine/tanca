@@ -20,7 +20,7 @@ private slots:
     void slotAccept();
 
     void slotClicked();
-    void slotMemberItemActivated(QListWidgetItem *item);
+    void slotPlayerItemActivated();
     void slotTeamItemActivated(QListWidgetItem *item);
 private:
     Ui::TeamWindow ui;
@@ -29,6 +29,7 @@ private:
     QList<Player> mList;
     QList<Player> mSelection;
     void Update();
+    int mTeamSize;
 };
 
 #endif // TEAMWINDOW_H

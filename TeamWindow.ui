@@ -7,14 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>512</width>
-    <height>332</height>
+    <height>307</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Gestion d'équipe</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
-   <item>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -43,9 +43,12 @@
      </property>
     </widget>
    </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
+   <item row="1" column="0">
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QWidget" name="">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QLabel" name="label_2">
@@ -58,26 +61,27 @@
         </widget>
        </item>
        <item>
-        <widget class="QListWidget" name="memberList">
+        <widget class="QTableWidget" name="playersTable">
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>
          </property>
+         <attribute name="horizontalHeaderStretchLastSection">
+          <bool>true</bool>
+         </attribute>
+         <attribute name="verticalHeaderVisible">
+          <bool>false</bool>
+         </attribute>
         </widget>
        </item>
       </layout>
-     </item>
-     <item>
-      <widget class="QPushButton" name="buttonSwap">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="tanca.qrc">
-         <normaloff>:/icons/arrow.png</normaloff>:/icons/arrow.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
+     </widget>
+     <widget class="QWidget" name="">
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QLabel" name="label_3">
@@ -97,11 +101,11 @@
         </widget>
        </item>
       </layout>
-     </item>
-    </layout>
+     </widget>
+    </widget>
    </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <item row="2" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -114,6 +118,17 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="buttonSwap">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="tanca.qrc">
+         <normaloff>:/icons/arrow.png</normaloff>:/icons/arrow.png</iconset>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="buttonOk">

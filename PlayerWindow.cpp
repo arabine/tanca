@@ -26,10 +26,21 @@ void PlayerWindow::slotAddLicence()
 
 void PlayerWindow::SetPlayer(const Player &player)
 {
+    QString name = player.name.toLower();
+    name[0].toUpper();
+
+    QString lastName = player.lastName.toLower();
+    lastName[0].toUpper();
+
+    QString nickName = player.nickName.toLower();
+    nickName[0].toUpper();
+
     ui.dateBirth->setDate(player.birthDate);
     ui.lineCity->setText(player.city);
     ui.plainComments->setPlainText(player.comments);
-    ui.lineLastName->setText(player.lastName);
+    ui.lineName->setText(name);
+    ui.lineNickName->setText(nickName);
+    ui.lineLastName->setText(lastName);
 
     ui.listLicences->clear();
     QStringList items = player.membership.split(";");
@@ -45,8 +56,6 @@ void PlayerWindow::SetPlayer(const Player &player)
         }
     }
 
-    ui.lineName->setText(player.name);
-    ui.lineNickName->setText(player.nickName);
     ui.spinPostCode->setValue(player.postCode);
     ui.lineStreet->setText(player.road);
     ui.lineMobilePhone->setText(player.mobilePhone);
@@ -56,10 +65,21 @@ void PlayerWindow::SetPlayer(const Player &player)
 
 void PlayerWindow::GetPlayer(Player &player)
 {
+    QString name = ui.lineName->text().toLower();
+    name[0].toUpper();
+
+    QString lastName = ui.lineLastName->text().toLower();
+    lastName[0].toUpper();
+
+    QString nickName = ui.lineNickName->text().toLower();
+    nickName[0].toUpper();
+
     player.birthDate = ui.dateBirth->date();
     player.city = ui.lineCity->text();
     player.comments = ui.plainComments->toPlainText();
-    player.lastName = ui.lineLastName->text();
+    player.lastName = lastName;
+    player.name = name;
+    player.nickName = nickName;
 
     // Separate each licence with a ';'
     QString licences;
@@ -73,8 +93,6 @@ void PlayerWindow::GetPlayer(Player &player)
     }
 
     player.membership = licences;
-    player.name = ui.lineName->text();
-    player.nickName = ui.lineNickName->text();
     player.postCode = ui.spinPostCode->value();
     player.road = ui.lineStreet->text();
     player.mobilePhone = ui.lineMobilePhone->text();

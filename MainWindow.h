@@ -39,8 +39,11 @@ private slots:
      void slotExport();
      void slotTabChanged(int index);
 
+     void slotDeleteTeam();
+     void slotEditTeam();
+     void slotDeleteEvent();
 private:
-    void InitializePlayers();
+    void UpdatePlayersTable();
 
     // Windows
     Ui::MainWindow *ui;
@@ -65,6 +68,7 @@ private:
 
     bool FindGame(const int id, Game &game);
     void UpdateSeasons();
+    void UpdateEventsTable();
 
 };
 

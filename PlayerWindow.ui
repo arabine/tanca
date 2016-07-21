@@ -235,7 +235,11 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_7">
            <item>
-            <widget class="QDateEdit" name="dateEdit_2"/>
+            <widget class="QDateEdit" name="dateEdit_2">
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="buttonAddLicence">
