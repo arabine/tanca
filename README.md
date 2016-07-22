@@ -1,7 +1,19 @@
-# Tanca, un gestionnaire de club et de concours de pétanque (petanque club & contests manager)
+# Tanca, un gestionnaire de club et de concours de pétanque (petanque club and contests manager)
 
-Tanca est un logiciel permettant de gérer un club de pétanque et d'organiser des concours internes.
-Tanca will help petanque clubs to follow subscribers and organize in-house contests.
+Tanca est un logiciel permettant de gérer un club de pétanque et d'organiser des concours internes. (Tanca will help petanque clubs to follow subscribers and organize in-house contests).
+
+## Présentation
+
+Tanca vous aide à organiser votre club de pétanque. Il vous permet de garder une trace de vos adhérents et de leurs informations et possèd eun module de création de concours.
+
+Pour le moment, seul le concours de type "Tournois Suisse" est supporté.
+
+
+## Captures d'écrans
+
+Liste des joueurs:
+![GitHub Logo](doc/screen_joueurs.png)
+
 
 ## Historique des versions
 
