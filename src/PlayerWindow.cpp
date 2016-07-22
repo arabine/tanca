@@ -1,5 +1,5 @@
 #include "PlayerWindow.h"
-
+#include <QMessageBox>
 
 PlayerWindow::PlayerWindow(QWidget *parent)
     : QDialog(parent)
@@ -10,7 +10,7 @@ PlayerWindow::PlayerWindow(QWidget *parent)
     datePickerWindow->hide();
 
     connect(ui.buttonAddLicence, &QPushButton::clicked, this, &PlayerWindow::slotAddLicence);
-    connect(ui.buttonOk, &QPushButton::clicked, this, &PlayerWindow::accept);
+    connect(ui.buttonOk, &QPushButton::clicked, this, &PlayerWindow::slotAccept);
     connect(ui.buttonCancel, &QPushButton::clicked, this, &PlayerWindow::reject);
 }
 
@@ -24,16 +24,51 @@ void PlayerWindow::slotAddLicence()
     }
 }
 
+void PlayerWindow::slotAccept()
+{
+    bool ok = true;
+
+    if (ui.lineName->text().size() == 0)
+    {
+        (void) QMessageBox::warning(this, tr("Formulaire de joueur"),
+                                            tr("Il faut inscrire un prénom"),
+                                            QMessageBox::Ok);
+        ok = false;
+    }
+
+    if (ui.lineLastName->text().size() == 0)
+    {
+        (void) QMessageBox::warning(this, tr("Formulaire de joueur"),
+                                            tr("Il faut inscrire un nom"),
+                                            QMessageBox::Ok);
+        ok = false;
+    }
+
+    if (ok)
+    {
+        accept();
+    }
+}
+
 void PlayerWindow::SetPlayer(const Player &player)
 {
     QString name = player.name.toLower();
-    name[0].toUpper();
+    if (name.size() > 0)
+    {
+        name.replace(0, 1, name[0].toUpper());
+    }
 
     QString lastName = player.lastName.toLower();
-    lastName[0].toUpper();
+    if (lastName.size() > 0)
+    {
+        lastName.replace(0, 1, lastName[0].toUpper());
+    }
 
     QString nickName = player.nickName.toLower();
-    nickName[0].toUpper();
+    if (nickName.size() > 0)
+    {
+        nickName.replace(0, 1, nickName[0].toUpper());
+    }
 
     ui.dateBirth->setDate(player.birthDate);
     ui.lineCity->setText(player.city);
@@ -66,13 +101,22 @@ void PlayerWindow::SetPlayer(const Player &player)
 void PlayerWindow::GetPlayer(Player &player)
 {
     QString name = ui.lineName->text().toLower();
-    name[0].toUpper();
+    if (name.size() > 0)
+    {
+        name.replace(0, 1, name[0].toUpper());
+    }
 
     QString lastName = ui.lineLastName->text().toLower();
-    lastName[0].toUpper();
+    if (lastName.size() > 0)
+    {
+        lastName.replace(0, 1, lastName[0].toUpper());
+    }
 
     QString nickName = ui.lineNickName->text().toLower();
-    nickName[0].toUpper();
+    if (nickName.size() > 0)
+    {
+        nickName.replace(0, 1, nickName[0].toUpper());
+    }
 
     player.birthDate = ui.dateBirth->date();
     player.city = ui.lineCity->text();

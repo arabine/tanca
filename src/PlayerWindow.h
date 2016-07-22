@@ -17,6 +17,7 @@ public:
 
 private slots:
     void slotAddLicence();
+    void slotAccept();
 private:
     DatePickerWindow *datePickerWindow;
 
