@@ -7,7 +7,7 @@ Tanca will help petanque clubs to follow subscribers and organize in-house conte
 
 ### V1.3
 
- - Terminer l'édition d'un joueur
+ - Le formulaire d'édition d'un joueur fonctionne complètement + contrôle de la casse des prénom/nom
  - Lors de l'import, comparer les nom/prénom en minimisant la casse
  - Correction automatique de la casse des noms/prénoms/pseudonymes pour uniformiser l'affichage
  - Remplacement des listes par des tables avec classement automatique

@@ -2,8 +2,8 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Tanca"
-#define MyAppVersion "1.2"
-#define MyAppPublisher "Misral.io"
+#define MyAppVersion "1.3"
+#define MyAppPublisher "Erigo.io"
 #define MyAppURL "http://www.tanca.fr"
 #define MyAppExeName "Tanca.exe"
 
