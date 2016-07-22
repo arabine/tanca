@@ -23,7 +23,7 @@ MOC_DIR         = $$DESTDIR/moc
 
 QT       += core gui sql widgets
 
-RC_FILE = icon.rc
+RC_FILE = assets/icon.rc
 TARGET = Tanca
 TEMPLATE = app
 
@@ -71,5 +71,4 @@ FORMS    += MainWindow.ui \
 
 OTHER_FILES += README.md LICENSE
 
-RESOURCES += \
-    tanca.qrc
+RESOURCES += assets/tanca.qrc
