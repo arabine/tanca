@@ -391,27 +391,18 @@ void MainWindow::slotAddTeam()
     int selection = ui->eventTable->currentRow();
     if (selection > -1)
     {
-        if (mDatabase.GetPlayerList().size() > 2)
-        {
-            // Prepare widget contents
-            teamWindow->Initialize(mDatabase.GetPlayerList(), mPlayersInTeams);
+        // Prepare widget contents
+        teamWindow->Initialize(mDatabase.GetPlayerList(), mPlayersInTeams);
 
-            if (teamWindow->exec() == QDialog::Accepted)
-            {
-                Team team;
-                teamWindow->GetTeam(team);
-                team.eventId = mCurrentEvent.id;
-                if (mDatabase.AddTeam(team))
-                {
-                    UpdateTeamList(mCurrentEvent.id);
-                }
-            }
-        }
-        else
+        if (teamWindow->exec() == QDialog::Accepted)
         {
-            (void) QMessageBox::warning(this, tr("Tanca"),
-                                                tr("Pas assez de joueurs inscris."),
-                                                QMessageBox::Ok);
+            Team team;
+            teamWindow->GetTeam(team);
+            team.eventId = mCurrentEvent.id;
+            if (mDatabase.AddTeam(team))
+            {
+                UpdateTeamList(mCurrentEvent.id);
+            }
         }
     }
 }
