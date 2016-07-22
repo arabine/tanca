@@ -13,6 +13,8 @@ Tanca will help petanque clubs to follow subscribers and organize in-house conte
  - Remplacement des listes par des tables avec classement automatique
  - Mettre en gris les lignes des parties terminées (pointage effectué)
  - Afficher calendrier graphique lors du choix de la date de l'événement
+ - Suppression/édition des équipes
+ - Edition/suppression d'un événement
 
 ### V1.2
 
@@ -38,13 +40,13 @@ Tanca will help petanque clubs to follow subscribers and organize in-house conte
 
 
  - L'ajout manuelle de parties (édition des rencontres ?)
- - Suppression/édition des équipes
- - Edition/suppression d'un événement
  - Exporter la base de joueurs
  - Imprimer ou Exporter les matches d'un événement
  - Affichage du numéro des équipes dans la liste des matches
  - Afficher/exporter le classement d'un événement
-
+ - Implémenter les statistiques
+ - Ajout de champs dans la fiche joueur: sexe, nationalité, date du certificat médical, catégorie
+ - Support des catégories (Vétéran, Sénior, Junior, Cadet, Minime, Benjamin)
 
 ## Swisss (round-robin) tournament algorithm
 
