@@ -12,19 +12,19 @@ Pour le moment, seul le concours de type "Tournoi Suisse" est supporté.
 ## Captures d'écrans
 
 Liste des joueurs:
-![GitHub Logo](doc/screen_joueurs.png)
+![Capture](doc/screen_joueurs.png)
 
 Classement de la saison du tournoi Suisse:
-![GitHub Logo](doc/screen_classement.png)
+![Capture](doc/screen_classements.png)
 
 Liste des matches:
-![GitHub Logo](doc/screen_matches.png)
+![Capture](doc/screen_matches.png)
 
 Liste des équipe participant à un événement:
-![GitHub Logo](doc/screen_teams.png)
+![Capture](doc/screen_teams.png)
 
 Affichage des matches du tournoi:
-![GitHub Logo](doc/screen_tournament.png)
+![Capture](doc/screen_tournament.png)
 
 ## Historique des versions
 
