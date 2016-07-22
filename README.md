@@ -6,7 +6,7 @@ Tanca est un logiciel permettant de gérer un club de pétanque et d'organiser d
 
 Tanca vous aide à organiser votre club de pétanque. Il vous permet de garder une trace de vos adhérents et de leurs informations et possèd eun module de création de concours.
 
-Pour le moment, seul le concours de type "Tournois Suisse" est supporté.
+Pour le moment, seul le concours de type "Tournoi Suisse" est supporté.
 
 
 ## Captures d'écrans
@@ -14,6 +14,17 @@ Pour le moment, seul le concours de type "Tournois Suisse" est supporté.
 Liste des joueurs:
 ![GitHub Logo](doc/screen_joueurs.png)
 
+Classement de la saison du tournoi Suisse:
+![GitHub Logo](doc/screen_classement.png)
+
+Liste des matches:
+![GitHub Logo](doc/screen_matches.png)
+
+Liste des équipe participant à un événement:
+![GitHub Logo](doc/screen_teams.png)
+
+Affichage des matches du tournoi:
+![GitHub Logo](doc/screen_tournament.png)
 
 ## Historique des versions
 
