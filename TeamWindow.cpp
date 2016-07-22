@@ -1,5 +1,6 @@
 #include "TeamWindow.h"
 #include "TableHelper.h"
+#include "Log.h"
 
 QStringList gPlayerListHeader;
 
@@ -14,9 +15,34 @@ TeamWindow::TeamWindow(QWidget *parent)
     connect(ui.buttonSwap, &QPushButton::clicked, this, &TeamWindow::slotClicked);
 
     connect(ui.playersTable, SIGNAL(itemSelectionChanged()), this, SLOT(slotPlayerItemActivated()));
-    connect(ui.teamList, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(slotTeamItemActivated(QListWidgetItem*)));
+    connect(ui.teamList, &QListWidget::itemClicked, this, &TeamWindow::slotTeamItemActivated);
 
     gPlayerListHeader << tr("Id") << tr("Prénom") << tr("Nom") << tr("Pseudo");
+}
+
+void TeamWindow::SetTeam(const Player &p1, const Player &p2)
+{
+    mSelection.clear();
+    mSelection.append(p1);
+    mSelection.append(p2);
+    Update();
+}
+
+void TeamWindow::GetTeam(Team &team)
+{
+    if (mSelection.size() >= 2)
+    {
+        team.player1Id = mSelection.at(0).id;
+        team.player2Id = mSelection.at(1).id;
+    }
+
+    if (mSelection.size() >= 3)
+    {
+        team.player3Id = mSelection.at(2).id;
+    }
+
+    // Update team name
+    team.CreateName(mSelection.at(0).name, mSelection.at(1).name);
 }
 
 void TeamWindow::Initialize(const QList<Player> &players, const QList<int> &inTeams)
@@ -57,6 +83,8 @@ void TeamWindow::Update()
     {
         ui.teamList->addItem(p.name + " " + p.lastName);
     }
+
+    helper.Finish();
 }
 
 void TeamWindow::slotPlayerItemActivated()
@@ -74,26 +102,23 @@ void TeamWindow::slotTeamItemActivated(QListWidgetItem *item)
 
 void TeamWindow::slotClicked()
 {
-    int selectionLeft = ui.playersTable->currentRow();
     int selectionRight = ui.teamList->currentRow();
+    TableHelper helper(ui.playersTable);
 
-    if (selectionLeft > -1)
+    int id = -1;
+    (void) helper.GetFirstColumnValue(id);
+
+    if (id > -1)
     {
-        int id;
-        TableHelper helper(ui.playersTable);
-
-        if (helper.GetFirstColumnValue(id))
+        Player p;
+        if (Player::Find(mList, id, p) && (mSelection.size() < mTeamSize))
         {
-            Player p;
-            if (Player::Find(mList, id, p) && (mSelection.size() < mTeamSize))
+            // transfer to the right and remove the player from the list
+            mSelection.append(p);
+            int index;
+            if (Player::Index(mList, id, index))
             {
-                // transfer to the right and remove the player from the list
-                mSelection.append(p);
-                int index;
-                if (Player::Index(mList, id, index))
-                {
-                    mList.removeAt(index);
-                }
+                mList.removeAt(index);
             }
         }
     }
@@ -112,9 +137,6 @@ void TeamWindow::slotAccept()
 {
     if (mSelection.size() == mTeamSize)
     {
-        mTeam.player1Id = mSelection.at(0).id;
-        mTeam.player2Id = mSelection.at(1).id;
-        mTeam.player3Id = -1;
         accept();
     }
 }

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <QModelIndex>
 #include <QTableWidgetItem>
+#include <QHeaderView>
 
 TableHelper::TableHelper(QTableWidget *widget)
     : mWidget(widget)
@@ -41,6 +42,13 @@ void TableHelper::Initialize(const QStringList &header, int rows)
     mWidget->setSortingEnabled(false);
 
     row = 0;
+}
+
+void TableHelper::Finish()
+{
+    mWidget->resizeColumnsToContents();
+    mWidget->setSortingEnabled(true);
+    mWidget->horizontalHeader()->setStretchLastSection(true);
 }
 
 void TableHelper::AppendLine(const QList<QVariant> &list, bool selected)

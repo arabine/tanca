@@ -12,9 +12,11 @@ class TeamWindow : public QDialog
 public:
     TeamWindow(QWidget *parent);
 
-    Team GetTeam() { return mTeam; }
+    void SetTeam(const Player &p1, const Player &p2);
+    void GetTeam(Team &team);
 
     void Initialize(const QList<Player> &players, const QList<int> &inTeams);
+
 
 private slots:
     void slotAccept();
@@ -24,7 +26,6 @@ private slots:
     void slotTeamItemActivated(QListWidgetItem *item);
 private:
     Ui::TeamWindow ui;
-    Team mTeam;
 
     QList<Player> mList;
     QList<Player> mSelection;

@@ -395,6 +395,27 @@ QList<Event> DbManager::GetEvents(int year)
     return result;
 }
 
+bool DbManager::DeleteEvent(int id)
+{
+    bool success = false;
+
+    QSqlQuery queryAdd(mDb);
+    queryAdd.prepare("DELETE FROM events WHERE id= :id");
+    queryAdd.bindValue(":id", id);
+
+    if(queryAdd.exec())
+    {
+        qDebug() << "Delete event success";
+        success = true;
+    }
+    else
+    {
+        TLogError("Delete event failed: " + queryAdd.lastError().text().toStdString());
+    }
+
+    return success;
+}
+
 
 bool DbManager::AddGames(const QList<Game>& games)
 {
@@ -492,6 +513,28 @@ bool DbManager::EditGame(const Game& game)
     return success;
 }
 
+bool DbManager::DeleteGameByEventId(int eventId)
+{
+    bool success = false;
+
+    QSqlQuery queryAdd(mDb);
+    queryAdd.prepare("DELETE FROM games WHERE event_id= :event_id");
+    queryAdd.bindValue(":event_id", eventId);
+
+    if(queryAdd.exec())
+    {
+        qDebug() << "Delete game success";
+        success = true;
+    }
+    else
+    {
+        TLogError("Delete game failed: " + queryAdd.lastError().text().toStdString());
+    }
+
+    return success;
+}
+
+
 bool DbManager::AddTeam(const Team &team)
 {
     bool success = false;
@@ -552,7 +595,7 @@ QList<Team> DbManager::GetTeams(int eventId)
 
                 if (valid)
                 {
-                    team.teamName = p1.name + " / " + p2.name;
+                    team.CreateName(p1.name, p2.name);
                 }
                 else
                 {
@@ -564,5 +607,77 @@ QList<Team> DbManager::GetTeams(int eventId)
         }
     }
     return result;
+}
+
+bool DbManager::EditTeam(const Team &team)
+{
+    bool success = false;
+
+    QSqlQuery queryEdit(mDb);
+
+    queryEdit.prepare("UPDATE teams SET event_id = :event_id, team_name = :team_name, player1_id = :player1_id, "
+                      "player2_id = :player2_id, player3_id = :player3_id, state = :state, document = :document WHERE id = :id");
+
+    queryEdit.bindValue(":id", team.id);
+    queryEdit.bindValue(":event_id", team.eventId);
+    queryEdit.bindValue(":team_name", team.teamName);
+    queryEdit.bindValue(":player1_id", team.player1Id);
+    queryEdit.bindValue(":player2_id", team.player2Id);
+    queryEdit.bindValue(":player3_id", team.player3Id);
+    queryEdit.bindValue(":state", team.state);
+    queryEdit.bindValue(":document", team.document);
+
+    if(queryEdit.exec())
+    {
+        qDebug() << "Edit team success";
+        success = true;
+    }
+    else
+    {
+        TLogError("Edit team failed: " + queryEdit.lastError().text().toStdString());
+    }
+    return success;
+}
+
+bool DbManager::DeleteTeam(int id)
+{
+    bool success = false;
+
+    QSqlQuery queryAdd(mDb);
+    queryAdd.prepare("DELETE FROM teams WHERE id = :id");
+    queryAdd.bindValue(":id", id);
+
+    if(queryAdd.exec())
+    {
+        qDebug() << "Delete team success";
+        success = true;
+    }
+    else
+    {
+        TLogError("Delete team failed: " + queryAdd.lastError().text().toStdString());
+    }
+
+    return success;
+}
+
+bool DbManager::DeleteTeamByEventId(int eventId)
+{
+    bool success = false;
+
+    QSqlQuery queryAdd(mDb);
+    queryAdd.prepare("DELETE FROM teams WHERE event_id= :event_id");
+    queryAdd.bindValue(":event_id", eventId);
+
+    if(queryAdd.exec())
+    {
+        qDebug() << "Delete team success";
+        success = true;
+    }
+    else
+    {
+        TLogError("Delete team failed: " + queryAdd.lastError().text().toStdString());
+    }
+
+    return success;
 }
 

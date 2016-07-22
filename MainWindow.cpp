@@ -7,7 +7,7 @@
 #include "TableHelper.h"
 #include "ui_MainWindow.h"
 
-static const QString gVersion = "1.2";
+static const QString gVersion = "1.3";
 
 
 // Table headers
@@ -15,6 +15,7 @@ QStringList mGamesTableHeader;
 QStringList mEventsTableHeader;
 QStringList mPlayersTableHeader;
 QStringList mRankingTableHeader;
+QStringList mTeamsTableHeader;
 
 #ifdef USE_WINDOWS_OS
 QString gAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tanca";
@@ -99,9 +100,10 @@ MainWindow::MainWindow(QWidget *parent)
     // Setup other stuff
     mDatabase.Initialize();
     mGamesTableHeader << tr("Id") << tr("Partie") << tr("Rencontre");
-    mEventsTableHeader << tr("Id") << tr("Date") << tr("Type") << tr("Statut");
+    mEventsTableHeader << tr("Id") << tr("Date") << tr("Type") << tr("Titre") << tr("État");
     mPlayersTableHeader << tr("Id") << tr("UUID") << tr("Prénom") << tr("Nom") << tr("Pseudonyme") << tr("E-mail") << tr("Téléphone (mobile)") << tr("Téléphone (maison)") << tr("Date de naissance") << tr("Rue") << tr("Code postal") << tr("Ville") << tr("Licences") << tr("Commentaires") << tr("Statut") << tr("Divers");
     mRankingTableHeader << tr("Id") << tr("Joueur") << tr("Points") << tr("Parties jouées");
+    mTeamsTableHeader << tr("Id") << ("Nom de l'équipe");
 
     // Initialize views
     UpdatePlayersTable();
@@ -134,7 +136,7 @@ void MainWindow::UpdatePlayersTable()
     ui->playersWidget->hideColumn(14); // don't show the State
     ui->playersWidget->hideColumn(15); // don't show the Document
 
-    ui->eventTable->setSortingEnabled(true);
+    helper.Finish();
 }
 
 void MainWindow::slotImportFile()
@@ -248,18 +250,22 @@ void MainWindow::slotEditPlayer()
 
 void MainWindow::UpdateTeamList(int eventId)
 {
-    ui->teamList->clear();
     mTeams = mDatabase.GetTeams(eventId);
     mPlayersInTeams.clear();
 
     if (mCurrentEvent.state == Event::cNotStarted)
     {
         ui->buttonEditTeam->setEnabled(true);
+        ui->buttonDeleteTeam->setEnabled(true);
     }
     else
     {
         ui->buttonEditTeam->setEnabled(false);
+        ui->buttonDeleteTeam->setEnabled(false);
     }
+
+    TableHelper helper(ui->teamTable);
+    helper.Initialize(mTeamsTableHeader, mTeams.size());
 
     foreach (Team team, mTeams)
     {
@@ -273,9 +279,13 @@ void MainWindow::UpdateTeamList(int eventId)
             mPlayersInTeams.append(team.player1Id);
             mPlayersInTeams.append(team.player2Id);
 
-            ui->teamList->addItem(team.teamName);
+            QList<QVariant> rowData;
+            rowData << team.id << team.teamName;
+            helper.AppendLine(rowData, false);
         }
     }
+
+    helper.Finish();
 }
 
 void MainWindow::slotEventItemActivated()
@@ -292,7 +302,7 @@ void MainWindow::slotEventItemActivated()
 
             if (mCurrentEvent.id != -1)
             {
-                std::cout << "Current match id: " << mCurrentEvent.id << std::endl;
+                std::cout << "Current event id: " << mCurrentEvent.id << std::endl;
                 UpdateTeamList(mCurrentEvent.id);
                 UpdateGameList();
             }
@@ -330,7 +340,7 @@ void MainWindow::slotAddEvent()
 
 void MainWindow::slotEditEvent()
 {
-    TableHelper helper(ui->playersWidget);
+    TableHelper helper(ui->eventTable);
 
     int id;
     if (helper.GetFirstColumnValue(id))
@@ -353,21 +363,41 @@ void MainWindow::slotEditEvent()
 
 void MainWindow::slotDeleteEvent()
 {
+    TableHelper helper(ui->eventTable);
 
+    int id;
+    if (helper.GetFirstColumnValue(id))
+    {
+        if (QMessageBox::warning(this, tr("Suppression d'un événement"),
+                                    tr("Attention ! Toutes les parties associées seront perdues. Continuer ?"),
+                                    QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok)
+        {
+            bool success = mDatabase.DeleteGameByEventId(id);
+            success = success && mDatabase.DeleteTeamByEventId(id);
+            success = success && mDatabase.DeleteEvent(id);
+
+            if (!success)
+            {
+                TLogError("Delete event failure");
+            }
+            UpdateSeasons();
+        }
+    }
 }
 
 
 void MainWindow::slotAddTeam()
 {
-    int match = ui->eventTable->currentRow();
-    if (match > -1)
+    int selection = ui->eventTable->currentRow();
+    if (selection > -1)
     {
         // Prepare widget contents
         teamWindow->Initialize(mDatabase.GetPlayerList(), mPlayersInTeams);
 
         if (teamWindow->exec() == QDialog::Accepted)
         {
-            Team team = teamWindow->GetTeam();
+            Team team;
+            teamWindow->GetTeam(team);
             team.eventId = mCurrentEvent.id;
             if (mDatabase.AddTeam(team))
             {
@@ -379,12 +409,72 @@ void MainWindow::slotAddTeam()
 
 void MainWindow::slotEditTeam()
 {
+    if (mCurrentEvent.state == Event::cNotStarted)
+    {
+        TableHelper helper(ui->teamTable);
 
+        int id;
+        if (helper.GetFirstColumnValue(id))
+        {
+            Team team;
+            if (Team::Find(mTeams, id, team))
+            {
+                // Prepare widget contents
+                teamWindow->Initialize(mDatabase.GetPlayerList(), mPlayersInTeams);
+
+                Player p1, p2;
+                bool found = mDatabase.FindPlayer(team.player1Id, p1);
+                found = found && mDatabase.FindPlayer(team.player2Id, p2);
+
+                if (found)
+                {
+                    teamWindow->SetTeam(p1, p2);
+
+                    if (teamWindow->exec() == QDialog::Accepted)
+                    {
+                        teamWindow->GetTeam(team);
+                        if (mDatabase.EditTeam(team))
+                        {
+                            UpdateTeamList(mCurrentEvent.id);
+                        }
+                    }
+                }
+                else
+                {
+                    TLogError("Cannot find players");
+                }
+            }
+        }
+    }
+    else
+    {
+        (void) QMessageBox::warning(this, tr("Tanca"),
+                                    tr("Les parties ont déjà commencé."),
+                                    QMessageBox::Ok);
+    }
 }
 
 void MainWindow::slotDeleteTeam()
 {
+    if (mCurrentEvent.state == Event::cNotStarted)
+    {
+        TableHelper helper(ui->teamTable);
 
+        int id;
+        if (helper.GetFirstColumnValue(id))
+        {
+            if (mDatabase.DeleteTeam(id))
+            {
+                UpdateTeamList(mCurrentEvent.id);
+            }
+        }
+    }
+    else
+    {
+        (void) QMessageBox::warning(this, tr("Tanca"),
+                                    tr("Les parties ont déjà commencé."),
+                                    QMessageBox::Ok);
+    }
 }
 
 void MainWindow::UpdateEventsTable()
@@ -395,15 +485,22 @@ void MainWindow::UpdateEventsTable()
     foreach (Event event, mEvents)
     {
         QList<QVariant> rowData;
-        rowData << event.id << event.date.toString(Qt::TextDate);
+        rowData << event.id << event.date.toString("d MMMM yyyy") << event.TypeToString() << event.title << event.StateToString();
         helper.AppendLine(rowData, false);
     }
 
-    ui->eventTable->setSortingEnabled(true);
+    helper.Finish();
 
     if (mEvents.size() > 0)
     {
+        // Will refresh all the UI elements for that event
         ui->eventTable->selectRow(mEvents.size() - 1);
+    }
+    else
+    {
+        // Empty teams and games
+        ui->teamTable->clear();
+        ui->gameTable->clear();
     }
 }
 
@@ -512,13 +609,13 @@ void MainWindow::UpdateGameList()
         }
     }
 
-    ui->gameTable->setSortingEnabled(true);
+    helper.Finish();
     ui->gameTable->sortByColumn(1, Qt::AscendingOrder);
 }
 
 void MainWindow::slotEditGame()
 {
-    if (mCurrentEvent.state == Event::cNotStarted)
+    if (mCurrentEvent.state == Event::cStarted)
     {
         QModelIndexList indexes = ui->gameTable->selectionModel()->selection().indexes();
 
@@ -568,7 +665,7 @@ void MainWindow::slotEditGame()
     else
     {
         (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Impossible de changer les équipes une fois\r\nles parties commencées."),
+                                    tr("Il faut démarrer la compétition d'abord."),
                                     QMessageBox::Ok);
     }
 

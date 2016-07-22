@@ -121,6 +121,38 @@ struct Event
         date = QDateTime::currentDateTime();
     }
 
+    QString StateToString()
+    {
+        if (state == cNotStarted)
+        {
+            return QObject::tr("Non démarré");
+        }
+        else if (state == cStarted)
+        {
+            return QObject::tr("En cours");
+        }
+        else if (state == cCanceled)
+        {
+            return QObject::tr("Annulé");
+        }
+        else
+        {
+            return QObject::tr("");
+        }
+    }
+
+    QString TypeToString()
+    {
+        if (type == cClubContest)
+        {
+            return QObject::tr("Championnat du club");
+        }
+        else
+        {
+            return QObject::tr("");
+        }
+    }
+
     static QString Table() {
         return "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY, date TEXT, year INTEGER, title TEXT, state INTEGER, type INTEGER, document TEXT);";
     }
@@ -146,6 +178,12 @@ struct Team
         , state(-1)
     {
 
+    }
+
+    // Create a team name using player names
+    void CreateName(const QString &p1, const QString &p2)
+    {
+        teamName = p1 + " / " + p2;
     }
 
 
@@ -258,18 +296,23 @@ public:
     bool UpdateEventState(const Event &event);
     QList<Event> GetEvents(int year);
     bool EditEvent(const Event &event);
+    bool DeleteEvent(int id);
 
     // Team management
     bool AddTeam(const Team &team);
-    QList<Team> GetTeams(int eventId);  
+    QList<Team> GetTeams(int eventId);
+    bool EditTeam(const Team &team);
+    bool DeleteTeam(int id);
+    bool DeleteTeamByEventId(int eventId);
 
     // Game management
     QList<Game> GetGames(int event_id);
     bool AddGames(const QList<Game> &games);
     bool EditGame(const Game &game);
+    bool DeleteGameByEventId(int eventId);
 
     // From ICities
-    virtual QStringList GetCities(int postCode);  
+    virtual QStringList GetCities(int postCode);
 
 private:
     QSqlDatabase mDb;

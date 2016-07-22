@@ -34,7 +34,7 @@ public:
     bool GetFirstColumnValue(int &value);
     void Initialize(const QStringList &header, int rows);
     void AppendLine(const QList<QVariant> &list, bool selected);
-
+    void Finish();
 private:
     QTableWidget *mWidget;
     int row;
