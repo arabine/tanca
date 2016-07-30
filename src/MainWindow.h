@@ -8,6 +8,7 @@
 #include "BracketWindow.h"
 #include "TeamWindow.h"
 #include "GameWindow.h"
+#include "ScoreWindow.h"
 #include "EventWindow.h"
 
 namespace Ui {
@@ -42,6 +43,8 @@ private slots:
      void slotDeleteTeam();
      void slotEditTeam();
      void slotDeleteEvent();
+     void slotAddGame();
+     void slotDeleteGame();
 private:
     void UpdatePlayersTable();
 
@@ -52,6 +55,7 @@ private:
     DatePickerWindow *datePickerWindow;
     TeamWindow *teamWindow;
     GameWindow *gameWindow;
+    ScoreWindow *scoreWindow;
     EventWindow *eventWindow;
 
     // other stuff
@@ -69,7 +73,6 @@ private:
     bool FindGame(const int id, Game &game);
     void UpdateSeasons();
     void UpdateEventsTable();
-
 };
 
 #endif // MAINWINDOW_H

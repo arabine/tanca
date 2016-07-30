@@ -31,6 +31,8 @@ class TableHelper : public QObject
 public:
     TableHelper(QTableWidget *widget);
 
+    void SetTableWidget(QTableWidget *widget) { mWidget = widget; }
+
     bool GetFirstColumnValue(int &value);
     void Initialize(const QStringList &header, int rows);
     void AppendLine(const QList<QVariant> &list, bool selected);

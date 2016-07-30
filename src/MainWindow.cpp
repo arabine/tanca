@@ -64,6 +64,9 @@ MainWindow::MainWindow(QWidget *parent)
     gameWindow = new GameWindow(this);
     gameWindow->hide();
 
+    scoreWindow = new ScoreWindow(this);
+    scoreWindow->hide();
+
     eventWindow = new EventWindow(this);
     eventWindow->hide();
 
@@ -95,7 +98,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->buttonShowRounds, &QPushButton::clicked, this, &MainWindow::slotShowGames);
     connect(ui->comboSeasons, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSeasonChanged(int)));
     connect(ui->buttonStart, &QPushButton::clicked, this, &MainWindow::slotStartRounds);
+
+    connect(ui->buttonAddGame, &QPushButton::clicked, this, &MainWindow::slotAddGame);
     connect(ui->buttonEditGame, &QPushButton::clicked, this, &MainWindow::slotEditGame);
+    connect(ui->buttonDeleteGame, &QPushButton::clicked, this, &MainWindow::slotDeleteGame);
 
     // Setup other stuff
     mDatabase.Initialize();
@@ -613,6 +619,11 @@ void MainWindow::UpdateGameList()
     ui->gameTable->sortByColumn(1, Qt::AscendingOrder);
 }
 
+void MainWindow::slotAddGame()
+{
+
+}
+
 void MainWindow::slotEditGame()
 {
     if (mCurrentEvent.state == Event::cStarted)
@@ -640,10 +651,10 @@ void MainWindow::slotEditGame()
 
                     if (valid)
                     {
-                        gameWindow->SetGame(game, team1, team2);
-                        if (gameWindow->exec() == QDialog::Accepted)
+                        scoreWindow->SetGame(game, team1, team2);
+                        if (scoreWindow->exec() == QDialog::Accepted)
                         {
-                            gameWindow->GetGame(game);
+                            scoreWindow->GetGame(game);
                             if (!mDatabase.EditGame(game))
                             {
                                 TLogError("Cannot edit game!");
@@ -668,8 +679,29 @@ void MainWindow::slotEditGame()
                                     tr("Il faut démarrer la compétition d'abord."),
                                     QMessageBox::Ok);
     }
-
 }
+
+
+void MainWindow::slotDeleteGame()
+{
+    TableHelper helper(ui->gameTable);
+
+    int id;
+    if (helper.GetFirstColumnValue(id))
+    {
+        if (QMessageBox::warning(this, tr("Suppression d'une rencontre"),
+                                    tr("Attention ! Tous les points associées seront perdus. Continuer ?"),
+                                    QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok)
+        {
+            if (!mDatabase.DeleteGame(id))
+            {
+                TLogError("Delete game failure");
+            }
+            UpdateGameList();
+        }
+    }
+}
+
 
 void MainWindow::slotTabChanged(int index)
 {

@@ -1,11 +1,10 @@
-#ifndef TEAMWINDOW_H
-#define TEAMWINDOW_H
+#ifndef TEAM_WINDOW_H
+#define TEAM_WINDOW_H
 
-#include <QDialog>
-#include "ui_TeamWindow.h"
+#include "SelectionWindow.h"
 #include "DbManager.h"
 
-class TeamWindow : public QDialog
+class TeamWindow : public SelectionWindow
 {
     Q_OBJECT
 
@@ -17,20 +16,14 @@ public:
 
     void Initialize(const QList<Player> &players, const QList<int> &inTeams);
 
+    void ClickedRight(int index);
+    void ClickedLeft(int id);
 
-private slots:
-    void slotAccept();
-
-    void slotClicked();
-    void slotPlayerItemActivated();
-    void slotTeamItemActivated(QListWidgetItem *item);
 private:
-    Ui::TeamWindow ui;
-
     QList<Player> mList;
     QList<Player> mSelection;
     void Update();
-    int mTeamSize;
+
 };
 
-#endif // TEAMWINDOW_H
+#endif // TEAM_WINDOW_H

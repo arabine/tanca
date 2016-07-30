@@ -47,10 +47,13 @@ SOURCES += main.cpp MainWindow.cpp \
     TeamWindow.cpp \
     BracketWindow.cpp \
     DatePickerWindow.cpp \
-    Log.cpp Util.cpp \
+    Log.cpp \
+    Util.cpp \
     GameWindow.cpp \
     EventWindow.cpp \
-    TableHelper.cpp
+    TableHelper.cpp \
+    SelectionWindow.cpp \
+    ScoreWindow.cpp
 
 HEADERS  += MainWindow.h \
     DbManager.h \
@@ -58,16 +61,20 @@ HEADERS  += MainWindow.h \
     TeamWindow.h \
     BracketWindow.h \
     DatePickerWindow.h \
-    Log.h Util.h Observer.h \
+    Log.h \
+    Util.h \
+    Observer.h \
     GameWindow.h \
     EventWindow.h \
-    TableHelper.h
+    TableHelper.h \
+    SelectionWindow.h \
+    ScoreWindow.h
 
 FORMS    += MainWindow.ui \
     PlayerWindow.ui \
-    TeamWindow.ui \
-    GameWindow.ui \
-    EventWindow.ui
+    SelectionWindow.ui \
+    EventWindow.ui \
+    ScoreWindow.ui
 
 OTHER_FILES += README.md LICENSE
 

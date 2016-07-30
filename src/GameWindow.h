@@ -11,11 +11,9 @@ class GameWindow : public QDialog
 
 public:
     GameWindow(QWidget *parent = 0);
-    void GetGame(Game &game);
-    void SetGame(const Game &game, const Team& team1, const Team& team2);
 
 private:
-    Ui::GameWindow ui;
+
 };
 
 

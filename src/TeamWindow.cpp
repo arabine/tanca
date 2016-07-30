@@ -2,22 +2,14 @@
 #include "TableHelper.h"
 #include "Log.h"
 
-QStringList gPlayerListHeader;
+
 
 TeamWindow::TeamWindow(QWidget *parent)
-    : QDialog(parent)
-    , mTeamSize(2)
+    : SelectionWindow(parent, tr("Créer/modifier une équipe"))
 {
-    ui.setupUi(this);
-
-    connect(ui.buttonOk, SIGNAL(clicked(bool)), this, SLOT(slotAccept()));
-    connect(ui.buttonCancel, SIGNAL(clicked(bool)), this, SLOT(reject()));
-    connect(ui.buttonSwap, &QPushButton::clicked, this, &TeamWindow::slotClicked);
-
-    connect(ui.playersTable, SIGNAL(itemSelectionChanged()), this, SLOT(slotPlayerItemActivated()));
-    connect(ui.teamList, &QListWidget::itemClicked, this, &TeamWindow::slotTeamItemActivated);
-
-    gPlayerListHeader << tr("Id") << tr("Prénom") << tr("Nom") << tr("Pseudo");
+    QStringList header;
+    header << tr("Id") << tr("Prénom") << tr("Nom") << tr("Pseudo");
+    SetHeader(header);
 }
 
 void TeamWindow::SetTeam(const Player &p1, const Player &p2)
@@ -62,82 +54,48 @@ void TeamWindow::Initialize(const QList<Player> &players, const QList<int> &inTe
     Update();
 }
 
-void TeamWindow::Update()
+void TeamWindow::ClickedRight(int index)
 {
-    ui.playersTable->clear();
-    ui.teamList->clear();
+    const Player &p = mSelection.at(index);
+    // transfer to the left
+    mList.append(p);
+    mSelection.removeAt(index);
 
-    TableHelper helper(ui.playersTable);
-    helper.Initialize(gPlayerListHeader, mList.size());
-
-    foreach (Player p, mList)
-    {
-        QList<QVariant> rowData;
-        rowData << p.id << p.name << p.lastName << p.nickName;
-        helper.AppendLine(rowData, false);
-    }
-
-    ui.playersTable->setSortingEnabled(true);
-
-    foreach (Player p, mSelection)
-    {
-        ui.teamList->addItem(p.name + " " + p.lastName);
-    }
-
-    helper.Finish();
+    Update();
 }
 
-void TeamWindow::slotPlayerItemActivated()
+void TeamWindow::ClickedLeft(int id)
 {
-    ui.teamList->clearSelection();
-    ui.teamList->clearFocus();
-}
-
-void TeamWindow::slotTeamItemActivated(QListWidgetItem *item)
-{
-    (void) item;
-    ui.playersTable->clearSelection();
-    ui.playersTable->clearFocus();
-}
-
-void TeamWindow::slotClicked()
-{
-    int selectionRight = ui.teamList->currentRow();
-    TableHelper helper(ui.playersTable);
-
-    int id = -1;
-    (void) helper.GetFirstColumnValue(id);
-
-    if (id > -1)
+    Player p;
+    if (Player::Find(mList, id, p) && (mSelection.size() < GetMaxSize()))
     {
-        Player p;
-        if (Player::Find(mList, id, p) && (mSelection.size() < mTeamSize))
+        // transfer to the right and remove the player from the list
+        mSelection.append(p);
+        int index;
+        if (Player::Index(mList, id, index))
         {
-            // transfer to the right and remove the player from the list
-            mSelection.append(p);
-            int index;
-            if (Player::Index(mList, id, index))
-            {
-                mList.removeAt(index);
-            }
+            mList.removeAt(index);
         }
-    }
-    else if (selectionRight > -1)
-    {
-        const Player &p = mSelection.at(selectionRight);
-        // transfer to the left
-        mList.append(p);
-        mSelection.removeAt(selectionRight);
     }
 
     Update();
 }
 
-void TeamWindow::slotAccept()
+void TeamWindow::Update()
 {
-    if (mSelection.size() == mTeamSize)
-    {
-        accept();
-    }
-}
+    StartUpdate(mList.size());
 
+    foreach (Player p, mList)
+    {
+        QList<QVariant> rowData;
+        rowData << p.id << p.name << p.lastName << p.nickName;
+        AddLeftEntry(rowData);
+    }
+
+    foreach (Player p, mSelection)
+    {
+        AddRightEntry(p.name + " " + p.lastName);
+    }
+
+    FinishUpdate();
+}
