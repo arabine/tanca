@@ -61,7 +61,8 @@ Affichage des matches du tournoi:
 
 ## TODO
 
-
+ - Ajouter la suppression d'un joueur (uniquement si pas d'événements associés)
+ - Ajouter un nouveau type d'événement: les tournois
  - L'ajout manuelle de parties (édition des rencontres ?)
  - Exporter la base de joueurs
  - Imprimer ou Exporter les matches d'un événement
