@@ -309,6 +309,7 @@ public:
     QList<Game> GetGames(int event_id);
     bool AddGames(const QList<Game> &games);
     bool EditGame(const Game &game);
+    bool DeleteGame(int id);
     bool DeleteGameByEventId(int eventId);
 
     // From ICities

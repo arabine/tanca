@@ -513,6 +513,27 @@ bool DbManager::EditGame(const Game& game)
     return success;
 }
 
+bool DbManager::DeleteGame(int id)
+{
+    bool success = false;
+
+    QSqlQuery queryDel(mDb);
+    queryDel.prepare("DELETE FROM games WHERE id= :id");
+    queryDel.bindValue(":id", id);
+
+    if(queryDel.exec())
+    {
+        qDebug() << "Delete game success";
+        success = true;
+    }
+    else
+    {
+        TLogError("Delete game failed: " + queryDel.lastError().text().toStdString());
+    }
+
+    return success;
+}
+
 bool DbManager::DeleteGameByEventId(int eventId)
 {
     bool success = false;
