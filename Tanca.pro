@@ -49,6 +49,7 @@ SOURCES += main.cpp MainWindow.cpp \
     DatePickerWindow.cpp \
     Log.cpp \
     Util.cpp \
+    UniqueId.cpp \
     GameWindow.cpp \
     EventWindow.cpp \
     TableHelper.cpp \
@@ -63,6 +64,7 @@ HEADERS  += MainWindow.h \
     DatePickerWindow.h \
     Log.h \
     Util.h \
+    UniqueId.h \
     Observer.h \
     GameWindow.h \
     EventWindow.h \
