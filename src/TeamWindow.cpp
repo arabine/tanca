@@ -34,7 +34,7 @@ void TeamWindow::GetTeam(Team &team)
     }
 
     // Update team name
-    team.CreateName(mSelection.at(0).name, mSelection.at(1).name);
+    DbManager::CreateName(team, mSelection.at(0), mSelection.at(1));
 }
 
 void TeamWindow::Initialize(const QList<Player> &players, const QList<int> &inTeams)

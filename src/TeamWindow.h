@@ -22,8 +22,7 @@ public:
 private:
     QList<Player> mList;
     QList<Player> mSelection;
-    void Update();
-
+    void Update();    
 };
 
 #endif // TEAM_WINDOW_H
