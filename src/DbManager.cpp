@@ -7,6 +7,19 @@
 #include <QUuid>
 #include <iostream>
 
+
+/**
+ * History of changes
+ * 1.0
+ *      - Added Infos table
+ *      - Added the 'number' column into 'teams' table
+ * 0.0
+ *      Initial version
+ */
+
+static const QString gBaseVersion = "0.0";
+static const QString gVersion1_0 = "1.0";
+
 static QStringList MakeTables()
 {
     QStringList tables;
@@ -15,6 +28,7 @@ static QStringList MakeTables()
     tables << Event::Table();
     tables << Team::Table();
     tables << Game::Table();
+    tables << Infos::Table();
 
     return tables;
 }
@@ -35,6 +49,79 @@ DbManager::~DbManager()
     {
         mDb.close();
     }
+}
+
+bool DbManager::EditInfos()
+{
+    bool success = false;
+
+    QSqlQuery query(mDb);
+    query.prepare("UPDATE infos SET version = :version");
+    query.bindValue(":version", mInfos.version);
+
+    if(query.exec())
+    {
+        qDebug() << "Updgraded DB version to " << mInfos.version;
+        success = true;
+    }
+    else
+    {
+        TLogError("Updgraded DB failed: " + query.lastError().text().toStdString());
+    }
+
+    return success;
+}
+
+void DbManager::Upgrade()
+{
+    QSqlQuery query(mDb);
+
+    if (mDb.tables().contains("infos"))
+    {
+        query.prepare("SELECT * FROM infos");
+
+        if(query.exec())
+        {
+            if (query.next())
+            {
+                mInfos.version = query.value("version").toString();
+            }
+            else
+            {
+                // No any table entries, add one
+                query.prepare("INSERT INTO infos (version) VALUES (:version)");
+                query.bindValue(":version", gBaseVersion);
+                mInfos.version = gBaseVersion;
+
+                if(query.exec())
+                {
+                    qDebug() << "Add some info field success";
+                }
+                else
+                {
+                    TLogError("Add some info field failed");
+                }
+            }
+        }
+    }
+
+    // Ok, now we have all the necessary information, change the tables if needed
+    if (mInfos.version == gBaseVersion)
+    {
+        // Upgrade to the 1.0
+        query.prepare("ALTER TABLE teams ADD COLUMN number INTEGER DEFAULT 0");
+        if(query.exec())
+        {
+            qDebug() << "Upgrade table 'teams' to 1.0 success";
+            mInfos.version = gVersion1_0;
+            EditInfos();
+        }
+        else
+        {
+            TLogError("Upgrade table 'teams' to 1.0 failed");
+        }
+    }
+
 }
 
 void DbManager::Initialize()
@@ -63,6 +150,7 @@ void DbManager::Initialize()
             }
         }
 
+        Upgrade();
         mPlayers = UpdatePlayerList();
     }
     else
@@ -561,8 +649,8 @@ bool DbManager::AddTeam(const Team &team)
     bool success = false;
 
     QSqlQuery queryAdd(mDb);
-    queryAdd.prepare("INSERT INTO teams (event_id, team_name, player1_id, player2_id, player3_id, state, document) "
-                     "VALUES (:event_id, :team_name, :player1_id, :player2_id, :player3_id, :state, :document)");
+    queryAdd.prepare("INSERT INTO teams (event_id, team_name, player1_id, player2_id, player3_id, state, document, number) "
+                     "VALUES (:event_id, :team_name, :player1_id, :player2_id, :player3_id, :state, :document, :number)");
     queryAdd.bindValue(":event_id", team.eventId);
     queryAdd.bindValue(":team_name", team.teamName);
     queryAdd.bindValue(":player1_id", team.player1Id);
@@ -570,6 +658,7 @@ bool DbManager::AddTeam(const Team &team)
     queryAdd.bindValue(":player3_id", team.player3Id);
     queryAdd.bindValue(":state", team.state);
     queryAdd.bindValue(":document", team.document);
+    queryAdd.bindValue(":number", team.number);
 
     if(queryAdd.exec())
     {
@@ -605,6 +694,7 @@ QList<Team> DbManager::GetTeams(int eventId)
             team.player3Id = query.value("player3_id").toInt();
             team.state = query.value("state").toInt();
             team.document = query.value("document").toString();
+            team.number = query.value("number").toInt();
 
             if (team.teamName == "")
             {
@@ -616,7 +706,7 @@ QList<Team> DbManager::GetTeams(int eventId)
 
                 if (valid)
                 {
-                    team.CreateName(p1.name, p2.name);
+                    CreateName(team, p1, p2);
                 }
                 else
                 {
@@ -630,6 +720,12 @@ QList<Team> DbManager::GetTeams(int eventId)
     return result;
 }
 
+
+void DbManager::CreateName(Team &team, const Player &p1, const Player &p2)
+{
+    team.teamName = p1.name + " " + p1.lastName.left(3) + QString(". / ") + p2.name + " " + p2.lastName.left(3) + QString(".");
+}
+
 bool DbManager::EditTeam(const Team &team)
 {
     bool success = false;
@@ -637,7 +733,7 @@ bool DbManager::EditTeam(const Team &team)
     QSqlQuery queryEdit(mDb);
 
     queryEdit.prepare("UPDATE teams SET event_id = :event_id, team_name = :team_name, player1_id = :player1_id, "
-                      "player2_id = :player2_id, player3_id = :player3_id, state = :state, document = :document WHERE id = :id");
+                      "player2_id = :player2_id, player3_id = :player3_id, state = :state, document = :document, number = :number WHERE id = :id");
 
     queryEdit.bindValue(":id", team.id);
     queryEdit.bindValue(":event_id", team.eventId);
@@ -647,6 +743,7 @@ bool DbManager::EditTeam(const Team &team)
     queryEdit.bindValue(":player3_id", team.player3Id);
     queryEdit.bindValue(":state", team.state);
     queryEdit.bindValue(":document", team.document);
+    queryEdit.bindValue(":number", team.number);
 
     if(queryEdit.exec())
     {

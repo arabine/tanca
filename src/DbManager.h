@@ -160,6 +160,7 @@ struct Event
 
 struct Team
 {
+    // Version 0.0
     int id;
     int eventId;
     QString teamName;
@@ -168,6 +169,9 @@ struct Team
     int player3Id;
     int state;
     QString document;  // JSON document, reserved to store anything in the future
+
+    // Version 1.0
+    int number;
 
     Team()
         : id(-1)
@@ -180,13 +184,13 @@ struct Team
 
     }
 
-    // Create a team name using player names
-    void CreateName(const QString &p1, const QString &p2)
-    {
-        teamName = p1 + " / " + p2;
-    }
-
-
+    /**
+     * @brief Find a team id within a list
+     * @param teams
+     * @param id
+     * @param team
+     * @return
+     */
     static bool Find(const QList<Team> &teams, const int id, Team &team)
     {
         bool found = false;
@@ -200,6 +204,30 @@ struct Team
             }
         }
 
+        return found;
+    }
+
+    /**
+     * @brief Find a team index in the list by its id
+     * @param players
+     * @param id
+     * @param index
+     * @return
+     */
+    static bool Index(const QList<Team> &teams, const int id, int &index)
+    {
+        bool found = false;
+
+        index = 0;
+        foreach (Team t, teams)
+        {
+            if (t.id == id)
+            {
+                found = true;
+                break;
+            }
+            index++;
+        }
         return found;
     }
 
@@ -259,6 +287,16 @@ struct Game
     }
 };
 
+struct Infos
+{
+    QString version;
+
+    static QString Table() {
+        return "CREATE TABLE IF NOT EXISTS infos (version TEXT);";
+    }
+};
+
+
 class ICities
 {
 public:
@@ -315,12 +353,18 @@ public:
     // From ICities
     virtual QStringList GetCities(int postCode);
 
+    // Static members
+    static void CreateName(Team &team, const Player &p1, const Player &p2);
+
 private:
     QSqlDatabase mDb;
     QSqlDatabase mCities;
     QList<Player> mPlayers; // Cached player list
+    Infos mInfos;
 
     QList<Player> UpdatePlayerList();
+    void Upgrade();
+    bool EditInfos();
 };
 
 #endif // DBMANAGER_H
