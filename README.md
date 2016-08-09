@@ -28,6 +28,13 @@ Affichage des matches du tournoi:
 
 ## Historique des versions
 
+### V1.4
+
+ - Afficher le nom des joueurs dans les différents écrans afin de différencier les joueurs (les trois premières lettres du nom)
+ - Afficher le nom complet dans la liste des équipes
+ - L'ajout manuelle de parties
+
+
 ### V1.3
 
  - Le formulaire d'édition d'un joueur fonctionne complètement + contrôle de la casse des prénom/nom
@@ -38,6 +45,7 @@ Affichage des matches du tournoi:
  - Afficher calendrier graphique lors du choix de la date de l'événement
  - Suppression/édition des équipes
  - Edition/suppression d'un événement
+
 
 ### V1.2
 
@@ -58,17 +66,26 @@ Affichage des matches du tournoi:
 
  - Version initiale pour tests
 
-
 ## TODO
 
+### V1.4
+
  - Ajouter la suppression d'un joueur (uniquement si pas d'événements associés)
- - Ajouter un nouveau type d'événement: les tournois
- - L'ajout manuelle de parties (édition des rencontres ?)
  - Exporter la base de joueurs
- - Imprimer ou Exporter les matches d'un événement
+ - Exporter les matches d'un événement
  - Affichage du numéro des équipes dans la liste des matches
- - Afficher/exporter le classement d'un événement
  - Implémenter les statistiques
+ - Afficher un popup si la fiche de joueur n'est pas valide
+ - Différencier la création d'une équipe d'un jeu (mutualiser == mauvaise idée :)
+ - Ajouter la possibilité de créer un nom d'équipe (si vide == nom automatique)
+
+
+### V2.0
+
+ - Passer tous les qDebug() en TLogInfo()
+ - Ajouter un nouveau type d'événement: les tournois
+ - Passer de QtCanvas en QtQuick (préparer version mobile)
+ - Effectuer les pointages directement sur le graphique
  - Ajout de champs dans la fiche joueur: sexe, nationalité, date du certificat médical, catégorie
  - Support des catégories (Vétéran, Sénior, Junior, Cadet, Minime, Benjamin)
 
