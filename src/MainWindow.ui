@@ -52,14 +52,21 @@
           <item>
            <widget class="QPushButton" name="buttonAddPlayer">
             <property name="text">
-             <string>Ajouter un joueur</string>
+             <string>Ajouter</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="buttonEditPlayer">
             <property name="text">
-             <string>Editer un joueur</string>
+             <string>Éditer</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="buttonDeletePlayer">
+            <property name="text">
+             <string>Supprimer</string>
             </property>
            </widget>
           </item>

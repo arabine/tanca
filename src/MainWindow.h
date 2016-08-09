@@ -10,6 +10,7 @@
 #include "GameWindow.h"
 #include "ScoreWindow.h"
 #include "EventWindow.h"
+#include "UniqueId.h"
 
 namespace Ui {
 class MainWindow;
@@ -45,6 +46,8 @@ private slots:
      void slotDeleteEvent();
      void slotAddGame();
      void slotDeleteGame();
+     void slotDeletePlayer();
+     void slotExportPlayers();
 private:
     void UpdatePlayersTable();
 
@@ -65,6 +68,7 @@ private:
     QList<Team> mTeams;
     QList<Game> mGames;
     Event mCurrentEvent;
+    UniqueId mTeamsId;
 
     void UpdateTeamList(int eventId);
     bool FindPlayer(int id, Player &player);

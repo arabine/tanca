@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , mDatabase(gDbFullPath)
+    , mTeamsId(0U, 2000000U)
 {
     Log::SetLogPath(gAppDataPath.toStdString());
     Log::RegisterListener(consoleOutput);
@@ -79,6 +80,8 @@ MainWindow::MainWindow(QWidget *parent)
     // Setup signals for TAB 1: players management
     connect(ui->buttonAddPlayer, &QPushButton::clicked, this, &MainWindow::slotAddPlayer);
     connect(ui->buttonEditPlayer, &QPushButton::clicked, this, &MainWindow::slotEditPlayer);
+    connect(ui->buttonDeletePlayer, &QPushButton::clicked, this, &MainWindow::slotDeletePlayer);
+    connect(ui->buttonExportPlayers, &QPushButton::clicked, this, &MainWindow::slotExportPlayers);
 
     // Setup signals for TAB 2: club championship ranking
     connect(ui->comboRankingSeasons, SIGNAL(currentIndexChanged(int)), this, SLOT(slotRankingSeasonChanged(int)));
@@ -109,7 +112,7 @@ MainWindow::MainWindow(QWidget *parent)
     mEventsTableHeader << tr("Id") << tr("Date") << tr("Type") << tr("Titre") << tr("État");
     mPlayersTableHeader << tr("Id") << tr("UUID") << tr("Prénom") << tr("Nom") << tr("Pseudonyme") << tr("E-mail") << tr("Téléphone (mobile)") << tr("Téléphone (maison)") << tr("Date de naissance") << tr("Rue") << tr("Code postal") << tr("Ville") << tr("Licences") << tr("Commentaires") << tr("Statut") << tr("Divers");
     mRankingTableHeader << tr("Id") << tr("Joueur") << tr("Points") << tr("Parties jouées");
-    mTeamsTableHeader << tr("Id") << ("Nom de l'équipe");
+    mTeamsTableHeader << tr("Id") << tr("Joueur 1") << tr("Joueur 2") << ("Nom de l'équipe");
 
     // Initialize views
     UpdatePlayersTable();
@@ -254,6 +257,16 @@ void MainWindow::slotEditPlayer()
     }
 }
 
+void MainWindow::slotDeletePlayer()
+{
+
+}
+
+void MainWindow::slotExportPlayers()
+{
+
+}
+
 void MainWindow::UpdateTeamList(int eventId)
 {
     mTeams = mDatabase.GetTeams(eventId);
@@ -272,6 +285,7 @@ void MainWindow::UpdateTeamList(int eventId)
 
     TableHelper helper(ui->teamTable);
     helper.Initialize(mTeamsTableHeader, mTeams.size());
+    mTeamsId.Clear();
 
     foreach (Team team, mTeams)
     {
@@ -285,8 +299,10 @@ void MainWindow::UpdateTeamList(int eventId)
             mPlayersInTeams.append(team.player1Id);
             mPlayersInTeams.append(team.player2Id);
 
+            mTeamsId.AddId(team.number);
+
             QList<QVariant> rowData;
-            rowData << team.id << team.teamName;
+            rowData << team.id << p1.FullName() << p2.FullName() << team.teamName;
             helper.AppendLine(rowData, false);
         }
     }
@@ -398,17 +414,25 @@ void MainWindow::slotAddTeam()
     if (selection > -1)
     {
         // Prepare widget contents
+        std::uint32_t id = mTeamsId.TakeId();
         teamWindow->Initialize(mDatabase.GetPlayerList(), mPlayersInTeams);
+        teamWindow->SetNumber(id);
 
         if (teamWindow->exec() == QDialog::Accepted)
         {
             Team team;
             teamWindow->GetTeam(team);
             team.eventId = mCurrentEvent.id;
+            team.number = teamWindow->GetNumber();
             if (mDatabase.AddTeam(team))
             {
                 UpdateTeamList(mCurrentEvent.id);
             }
+        }
+        else
+        {
+            // release the unused id
+            mTeamsId.ReleaseId(id);
         }
     }
 }
@@ -478,7 +502,7 @@ void MainWindow::slotDeleteTeam()
     else
     {
         (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Les parties ont déjà commencé."),
+                                    tr("Impossible de supprimer l'équipe, la partie est commencée."),
                                     QMessageBox::Ok);
     }
 }
@@ -621,7 +645,24 @@ void MainWindow::UpdateGameList()
 
 void MainWindow::slotAddGame()
 {
+    // Prepare widget contents
+    gameWindow->Initialize(mTeams);
+    gameWindow->AllowZeroNumber(false);
 
+    if (gameWindow->exec() == QDialog::Accepted)
+    {
+        Game game;
+        gameWindow->GetGame(game);
+        game.eventId = mCurrentEvent.id;
+        game.turn = gameWindow->GetNumber() - 1; // turns begin internally @ zero
+
+        QList<Game> list;
+        list.append(game);
+        if (mDatabase.AddGames(list))
+        {
+            UpdateGameList();
+        }
+    }
 }
 
 void MainWindow::slotEditGame()
