@@ -274,7 +274,10 @@ void BracketWindow::SetGames(const QList<Game>& games, const QList<Team> &teams)
                 if (Team::Find(teams, round.team1Id, team))
                 {
                     match->SetTeam(BracketBox::TOP, team);
-                   // match->SetId(BracketBox::TOP, team.id);
+                    if (team.number > 0)
+                    {
+                        match->SetId(BracketBox::TOP, team.number);
+                    }
                     match->SetScore(BracketBox::TOP, round.team1Score);
                 }
                 else
