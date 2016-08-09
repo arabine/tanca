@@ -9,6 +9,7 @@ SelectionWindow::SelectionWindow(QWidget *parent, const QString &title)
 {
     ui.setupUi(this);
     ui.labelTitle->setText(title);
+    ui.spinSelectionNumber->setMinimum(0);
 
     mHelper.SetTableWidget(ui.playersTable);
 
@@ -46,6 +47,28 @@ void SelectionWindow::AddLeftEntry(const QList<QVariant> &rowData)
 void SelectionWindow::AddRightEntry(const QString &text)
 {
     ui.selectionList->addItem(text);
+}
+
+void SelectionWindow::SetNumber(std::uint32_t number)
+{
+    ui.spinSelectionNumber->setValue(number);
+}
+
+uint32_t SelectionWindow::GetNumber()
+{
+    return ui.spinSelectionNumber->value();
+}
+
+void SelectionWindow::AllowZeroNumber(bool enable)
+{
+    if (enable)
+    {
+        ui.spinSelectionNumber->setMinimum(0);
+    }
+    else
+    {
+        ui.spinSelectionNumber->setMinimum(1);
+    }
 }
 
 void SelectionWindow::slotPlayerItemActivated()
