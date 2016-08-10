@@ -1,6 +1,5 @@
 #include "DbManager.h"
 #include "Log.h"
-#include <QSqlQuery>
 #include <QSqlError>
 #include <QSqlRecord>
 #include <QDebug>
@@ -182,6 +181,28 @@ bool DbManager::PlayerExists(const Player &player) const
         }
     }
     return found;
+}
+
+bool DbManager::DeletePlayer(int id)
+{
+    bool success = false;
+
+    QSqlQuery query(mDb);
+    query.prepare("DELETE FROM players WHERE id= :id");
+    query.bindValue(":id", id);
+
+    if(query.exec())
+    {
+        qDebug() << "Delete player success";
+        success = true;
+        mPlayers = UpdatePlayerList();
+    }
+    else
+    {
+        TLogError("Delete player failed: " + query.lastError().text().toStdString());
+    }
+
+    return success;
 }
 
 QList<Player> DbManager::UpdatePlayerList()
@@ -487,18 +508,18 @@ bool DbManager::DeleteEvent(int id)
 {
     bool success = false;
 
-    QSqlQuery queryAdd(mDb);
-    queryAdd.prepare("DELETE FROM events WHERE id= :id");
-    queryAdd.bindValue(":id", id);
+    QSqlQuery query(mDb);
+    query.prepare("DELETE FROM events WHERE id= :id");
+    query.bindValue(":id", id);
 
-    if(queryAdd.exec())
+    if(query.exec())
     {
         qDebug() << "Delete event success";
         success = true;
     }
     else
     {
-        TLogError("Delete event failed: " + queryAdd.lastError().text().toStdString());
+        TLogError("Delete event failed: " + query.lastError().text().toStdString());
     }
 
     return success;
@@ -552,15 +573,27 @@ QList<Game> DbManager::GetGames(int event_id)
         while (query.next())
         {
             Game game;
-            game.id = query.value("id").toInt();
-            game.eventId = query.value("event_id").toInt();
-            game.turn = query.value("turn").toInt();
-            game.team1Id = query.value("team1_id").toInt();
-            game.team2Id = query.value("team2_id").toInt();
-            game.team1Score = query.value("team1_score").toInt();
-            game.team2Score = query.value("team2_score").toInt();
-            game.state = query.value("state").toInt();
-            game.document = query.value("document").toString();
+            game.FillFrom(query);
+            result.append(game);
+        }
+    }
+    return result;
+}
+
+QList<Game> DbManager::GetGamesByTeamId(int teamId)
+{
+    QSqlQuery query(mDb);
+    query.prepare("SELECT * FROM games WHERE team1_id = :teamId OR team2_id = :teamId");
+    query.bindValue(":teamId", teamId);
+
+    QList<Game> result;
+
+    if(query.exec())
+    {
+        while (query.next())
+        {
+            Game game;
+            game.FillFrom(query);
             result.append(game);
         }
     }
@@ -686,15 +719,7 @@ QList<Team> DbManager::GetTeams(int eventId)
         while (query.next())
         {
             Team team;
-            team.id = query.value("id").toInt();
-            team.eventId = query.value("event_id").toInt();
-            team.teamName = query.value("team_name").toString();
-            team.player1Id = query.value("player1_id").toInt();
-            team.player2Id = query.value("player2_id").toInt();
-            team.player3Id = query.value("player3_id").toInt();
-            team.state = query.value("state").toInt();
-            team.document = query.value("document").toString();
-            team.number = query.value("number").toInt();
+            team.FillFrom(query);
 
             if (team.teamName == "")
             {
@@ -714,6 +739,26 @@ QList<Team> DbManager::GetTeams(int eventId)
                 }
             }
 
+            result.append(team);
+        }
+    }
+    return result;
+}
+
+QList<Team> DbManager::GetTeamsByPlayerId(int playerId)
+{
+    QSqlQuery query(mDb);
+    query.prepare("SELECT * FROM teams WHERE player1_id = :playerId OR player2_id = :playerId");
+    query.bindValue(":playerId", playerId);
+
+    QList<Team> result;
+
+    if(query.exec())
+    {
+        while (query.next())
+        {
+            Team team;
+            team.FillFrom(query);
             result.append(team);
         }
     }

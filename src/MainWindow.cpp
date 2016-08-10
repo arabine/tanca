@@ -7,7 +7,7 @@
 #include "TableHelper.h"
 #include "ui_MainWindow.h"
 
-static const QString gVersion = "1.3";
+static const QString gVersion = "1.4";
 
 
 // Table headers
@@ -260,11 +260,63 @@ void MainWindow::slotEditPlayer()
 void MainWindow::slotDeletePlayer()
 {
 
+    TableHelper helper(ui->playersWidget);
+
+    int id;
+    if (helper.GetFirstColumnValue(id))
+    {
+        Player p;
+        if (mDatabase.FindPlayer(id, p))
+        {
+            bool canDelete = true;
+            // We allow deleting a player if there is no any game finished for him
+            QList<Team> teams = mDatabase.GetTeamsByPlayerId(id);
+
+            if (teams.size() > 0)
+            {
+                // Check if the player has played some games
+                foreach (Team team, teams)
+                {
+                    Event event = mDatabase.GetEvent(team.eventId);
+
+                    if (event.IsValid())
+                    {
+                        canDelete = false;
+                    }
+                }
+            }
+
+            if (canDelete)
+            {
+                // Granted to delete, actually do it!
+                if (mDatabase.DeletePlayer(id))
+                {
+                    UpdatePlayersTable();
+                    (void)QMessageBox::information(this, tr("Suppression d'un joueur"),
+                                        tr("Suppression du joueur réussie."),
+                                        QMessageBox::Ok);
+                }
+                else
+                {
+                    (void)QMessageBox::critical(this, tr("Suppression d'un joueur"),
+                                        tr("La tentative de suppression a échoué."),
+                                        QMessageBox::Ok);
+                }
+            }
+            else
+            {
+                (void)QMessageBox::critical(this, tr("Suppression d'un joueur"),
+                                        tr("Impossible de supprimer un joueur ayant participé à un événement.\n"
+                                           "Supprimez l'événement d'abord."),
+                                        QMessageBox::Ok);
+            }
+        }
+    }
 }
 
 void MainWindow::slotExportPlayers()
 {
-
+    // FIXME
 }
 
 void MainWindow::UpdateTeamList(int eventId)
@@ -322,11 +374,15 @@ void MainWindow::slotEventItemActivated()
         {
             mCurrentEvent = mDatabase.GetEvent(id);
 
-            if (mCurrentEvent.id != -1)
+            if (mCurrentEvent.IsValid())
             {
                 std::cout << "Current event id: " << mCurrentEvent.id << std::endl;
                 UpdateTeamList(mCurrentEvent.id);
                 UpdateGameList();
+            }
+            else
+            {
+                TLogError("Invalid event!");
             }
         }
     }

@@ -4,6 +4,7 @@
 #include <QSqlDatabase>
 #include <QtCore>
 #include <QSqlTableModel>
+#include <QSqlQuery>
 
 struct Player
 {
@@ -88,7 +89,7 @@ struct Player
     }
 
     static QString Table() {
-        return "CREATE TABLE IF NOT EXISTS players (id INTEGER PRIMARY KEY, uuid TEXT, name TEXT, last_name TEXT, nick_name TEXT, "
+        return "CREATE TABLE IF NOT EXISTS players (id INTEGER PRIMARY KEY AUTOINCREMENT, uuid TEXT, name TEXT, last_name TEXT, nick_name TEXT, "
                 "email TEXT, mobile_phone TEXT, home_phone TEXT, birth_date TEXT, road TEXT, post_code INTEGER, city TEXT, "
                 "membership TEXT, comments TEXT, state INTEGER, document TEXT);";
     }
@@ -119,6 +120,11 @@ struct Event
         , type(cClubContest)
     {
         date = QDateTime::currentDateTime();
+    }
+
+    bool IsValid()
+    {
+        return (id != -1);
     }
 
     QString StateToString()
@@ -154,7 +160,7 @@ struct Event
     }
 
     static QString Table() {
-        return "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY, date TEXT, year INTEGER, title TEXT, state INTEGER, type INTEGER, document TEXT);";
+        return "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, year INTEGER, title TEXT, state INTEGER, type INTEGER, document TEXT);";
     }
 };
 
@@ -182,6 +188,19 @@ struct Team
         , state(-1)
     {
 
+    }
+
+    void FillFrom(const QSqlQuery &query)
+    {
+        id = query.value("id").toInt();
+        eventId = query.value("event_id").toInt();
+        teamName = query.value("team_name").toString();
+        player1Id = query.value("player1_id").toInt();
+        player2Id = query.value("player2_id").toInt();
+        player3Id = query.value("player3_id").toInt();
+        state = query.value("state").toInt();
+        document = query.value("document").toString();
+        number = query.value("number").toInt();
     }
 
     /**
@@ -232,7 +251,7 @@ struct Team
     }
 
     static QString Table() {
-        return "CREATE TABLE IF NOT EXISTS teams (id INTEGER PRIMARY KEY, event_id INTEGER, team_name TEXT, player1_id INTEGER, "
+        return "CREATE TABLE IF NOT EXISTS teams (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER, team_name TEXT, player1_id INTEGER, "
                 "player2_id INTEGER, player3_id INTEGER, state INTEGER, document TEXT);";
     }
 };
@@ -248,6 +267,20 @@ struct Game
     int team2Score;
     int state;
     QString document;  // JSON document, reserved to store anything in the future
+
+    void FillFrom(const QSqlQuery &query)
+    {
+        id = query.value("id").toInt();
+        eventId = query.value("event_id").toInt();
+        turn = query.value("turn").toInt();
+        team1Id = query.value("team1_id").toInt();
+        team2Id = query.value("team2_id").toInt();
+        team1Score = query.value("team1_score").toInt();
+        team2Score = query.value("team2_score").toInt();
+        state = query.value("state").toInt();
+        document = query.value("document").toString();
+    }
+
 
     bool IsPlayed()
     {
@@ -282,7 +315,7 @@ struct Game
     }
 
     static QString Table() {
-        return "CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY, event_id INTEGER, turn INTEGER, team1_id INTEGER, "
+        return "CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER, turn INTEGER, team1_id INTEGER, "
                 "team2_id INTEGER, team1_score INTEGER, team2_score INTEGER, state INTEGER, document TEXT);";
     }
 };
@@ -326,6 +359,7 @@ public:
     bool FindPlayer(int id, Player &player);
     QList<Player> &GetPlayerList();
     bool PlayerExists(const Player &player) const;
+    bool DeletePlayer(int id);
 
     // Events management
     bool AddEvent(const Event &event);
@@ -339,12 +373,14 @@ public:
     // Team management
     bool AddTeam(const Team &team);
     QList<Team> GetTeams(int eventId);
+    QList<Team> GetTeamsByPlayerId(int playerId);
     bool EditTeam(const Team &team);
     bool DeleteTeam(int id);
     bool DeleteTeamByEventId(int eventId);
 
     // Game management
     QList<Game> GetGames(int event_id);
+    QList<Game> GetGamesByTeamId(int teamId);
     bool AddGames(const QList<Game> &games);
     bool EditGame(const Game &game);
     bool DeleteGame(int id);
