@@ -33,7 +33,7 @@ Affichage des matches du tournoi:
  - Afficher le nom des joueurs dans les différents écrans afin de différencier les joueurs (les trois premières lettres du nom)
  - Afficher le nom complet dans la liste des équipes
  - L'ajout manuelle de parties
-
+ - Ajouter la suppression d'un joueur (uniquement si pas de partie jouées associées)
 
 ### V1.3
 
@@ -70,7 +70,6 @@ Affichage des matches du tournoi:
 
 ### V1.4
 
- - Ajouter la suppression d'un joueur (uniquement si pas d'événements associés)
  - Exporter la base de joueurs
  - Exporter les matches d'un événement
  - Affichage du numéro des équipes dans la liste des matches
