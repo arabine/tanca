@@ -86,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Setup signals for TAB 2: club championship ranking
     connect(ui->comboRankingSeasons, SIGNAL(currentIndexChanged(int)), this, SLOT(slotRankingSeasonChanged(int)));
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(slotTabChanged(int)));
-    connect(ui->buttonExport, &QPushButton::clicked, this, &MainWindow::slotExport);
+    connect(ui->buttonExport, &QPushButton::clicked, this, &MainWindow::slotExportRanking);
 
     // Setup signals for TAB 3: club championship management
     connect(ui->buttonAddEvent, &QPushButton::clicked, this, &MainWindow::slotAddEvent);
@@ -314,9 +314,46 @@ void MainWindow::slotDeletePlayer()
     }
 }
 
+
+void MainWindow::ExportTable(QTableWidget *table, const QString &title)
+{
+    QString fileName = QFileDialog::getSaveFileName(this, title,
+                                 QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
+                                 tr("Excel CSV (*.csv)"));
+    if (!fileName.isEmpty())
+    {
+        QFile f( fileName );
+        if (f.open(QFile::WriteOnly))
+        {
+            QTextStream data( &f );
+            QStringList strList;
+
+            // Export header title
+            for( int c = 0; c < table->columnCount(); ++c )
+            {
+                strList << table->horizontalHeaderItem(c)->data(Qt::DisplayRole).toString();
+            }
+
+            data << strList.join(";") << "\n";
+
+            // Export table contents
+            for( int r = 0; r < table->rowCount(); ++r )
+            {
+                strList.clear();
+                for( int c = 0; c < table->columnCount(); ++c )
+                {
+                    strList << table->item( r, c )->text();
+                }
+                data << strList.join( ";" ) + "\n";
+            }
+            f.close();
+        }
+    }
+}
+
 void MainWindow::slotExportPlayers()
 {
-    // FIXME
+    ExportTable(ui->playersWidget, tr("Exporter la base de joueurs au format Excel (CSV)"));
 }
 
 void MainWindow::UpdateTeamList(int eventId)
@@ -807,40 +844,9 @@ void MainWindow::slotTabChanged(int index)
     slotRankingSeasonChanged(ui->comboRankingSeasons->currentIndex());
 }
 
-void MainWindow::slotExport()
+void MainWindow::slotExportRanking()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Exporter le classement au format Excel (CSV)"),
-                                 QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
-                                 tr("Excel CSV (*.csv)"));
-    if (!fileName.isEmpty())
-    {
-        QFile f( fileName );
-        if (f.open(QFile::WriteOnly))
-        {
-            QTextStream data( &f );
-            QStringList strList;
-
-            // Export header title
-            for( int c = 0; c < ui->tableContest->columnCount(); ++c )
-            {
-                strList << ui->tableContest->horizontalHeaderItem(c)->data(Qt::DisplayRole).toString();
-            }
-
-            data << strList.join(";") << "\n";
-
-            // Export table contents
-            for( int r = 0; r < ui->tableContest->rowCount(); ++r )
-            {
-                strList.clear();
-                for( int c = 0; c < ui->tableContest->columnCount(); ++c )
-                {
-                    strList << ui->tableContest->item( r, c )->text();
-                }
-                data << strList.join( ";" ) + "\n";
-            }
-            f.close();
-        }
-    }
+    ExportTable(ui->tableContest, tr("Exporter le classement au format Excel (CSV)"));
 }
 
 void MainWindow::slotRankingSeasonChanged(int index)

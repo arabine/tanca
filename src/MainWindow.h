@@ -38,7 +38,7 @@ private slots:
      void slotEditEvent();
      void slotRankingSeasonChanged(int index);
      void slotImportFile();
-     void slotExport();
+     void slotExportRanking();
      void slotTabChanged(int index);
 
      void slotDeleteTeam();
@@ -77,6 +77,7 @@ private:
     bool FindGame(const int id, Game &game);
     void UpdateSeasons();
     void UpdateEventsTable();
+    void ExportTable(QTableWidget *table, const QString &title);
 };
 
 #endif // MAINWINDOW_H
