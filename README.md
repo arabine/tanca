@@ -34,6 +34,7 @@ Affichage des matches du tournoi:
  - Afficher le nom complet dans la liste des équipes
  - L'ajout manuelle de parties
  - Ajouter la suppression d'un joueur (uniquement si pas de partie jouées associées)
+ - Exporter la base de joueurs
 
 ### V1.3
 
@@ -68,25 +69,19 @@ Affichage des matches du tournoi:
 
 ## TODO
 
-### V1.4
-
- - Exporter la base de joueurs
- - Exporter les matches d'un événement
- - Affichage du numéro des équipes dans la liste des matches
- - Implémenter les statistiques
- - Afficher un popup si la fiche de joueur n'est pas valide
- - Différencier la création d'une équipe d'un jeu (mutualiser == mauvaise idée :)
- - Ajouter la possibilité de créer un nom d'équipe (si vide == nom automatique)
-
-
 ### V2.0
 
+ - Exporter les matches d'un événement
+ - Différencier la création d'une équipe d'un jeu (mutualiser == mauvaise idée, surtout pour permettre un nom d'équipe :)
+ - Ajouter la possibilité de créer un nom d'équipe (si vide == nom automatique)
  - Passer tous les qDebug() en TLogInfo()
- - Ajouter un nouveau type d'événement: les tournois
+ - Ajouter un nouveau type d'événement: les tournois (simple ou double élémination)
  - Passer de QtCanvas en QtQuick (préparer version mobile)
  - Effectuer les pointages directement sur le graphique
  - Ajout de champs dans la fiche joueur: sexe, nationalité, date du certificat médical, catégorie
  - Support des catégories (Vétéran, Sénior, Junior, Cadet, Minime, Benjamin)
+ - Implémenter des statistiques pour un événement
+ - Progression d'un joueur en graphique
 
 ## Swisss (round-robin) tournament algorithm
 
