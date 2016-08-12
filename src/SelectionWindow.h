@@ -10,7 +10,7 @@ class SelectionWindow : public QDialog
     Q_OBJECT
 
 public:
-    SelectionWindow(QWidget *parent, const QString &title);
+    SelectionWindow(QWidget *parent, const QString &title, int minSize, int maxSize);
 
     void SetHeader(const QStringList &tableHeader);
     void StartUpdate(int size);
@@ -36,6 +36,7 @@ private:
     Ui::SelectionWindow ui;
 
     TableHelper mHelper;
+    int mMinSize;
     int mMaxSize;
     QStringList mTableHeader;
 };

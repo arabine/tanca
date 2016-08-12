@@ -2,10 +2,11 @@
 #include "TableHelper.h"
 #include "Log.h"
 
-SelectionWindow::SelectionWindow(QWidget *parent, const QString &title)
+SelectionWindow::SelectionWindow(QWidget *parent, const QString &title, int minSize, int maxSize)
     : QDialog(parent)
     , mHelper(NULL)
-    , mMaxSize(2)
+    , mMinSize(minSize)
+    , mMaxSize(maxSize)
 {
     ui.setupUi(this);
     ui.labelTitle->setText(title);
@@ -104,7 +105,7 @@ void SelectionWindow::slotClicked()
 
 void SelectionWindow::slotAccept()
 {
-    if (ui.selectionList->count() == mMaxSize)
+    if ((ui.selectionList->count() >= mMinSize) && (ui.selectionList->count() <= mMaxSize))
     {
         accept();
     }

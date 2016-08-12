@@ -5,7 +5,7 @@
 
 
 TeamWindow::TeamWindow(QWidget *parent)
-    : SelectionWindow(parent, tr("Créer/modifier une équipe"))
+    : SelectionWindow(parent, tr("Créer/modifier une équipe"), 2, 2)
 {
     QStringList header;
     header << tr("Id") << tr("Prénom") << tr("Nom") << tr("Pseudo");
