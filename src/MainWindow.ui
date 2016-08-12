@@ -364,9 +364,9 @@
                 <item row="0" column="0">
                  <layout class="QHBoxLayout" name="horizontalLayout_12">
                   <item>
-                   <widget class="QPushButton" name="buttonStart">
+                   <widget class="QPushButton" name="buttonRandomizeGames">
                     <property name="text">
-                     <string>Démarrer</string>
+                     <string>Générer auto.</string>
                     </property>
                    </widget>
                   </item>
