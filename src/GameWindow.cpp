@@ -26,7 +26,7 @@
 #include "GameWindow.h"
 
 GameWindow::GameWindow(QWidget *parent)
-    : SelectionWindow(parent, tr("Créer un jeu"))
+    : SelectionWindow(parent, tr("Créer un jeu"), 1, 2)
 {
     QStringList header;
     header << tr("Id") << tr("Équipe");
@@ -35,10 +35,17 @@ GameWindow::GameWindow(QWidget *parent)
 
 void GameWindow::GetGame(Game &game)
 {
-    if (mSelection.size() >= 2)
+    if (mSelection.size() >= 1)
     {
         game.team1Id = mSelection.at(0).id;
-        game.team2Id = mSelection.at(1).id;
+        if (mSelection.size() >= 2)
+        {
+            game.team2Id = mSelection.at(1).id;
+        }
+        else
+        {
+            game.team2Id = -1;
+        }
     }
 }
 

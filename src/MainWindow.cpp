@@ -100,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->eventTable, SIGNAL(itemSelectionChanged()), this, SLOT(slotEventItemActivated()));
     connect(ui->buttonShowRounds, &QPushButton::clicked, this, &MainWindow::slotShowGames);
     connect(ui->comboSeasons, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSeasonChanged(int)));
-    connect(ui->buttonStart, &QPushButton::clicked, this, &MainWindow::slotStartRounds);
+    connect(ui->buttonRandomizeGames, &QPushButton::clicked, this, &MainWindow::slotRandomizeGames);
 
     connect(ui->buttonAddGame, &QPushButton::clicked, this, &MainWindow::slotAddGame);
     connect(ui->buttonEditGame, &QPushButton::clicked, this, &MainWindow::slotEditGame);
@@ -361,7 +361,8 @@ void MainWindow::UpdateTeamList(int eventId)
     mTeams = mDatabase.GetTeams(eventId);
     mPlayersInTeams.clear();
 
-    if (mCurrentEvent.state == Event::cNotStarted)
+    // Cannot edit teams if some games exist
+    if (mGames.size() == 0)
     {
         ui->buttonEditTeam->setEnabled(true);
         ui->buttonDeleteTeam->setEnabled(true);
@@ -532,7 +533,7 @@ void MainWindow::slotAddTeam()
 
 void MainWindow::slotEditTeam()
 {
-    if (mCurrentEvent.state == Event::cNotStarted)
+    if (mGames.size() == 0)
     {
         TableHelper helper(ui->teamTable);
 
@@ -552,10 +553,12 @@ void MainWindow::slotEditTeam()
                 if (found)
                 {
                     teamWindow->SetTeam(p1, p2);
+                    teamWindow->SetNumber(team.number);
 
                     if (teamWindow->exec() == QDialog::Accepted)
                     {
                         teamWindow->GetTeam(team);
+                        team.number = teamWindow->GetNumber();
                         if (mDatabase.EditTeam(team))
                         {
                             UpdateTeamList(mCurrentEvent.id);
@@ -572,14 +575,14 @@ void MainWindow::slotEditTeam()
     else
     {
         (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Les parties ont déjà commencé."),
+                                    tr("Impossible d'éditer une équipe s'il existe des rencontres."),
                                     QMessageBox::Ok);
     }
 }
 
 void MainWindow::slotDeleteTeam()
 {
-    if (mCurrentEvent.state == Event::cNotStarted)
+    if (mGames.size() == 0)
     {
         TableHelper helper(ui->teamTable);
 
@@ -595,7 +598,7 @@ void MainWindow::slotDeleteTeam()
     else
     {
         (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Impossible de supprimer l'équipe, la partie est commencée."),
+                                    tr("Impossible de supprimer une équipe, des rencontres existent."),
                                     QMessageBox::Ok);
     }
 }
@@ -634,9 +637,9 @@ void MainWindow::slotSeasonChanged(int index)
     UpdateEventsTable();
 }
 
-void MainWindow::slotStartRounds()
+void MainWindow::slotRandomizeGames()
 {
-    if (mCurrentEvent.state == Event::cNotStarted)
+    if (mGames.size() == 0)
     {
         QList<Game> games = bracketWindow->BuildRounds(mTeams);
 
@@ -660,25 +663,18 @@ void MainWindow::slotStartRounds()
     else
     {
         (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Les parties ont déjà commencé."),
+                                    tr("Des rencontres existent déjà.\n"
+                                       "Videz la liste en supprimant les rencontres."),
                                     QMessageBox::Ok);
     }
 }
 
 void MainWindow::slotShowGames()
 {
-    if (mCurrentEvent.state != Event::cNotStarted)
-    {
-        UpdateGameList();
-        bracketWindow->setWindowModality(Qt::NonModal);
-        bracketWindow->show();
-    }
-    else
-    {
-        (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Il faut lancer la partie avant d'afficher les tours."),
-                                    QMessageBox::Ok);
-    }
+    UpdateGameList();
+    bracketWindow->setWindowModality(Qt::NonModal);
+    bracketWindow->show();
+
 }
 
 bool MainWindow::FindGame(const int id, Game &game)
@@ -702,34 +698,33 @@ void MainWindow::UpdateGameList()
     mGames = mDatabase.GetGames(mCurrentEvent.id);
     bracketWindow->SetGames(mGames, mTeams);
 
-    if (mCurrentEvent.state == Event::cNotStarted)
-    {
-        ui->buttonStart->setEnabled(true);
-    }
-    else
-    {
-        ui->buttonStart->setEnabled(false);
-    }
-
     TableHelper helper(ui->gameTable);
     helper.Initialize(mGamesTableHeader, mGames.size());
 
     foreach (Game game, mGames)
     {
+        // Be tolerant: only print found teams
         Team t1, t2;
-        bool valid = Team::Find(mTeams, game.team1Id, t1);
-        valid = valid && Team::Find(mTeams, game.team2Id, t2);
+        QList<QVariant> gameData;
+        gameData << game.id << (int)(game.turn + 1);
 
-        if (valid)
+        QString matchName;
+        if (Team::Find(mTeams, game.team1Id, t1))
         {
-            QList<QVariant> gameData;
-            gameData << game.id << (int)(game.turn + 1) << (t1.teamName + " <--> " + t2.teamName);
-            helper.AppendLine(gameData, game.IsPlayed());
+            matchName = t1.teamName;
         }
         else
         {
-            TLogError("Cannot update game list!");
+            matchName = "           ";
         }
+        matchName += " <--> ";
+        if (Team::Find(mTeams, game.team2Id, t2))
+        {
+            matchName += t2.teamName;
+        }
+
+        gameData << matchName;
+        helper.AppendLine(gameData, game.IsPlayed());
     }
 
     helper.Finish();
@@ -753,6 +748,11 @@ void MainWindow::slotAddGame()
         list.append(game);
         if (mDatabase.AddGames(list))
         {
+            if (mCurrentEvent.state != Event::cStarted)
+            {
+                mCurrentEvent.state = Event::cStarted;
+                mDatabase.UpdateEventState(mCurrentEvent);
+            }
             UpdateGameList();
         }
     }
@@ -760,58 +760,47 @@ void MainWindow::slotAddGame()
 
 void MainWindow::slotEditGame()
 {
-    if (mCurrentEvent.state == Event::cStarted)
+    QModelIndexList indexes = ui->gameTable->selectionModel()->selection().indexes();
+
+    if (indexes.size() > 1)
     {
-        QModelIndexList indexes = ui->gameTable->selectionModel()->selection().indexes();
+        QModelIndex index = indexes.at(0);
+        QMap<int, QVariant> data = ui->gameTable->model()->itemData(index);
 
-        if (indexes.size() > 1)
+        if (data.contains(0))
         {
-            QModelIndex index = indexes.at(0);
-            QMap<int, QVariant> data = ui->gameTable->model()->itemData(index);
+            int id = data[0].toInt();
+            std::cout << "Found team id: " << id << std::endl;
+            Game game;
 
-            if (data.contains(0))
+            if (FindGame(id, game))
             {
-                int id = data[0].toInt();
-                std::cout << "Found team id: " << id << std::endl;
-                Game game;
+                Team team1;
+                Team team2;
 
-                if (FindGame(id, game))
+                // Be tolerant if teams are not found
+                (void) Team::Find(mTeams, game.team1Id, team1);
+                (void) Team::Find(mTeams, game.team2Id, team2);
+
+                scoreWindow->SetGame(game, team1, team2);
+                if (scoreWindow->exec() == QDialog::Accepted)
                 {
-                    Team team1;
-                    Team team2;
-
-                    bool valid = Team::Find(mTeams, game.team1Id, team1);
-                    valid = valid && Team::Find(mTeams, game.team2Id, team2);
-
-                    if (valid)
+                    scoreWindow->GetGame(game);
+                    if (!mDatabase.EditGame(game))
                     {
-                        scoreWindow->SetGame(game, team1, team2);
-                        if (scoreWindow->exec() == QDialog::Accepted)
-                        {
-                            scoreWindow->GetGame(game);
-                            if (!mDatabase.EditGame(game))
-                            {
-                                TLogError("Cannot edit game!");
-                            }
-                            else
-                            {
-                                UpdateGameList();
-                            }
-                        }
+                        TLogError("Cannot edit game!");
+                    }
+                    else
+                    {
+                        UpdateGameList();
                     }
                 }
             }
-            else
-            {
-                TLogError("Cannot find any valid game in the list");
-            }
         }
-    }
-    else
-    {
-        (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Il faut démarrer la compétition d'abord."),
-                                    QMessageBox::Ok);
+        else
+        {
+            TLogError("Cannot find any valid game in the list");
+        }
     }
 }
 
@@ -930,19 +919,11 @@ void MainWindow::slotRankingSeasonChanged(int index)
                         ranking.Add(team.player1Id, game.team1Score);
                         ranking.Add(team.player2Id, game.team1Score);
                     }
-                    else
-                    {
-                        TLogError("[RANKING] Algorithm problem, cannot find team!");
-                    }
 
                     if (Team::Find(teams, game.team2Id, team))
                     {
                         ranking.Add(team.player1Id, game.team2Score);
                         ranking.Add(team.player2Id, game.team2Score);
-                    }
-                    else
-                    {
-                        TLogError("[RANKING] Algorithm problem, cannot find team!");
                     }
                 }
             }

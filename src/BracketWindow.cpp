@@ -211,19 +211,16 @@ QList<Game> BracketWindow::BuildRounds(const QList<Team> &tlist)
                 const Team &team = teams[j];
                 const Team &opp = teams[teams.size() - j - 1];
 
-                if ((team.id != -1) && (opp.id != -1))
-                {
-                    Game game;
+                Game game;
 
-                    game.eventId = opp.eventId;
-                    game.turn = i;
-                    game.team1Id = team.id;
-                    game.team2Id = opp.id;
+                game.eventId = opp.eventId;
+                game.turn = i;
+                game.team1Id = team.id;
+                game.team2Id = opp.id;
 
-                    mGames.append(game);
+                mGames.append(game);
 
-                    std::cout << "Turn: " << (i+1) << ", Game: " << team.teamName.toStdString() << " <- vs -> " << opp.teamName.toStdString() << std::endl;
-                }
+                std::cout << "Turn: " << (i+1) << ", Game: " << team.teamName.toStdString() << " <- vs -> " << opp.teamName.toStdString() << std::endl;
             }
 
             // Then rotate, keep first player always at the first place
@@ -270,6 +267,7 @@ void BracketWindow::SetGames(const QList<Game>& games, const QList<Team> &teams)
             {
                 MatchGroup *match = new MatchGroup(mScene, roundBox);
 
+                // Be tolerant: only show found teams
                 Team team;
                 if (Team::Find(teams, round.team1Id, team))
                 {
@@ -280,10 +278,6 @@ void BracketWindow::SetGames(const QList<Game>& games, const QList<Team> &teams)
                     }
                     match->SetScore(BracketBox::TOP, round.team1Score);
                 }
-                else
-                {
-                    std::cout << "Impossible de trouver l'équipe !" << std::endl;
-                }
 
                 if (Team::Find(teams, round.team2Id, team))
                 {
@@ -293,10 +287,6 @@ void BracketWindow::SetGames(const QList<Game>& games, const QList<Team> &teams)
                         match->SetId(BracketBox::BOTTOM, team.number);
                     }
                     match->SetScore(BracketBox::BOTTOM, round.team2Score);
-                }
-                else
-                {
-                    std::cout << "Impossible de trouver l'équipe !" << std::endl;
                 }
 
                 roundBox->AddMatch(match);

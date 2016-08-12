@@ -33,7 +33,7 @@ private slots:
      void slotSeasonChanged(int index);
      void slotEventItemActivated();
      void slotEditPlayer();
-     void slotStartRounds();
+     void slotRandomizeGames();
      void slotEditGame();
      void slotEditEvent();
      void slotRankingSeasonChanged(int index);
