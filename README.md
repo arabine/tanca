@@ -35,6 +35,7 @@ Affichage des matches du tournoi:
  - L'ajout manuelle de parties
  - Ajouter la suppression d'un joueur (uniquement si pas de partie jouées associées)
  - Exporter la base de joueurs
+ - Accepter des joueurs exemptés
 
 ### V1.3
 
@@ -71,6 +72,7 @@ Affichage des matches du tournoi:
 
 ### V2.0
 
+ - Ranger les événements par rapport à leur date
  - Exporter les matches d'un événement
  - Différencier la création d'une équipe d'un jeu (mutualiser == mauvaise idée, surtout pour permettre un nom d'équipe :)
  - Ajouter la possibilité de créer un nom d'équipe (si vide == nom automatique)
