@@ -83,11 +83,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->buttonDeletePlayer, &QPushButton::clicked, this, &MainWindow::slotDeletePlayer);
     connect(ui->buttonExportPlayers, &QPushButton::clicked, this, &MainWindow::slotExportPlayers);
 
-    // Setup signals for TAB 2: club championship ranking
-    connect(ui->comboRankingSeasons, SIGNAL(currentIndexChanged(int)), this, SLOT(slotRankingSeasonChanged(int)));
-    connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(slotTabChanged(int)));
-    connect(ui->buttonExport, &QPushButton::clicked, this, &MainWindow::slotExportRanking);
-
     // Setup signals for TAB 3: club championship management
     connect(ui->buttonAddEvent, &QPushButton::clicked, this, &MainWindow::slotAddEvent);
     connect(ui->buttonEditEvent, &QPushButton::clicked, this, &MainWindow::slotEditEvent);
@@ -105,6 +100,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->buttonAddGame, &QPushButton::clicked, this, &MainWindow::slotAddGame);
     connect(ui->buttonEditGame, &QPushButton::clicked, this, &MainWindow::slotEditGame);
     connect(ui->buttonDeleteGame, &QPushButton::clicked, this, &MainWindow::slotDeleteGame);
+
+    connect(ui->tabWidget_2, SIGNAL(currentChanged(int)), this, SLOT(slotTabChanged(int)));
+    connect(ui->buttonExport, &QPushButton::clicked, this, &MainWindow::slotExportRanking);
 
     // Setup other stuff
     mDatabase.Initialize();
@@ -433,9 +431,6 @@ void MainWindow::UpdateSeasons()
     ui->comboSeasons->clear();
     ui->comboSeasons->addItems(seasons);
 
-    ui->comboRankingSeasons->clear();
-    ui->comboRankingSeasons->addItems(seasons);
-
     UpdateEventsTable();
 }
 
@@ -641,7 +636,7 @@ void MainWindow::slotRandomizeGames()
 {
     if (mGames.size() == 0)
     {
-        QList<Game> games = bracketWindow->BuildRounds(mTeams);
+        QList<Game> games = bracketWindow->BuildRounds(mTeams, ui->spinNbRounds->value());
 
         if (games.size() > 0)
         {
@@ -830,7 +825,7 @@ void MainWindow::slotTabChanged(int index)
 {
     Q_UNUSED(index);
     // Refresh ranking
-    slotRankingSeasonChanged(ui->comboRankingSeasons->currentIndex());
+    UpdateRanking(ui->comboSeasons->currentIndex());
 }
 
 void MainWindow::slotExportRanking()
@@ -838,9 +833,9 @@ void MainWindow::slotExportRanking()
     ExportTable(ui->tableContest, tr("Exporter le classement au format Excel (CSV)"));
 }
 
-void MainWindow::slotRankingSeasonChanged(int index)
+void MainWindow::UpdateRanking(int index)
 {
-    QList<Event> events = mDatabase.GetEvents(ui->comboRankingSeasons->itemText(index).toInt());
+    QList<Event> events = mDatabase.GetEvents(ui->comboSeasons->itemText(index).toInt());
 
     struct Rank
     {
@@ -903,7 +898,7 @@ void MainWindow::slotRankingSeasonChanged(int index)
 
     foreach (Event event, events)
     {
-        if (event.state == Event::cStarted)
+        if ((event.state == Event::cStarted) && (event.type == Event::cClubContest))
         {
             // Search for every game played for this event
             QList<Game> games = mDatabase.GetGames(event.id);

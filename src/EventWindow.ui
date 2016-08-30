@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>465</width>
+    <width>473</width>
     <height>261</height>
    </rect>
   </property>
@@ -86,6 +86,11 @@
           <item>
            <property name="text">
             <string>Championnat de club</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Tournoi type &quot;Système Suisse&quot;</string>
            </property>
           </item>
          </widget>

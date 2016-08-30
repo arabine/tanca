@@ -112,6 +112,7 @@ struct Event
 
     // Type
     static const int cClubContest = 0;
+    static const int cSwissRounds = 1;
 
     Event()
         : id(-1)

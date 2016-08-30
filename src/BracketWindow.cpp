@@ -152,7 +152,6 @@ void MatchGroup::Move(const QPointF &origin)
 
 BracketWindow::BracketWindow(QWidget *parent)
     : QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint)
-    , mTurns(3)
 {
     mScene = new Scene(0, 0, 950, 400, this);
     mView = new View(mScene, this);
@@ -182,7 +181,7 @@ void RoundBox::AddMatch(MatchGroup *match)
 }
 
 /*****************************************************************************/
-QList<Game> BracketWindow::BuildRounds(const QList<Team> &tlist)
+QList<Game> BracketWindow::BuildRounds(const QList<Team> &tlist, int nbRounds)
 {
     mGames.clear();
     QList<Team> teams = tlist; // Local copy to manipulate the list
@@ -201,9 +200,9 @@ QList<Game> BracketWindow::BuildRounds(const QList<Team> &tlist)
 
     // Check if there is enough teams for the desired number of rounds
     // Swiss tournament algorithm
-    if (teams.size() > mTurns)
+    if (teams.size() > nbRounds)
     {
-        for (int i = 0; i < mTurns; i++)
+        for (int i = 0; i < nbRounds; i++)
         {
             // Create matches for this turn
             for (int j = 0; j < max_games; j++)
@@ -233,7 +232,7 @@ QList<Game> BracketWindow::BuildRounds(const QList<Team> &tlist)
     else
     {
         (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Il n'y a pas assez d'équipes pour jouer %1 parties.").arg(mTurns),
+                                    tr("Il n'y a pas assez d'équipes pour jouer %1 parties.").arg(nbRounds),
                                     QMessageBox::Ok);
     }
 
@@ -247,7 +246,19 @@ void BracketWindow::SetGames(const QList<Game>& games, const QList<Team> &teams)
     qDeleteAll(mBoxes.begin(), mBoxes.end());
     mBoxes.clear();
 
-    for (int i = 0; i < mTurns; i++)
+    // Determine how many rounds has been played
+    int round_max = 0;
+    for (int i = 0; i < mGames.size(); i++)
+    {
+        const Game &round = mGames.at(i);
+        if (round.turn > round_max)
+        {
+            round_max = round.turn;
+        }
+    }
+    round_max++; // transform max [0..N] into number of rounds
+
+    for (int i = 0; i < round_max; i++)
     {
         RoundBox *roundBox = new RoundBox(i+1);
         QPointF pos;
@@ -259,7 +270,7 @@ void BracketWindow::SetGames(const QList<Game>& games, const QList<Team> &teams)
         mBoxes.append(roundBox);
         mScene->addItem(roundBox);
 
-        // Create matche boxes for that turn
+        // Create match boxes for that turn
         for (int j = 0; j < mGames.size(); j++)
         {
             const Game &round = mGames.at(j);

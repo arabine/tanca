@@ -206,7 +206,7 @@ class BracketWindow : public QDialog
 public:
     explicit BracketWindow(QWidget *parent = 0);
 
-    QList<Game> BuildRounds(const QList<Team> &tlist);
+    QList<Game> BuildRounds(const QList<Team> &tlist, int nbRounds);
     void SetGames(const QList<Game> &games, const QList<Team> &teams);
 
 private:
@@ -214,7 +214,6 @@ private:
     View *mView;
     QList<Game> mGames;
     QList<RoundBox *> mBoxes;
-    int mTurns;
 };
 
 #endif // ROUNDWINDOW_H

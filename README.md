@@ -70,10 +70,17 @@ Affichage des matches du tournoi:
 
 ## TODO
 
+### V1.5
+
+ - Exporter les matches d'un événement
+ - Ajouter un nouveau type d'événement: tournoi suisse
+ - Rendre configurable le nombre de tours de jeu
+ - Ajouter un menu à propos avec lien vers Github et licence
+
 ### V2.0
 
  - Ranger les événements par rapport à leur date
- - Exporter les matches d'un événement
+ - Ajouter un "supprimer tous" les tours de jeu
  - Différencier la création d'une équipe d'un jeu (mutualiser == mauvaise idée, surtout pour permettre un nom d'équipe :)
  - Ajouter la possibilité de créer un nom d'équipe (si vide == nom automatique)
  - Passer tous les qDebug() en TLogInfo()

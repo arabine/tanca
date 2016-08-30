@@ -26,27 +26,32 @@ public:
 
 
 private slots:
-    void slotAddPlayer();
+     void slotAddPlayer();
+     void slotEditPlayer();
+     void slotDeletePlayer();
+
+     void slotAddGame();
      void slotShowGames();
+     void slotEditGame();
+     void slotDeleteGame();
+
      void slotAddTeam();
+     void slotEditTeam();
+     void slotDeleteTeam();
+
      void slotAddEvent();
+     void slotDeleteEvent();
+     void slotEditEvent();
+
      void slotSeasonChanged(int index);
      void slotEventItemActivated();
-     void slotEditPlayer();
+
      void slotRandomizeGames();
-     void slotEditGame();
-     void slotEditEvent();
-     void slotRankingSeasonChanged(int index);
+
+
      void slotImportFile();
      void slotExportRanking();
      void slotTabChanged(int index);
-
-     void slotDeleteTeam();
-     void slotEditTeam();
-     void slotDeleteEvent();
-     void slotAddGame();
-     void slotDeleteGame();
-     void slotDeletePlayer();
      void slotExportPlayers();
 private:
     void UpdatePlayersTable();
@@ -73,7 +78,7 @@ private:
     void UpdateTeamList(int eventId);
     bool FindPlayer(int id, Player &player);
     void UpdateGameList();
-
+    void UpdateRanking(int index);
     bool FindGame(const int id, Game &game);
     void UpdateSeasons();
     void UpdateEventsTable();
