@@ -28,6 +28,14 @@ Affichage des matches du tournoi:
 
 ## Historique des versions
 
+### V1.5
+
+ - Exporter les matches d'un événement
+ - Ajouter un nouveau type d'événement: tournoi suisse
+ - Rendre configurable le nombre de tours de jeu
+ - Ajouter un menu à propos avec lien vers Github et licence
+ - Nouvelle interface de classement et de la liste des rencontres
+
 ### V1.4
 
  - Afficher le nom des joueurs dans les différents écrans afin de différencier les joueurs (les trois premières lettres du nom)
@@ -67,15 +75,9 @@ Affichage des matches du tournoi:
 ### V1.0
 
  - Version initiale pour tests
+ - Licencier tous les fichiers sources
 
 ## TODO
-
-### V1.5
-
- - Exporter les matches d'un événement
- - Ajouter un nouveau type d'événement: tournoi suisse
- - Rendre configurable le nombre de tours de jeu
- - Ajouter un menu à propos avec lien vers Github et licence
 
 ### V2.0
 

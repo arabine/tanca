@@ -46,9 +46,9 @@ void TableHelper::Initialize(const QStringList &header, int rows)
 
 void TableHelper::Finish()
 {
-    mWidget->resizeColumnsToContents();
     mWidget->setSortingEnabled(true);
     mWidget->horizontalHeader()->setStretchLastSection(true);
+    mWidget->resizeColumnsToContents();
 }
 
 void TableHelper::AppendLine(const QList<QVariant> &list, bool selected)

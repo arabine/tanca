@@ -474,7 +474,7 @@
                 </spacer>
                </item>
                <item>
-                <widget class="QPushButton" name="buttonExport">
+                <widget class="QPushButton" name="buttonExportRanking">
                  <property name="text">
                   <string>Exporter</string>
                  </property>
@@ -499,7 +499,7 @@
      <x>0</x>
      <y>0</y>
      <width>1045</width>
-     <height>19</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">
@@ -510,7 +510,14 @@
     <addaction name="separator"/>
     <addaction name="actionQuitter"/>
    </widget>
+   <widget class="QMenu" name="menu_propos">
+    <property name="title">
+     <string>Aide</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFichier"/>
+   <addaction name="menu_propos"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -529,6 +536,11 @@
   <action name="actionImporter">
    <property name="text">
     <string>Importer une liste d'adhérents (CSV)</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>À propos...</string>
    </property>
   </action>
  </widget>

@@ -76,7 +76,8 @@ FORMS    += MainWindow.ui \
     PlayerWindow.ui \
     SelectionWindow.ui \
     EventWindow.ui \
-    ScoreWindow.ui
+    ScoreWindow.ui \
+    AboutWindow.ui
 
 OTHER_FILES += README.md LICENSE
 
