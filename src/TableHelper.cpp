@@ -4,9 +4,12 @@
 #include <QTableWidgetItem>
 #include <QHeaderView>
 
+#include <iostream>
+
 TableHelper::TableHelper(QTableWidget *widget)
     : mWidget(widget)
-    , row(0)
+    , mSelectedColor(255,218,185)
+    , mRow(0)
 {
 
 }
@@ -41,7 +44,18 @@ void TableHelper::Initialize(const QStringList &header, int rows)
     mWidget->setHorizontalHeaderLabels(header);
     mWidget->setSortingEnabled(false);
 
-    row = 0;
+    mRow = 0;
+}
+
+void TableHelper::SetSelectedColor(const QColor &color)
+{
+    mSelectedColor = color;
+    mWidget->setStyleSheet("alternate-background-color: " + color.name() + " ;background-color: white;");
+}
+
+void TableHelper::SetAlternateColors(bool enable)
+{
+    mWidget->setAlternatingRowColors(enable);
 }
 
 void TableHelper::Finish()
@@ -54,6 +68,7 @@ void TableHelper::Finish()
 void TableHelper::AppendLine(const QList<QVariant> &list, bool selected)
 {
     int column = 0;
+
     foreach (QVariant data, list)
     {
         QTableWidgetItem *cell;
@@ -66,10 +81,13 @@ void TableHelper::AppendLine(const QList<QVariant> &list, bool selected)
             cell = new QTableWidgetItem(data.toString());
         }
 
-        cell->setBackgroundColor(selected ? Qt::lightGray : Qt::white);
-        mWidget->setItem(row, column, cell);
+        if (selected)
+        {
+            cell->setBackgroundColor(mSelectedColor);
+        }
+        mWidget->setItem(mRow, column, cell);
         column++;
     }
-    row++;
+    mRow++;
 }
 

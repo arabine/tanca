@@ -28,6 +28,11 @@ Affichage des matches du tournoi:
 
 ## Historique des versions
 
+### V1.6
+
+ - Affichage de la différence de points dans le classement
+ - Cosmétique : ajout d'icônes et de couleurs dans les tableaux
+
 ### V1.5
 
  - Exporter les matches d'un événement
@@ -56,7 +61,6 @@ Affichage des matches du tournoi:
  - Suppression/édition des équipes
  - Edition/suppression d'un événement
 
-
 ### V1.2
 
  - Le classement par points de la saison est fonctionnel
@@ -81,6 +85,7 @@ Affichage des matches du tournoi:
 
 ### V2.0
 
+ - Intégrer villes.db pour les codes postaux
  - Ranger les événements par rapport à leur date
  - Ajouter un "supprimer tous" les tours de jeu
  - Différencier la création d'une équipe d'un jeu (mutualiser == mauvaise idée, surtout pour permettre un nom d'équipe :)

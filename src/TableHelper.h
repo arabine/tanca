@@ -37,10 +37,12 @@ public:
     void Initialize(const QStringList &header, int rows);
     void AppendLine(const QList<QVariant> &list, bool selected);
     void Finish();
+    void SetSelectedColor(const QColor &color);
+    void SetAlternateColors(bool enable);
 private:
     QTableWidget *mWidget;
-    int row;
-
+    QColor mSelectedColor;
+    int mRow;
 };
 
 #endif // TABLE_HELPER_H

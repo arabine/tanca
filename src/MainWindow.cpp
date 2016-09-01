@@ -32,7 +32,7 @@
 #include "TableHelper.h"
 #include "ui_MainWindow.h"
 
-static const QString gVersion = "1.5";
+static const QString gVersion = "1.6";
 
 // Table headers
 QStringList gGamesTableHeader;
@@ -138,8 +138,8 @@ MainWindow::MainWindow(QWidget *parent)
     gGamesTableHeader << tr("Id") << tr("Partie") << tr("Équipe 1") << tr("Équipe 2") << tr("Score 1") << tr("Score 2");
     gEventsTableHeader << tr("Id") << tr("Date") << tr("Type") << tr("Titre") << tr("État");
     gPlayersTableHeader << tr("Id") << tr("UUID") << tr("Prénom") << tr("Nom") << tr("Pseudonyme") << tr("E-mail") << tr("Téléphone (mobile)") << tr("Téléphone (maison)") << tr("Date de naissance") << tr("Rue") << tr("Code postal") << tr("Ville") << tr("Licences") << tr("Commentaires") << tr("Statut") << tr("Divers");
-    gSeasonRankingTableHeader << tr("Id") << tr("Joueur") << tr("Points") << tr("Parties jouées");
-    gEventRankingTableHeader << tr("Id") << tr("Équipe") << tr("Points") << tr("Parties jouées");
+    gSeasonRankingTableHeader << tr("Id") << tr("Joueur") << tr("Parties gagnées") << tr("Parties perdues") << tr("Points marqués") << tr("Points concédés") << tr("Différence");
+    gEventRankingTableHeader << tr("Id") << tr("Équipe") << tr("Parties gagnées") << tr("Parties perdues") << tr("Points marqués") << tr("Points concédés") << tr("Différence");
     gTeamsTableHeader << tr("Id") << tr("Joueur 1") << tr("Joueur 2") << ("Nom de l'équipe");
 
     // Initialize views
@@ -874,13 +874,22 @@ void MainWindow::UpdateRanking()
 {
     struct Rank
     {
-        int points;
-        int playedGames;
+        int pointsWon;
+        int pointsLost;
+        int gamesWon;
+        int gamesLost;
         Rank()
-            : points(0)
-            , playedGames(0)
+            : pointsWon(0)
+            , pointsLost(0)
+            , gamesWon(0)
+            , gamesLost(0)
         {
 
+        }
+
+        int Difference()
+        {
+            return (pointsWon - pointsLost);
         }
     };
 
@@ -888,19 +897,35 @@ void MainWindow::UpdateRanking()
     {
     public:
 
-        void Add(int playerId, int score)
+        void Add(int playerId, int score, int opponent)
         {
             if (mList.contains(playerId))
             {
-                score += mList[playerId].points;
+                score       += mList[playerId].pointsWon;
+                opponent    += mList[playerId].pointsLost;
             }
-            mList[playerId].points = score;
-            mList[playerId].playedGames++;
+            mList[playerId].pointsWon = score;
+            mList[playerId].pointsLost = opponent;
+
+            if (opponent > score)
+            {
+                mList[playerId].gamesLost++;
+            }
+            else if (score > opponent)
+            {
+                mList[playerId].gamesWon++;
+            }
+            else
+            {
+                // Draw
+            }
         }
 
         void Show(QTableWidget *table, const QList<Player> &players, const QList<Team> &teams, bool isSeason)
         {
             TableHelper helper(table);
+            helper.SetSelectedColor(QColor(245,245,220));
+            helper.SetAlternateColors(true);
 
             if (isSeason)
             {
@@ -927,7 +952,7 @@ void MainWindow::UpdateRanking()
                     if (Player::Find(players, id, player))
                     {
                         QList<QVariant> rowData;
-                        rowData << player.id << player.FullName() << rank.points << rank.playedGames;
+                        rowData << player.id << player.FullName() << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference();
                         helper.AppendLine(rowData, false);
                     }
                     else
@@ -942,7 +967,7 @@ void MainWindow::UpdateRanking()
                     if (Team::Find(teams, id, team))
                     {
                         QList<QVariant> rowData;
-                        rowData << team.id << team.teamName << rank.points << rank.playedGames;
+                        rowData << team.id << team.teamName << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference();
                         helper.AppendLine(rowData, false);
                     }
                     else
@@ -992,12 +1017,12 @@ void MainWindow::UpdateRanking()
                         {
                             if (isSeason)
                             {
-                                ranking.Add(team.player1Id, game.team1Score);
-                                ranking.Add(team.player2Id, game.team1Score);
+                                ranking.Add(team.player1Id, game.team1Score, game.team2Score);
+                                ranking.Add(team.player2Id, game.team1Score, game.team2Score);
                             }
                             else
                             {
-                                ranking.Add(team.id, game.team1Score);
+                                ranking.Add(team.id, game.team1Score, game.team2Score);
                             }
                         }
 
@@ -1005,12 +1030,12 @@ void MainWindow::UpdateRanking()
                         {
                             if (isSeason)
                             {
-                                ranking.Add(team.player1Id, game.team2Score);
-                                ranking.Add(team.player2Id, game.team2Score);
+                                ranking.Add(team.player1Id, game.team2Score, game.team1Score);
+                                ranking.Add(team.player2Id, game.team2Score, game.team1Score);
                             }
                             else
                             {
-                                ranking.Add(team.id, game.team2Score);
+                                ranking.Add(team.id, game.team2Score, game.team1Score);
                             }
                         }
                     }
@@ -1020,6 +1045,6 @@ void MainWindow::UpdateRanking()
     }
 
     ranking.Show(ui->tableContest, mDatabase.GetPlayerList(), mTeams, isSeason);
-    ui->tableContest->sortByColumn(2, Qt::DescendingOrder);
+    ui->tableContest->sortByColumn(4, Qt::DescendingOrder);
 }
 

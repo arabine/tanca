@@ -54,12 +54,20 @@
             <property name="text">
              <string>Ajouter</string>
             </property>
+            <property name="icon">
+             <iconset resource="../assets/tanca.qrc">
+              <normaloff>:/icons/add.png</normaloff>:/icons/add.png</iconset>
+            </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="buttonEditPlayer">
             <property name="text">
              <string>Éditer</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../assets/tanca.qrc">
+              <normaloff>:/icons/edit.png</normaloff>:/icons/edit.png</iconset>
             </property>
            </widget>
           </item>
@@ -68,12 +76,20 @@
             <property name="text">
              <string>Supprimer</string>
             </property>
+            <property name="icon">
+             <iconset resource="../assets/tanca.qrc">
+              <normaloff>:/icons/delete.png</normaloff>:/icons/delete.png</iconset>
+            </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="buttonExportPlayers">
             <property name="text">
              <string>Exporter</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../assets/tanca.qrc">
+              <normaloff>:/icons/export.png</normaloff>:/icons/export.png</iconset>
             </property>
            </widget>
           </item>
@@ -161,6 +177,10 @@
                 <property name="text">
                  <string>Ajouter</string>
                 </property>
+                <property name="icon">
+                 <iconset resource="../assets/tanca.qrc">
+                  <normaloff>:/icons/add.png</normaloff>:/icons/add.png</iconset>
+                </property>
                </widget>
               </item>
               <item>
@@ -168,12 +188,20 @@
                 <property name="text">
                  <string>Editer</string>
                 </property>
+                <property name="icon">
+                 <iconset resource="../assets/tanca.qrc">
+                  <normaloff>:/icons/edit.png</normaloff>:/icons/edit.png</iconset>
+                </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="buttonDeleteEvent">
                 <property name="text">
                  <string>Supprimer</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../assets/tanca.qrc">
+                  <normaloff>:/icons/delete.png</normaloff>:/icons/delete.png</iconset>
                 </property>
                </widget>
               </item>
@@ -229,6 +257,10 @@
                  <property name="text">
                   <string>Ajouter</string>
                  </property>
+                 <property name="icon">
+                  <iconset resource="../assets/tanca.qrc">
+                   <normaloff>:/icons/add.png</normaloff>:/icons/add.png</iconset>
+                 </property>
                 </widget>
                </item>
                <item>
@@ -236,12 +268,20 @@
                  <property name="text">
                   <string>Editer</string>
                  </property>
+                 <property name="icon">
+                  <iconset resource="../assets/tanca.qrc">
+                   <normaloff>:/icons/edit.png</normaloff>:/icons/edit.png</iconset>
+                 </property>
                 </widget>
                </item>
                <item>
                 <widget class="QPushButton" name="buttonDeleteTeam">
                  <property name="text">
                   <string>Supprimer</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../assets/tanca.qrc">
+                   <normaloff>:/icons/delete.png</normaloff>:/icons/delete.png</iconset>
                  </property>
                 </widget>
                </item>
@@ -305,6 +345,10 @@
                     <property name="text">
                      <string>Générer auto.</string>
                     </property>
+                    <property name="icon">
+                     <iconset resource="../assets/tanca.qrc">
+                      <normaloff>:/icons/random.png</normaloff>:/icons/random.png</iconset>
+                    </property>
                    </widget>
                   </item>
                   <item>
@@ -312,12 +356,20 @@
                     <property name="text">
                      <string>Afficher</string>
                     </property>
+                    <property name="icon">
+                     <iconset resource="../assets/tanca.qrc">
+                      <normaloff>:/icons/show.png</normaloff>:/icons/show.png</iconset>
+                    </property>
                    </widget>
                   </item>
                   <item>
                    <widget class="QPushButton" name="buttonExportGames">
                     <property name="text">
                      <string>Exporter</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../assets/tanca.qrc">
+                      <normaloff>:/icons/export.png</normaloff>:/icons/export.png</iconset>
                     </property>
                    </widget>
                   </item>
@@ -369,6 +421,10 @@
                     <property name="text">
                      <string>Ajouter</string>
                     </property>
+                    <property name="icon">
+                     <iconset resource="../assets/tanca.qrc">
+                      <normaloff>:/icons/add.png</normaloff>:/icons/add.png</iconset>
+                    </property>
                    </widget>
                   </item>
                   <item>
@@ -376,12 +432,20 @@
                     <property name="text">
                      <string>Pointage</string>
                     </property>
+                    <property name="icon">
+                     <iconset resource="../assets/tanca.qrc">
+                      <normaloff>:/icons/edit.png</normaloff>:/icons/edit.png</iconset>
+                    </property>
                    </widget>
                   </item>
                   <item>
                    <widget class="QPushButton" name="buttonDeleteGame">
                     <property name="text">
                      <string>Supprimer</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../assets/tanca.qrc">
+                      <normaloff>:/icons/delete.png</normaloff>:/icons/delete.png</iconset>
                     </property>
                    </widget>
                   </item>
@@ -478,6 +542,10 @@
                  <property name="text">
                   <string>Exporter</string>
                  </property>
+                 <property name="icon">
+                  <iconset resource="../assets/tanca.qrc">
+                   <normaloff>:/icons/export.png</normaloff>:/icons/export.png</iconset>
+                 </property>
                 </widget>
                </item>
               </layout>
@@ -545,6 +613,8 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../assets/tanca.qrc"/>
+ </resources>
  <connections/>
 </ui>

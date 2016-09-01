@@ -1,5 +1,14 @@
 <RCC>
     <qresource prefix="/icons">
         <file>arrow.png</file>
+        <file>export.png</file>
+        <file>delete.png</file>
+        <file>add.png</file>
+        <file>edit.png</file>
+        <file>random.png</file>
+        <file>show.png</file>
+        <file>about.png</file>
+        <file>import.png</file>
+        <file>quit.png</file>
     </qresource>
 </RCC>
