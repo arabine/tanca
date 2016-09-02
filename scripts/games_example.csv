@@ -1,0 +1,16 @@
+Id;Partie;Équipe 1;Équipe 2;Score 1;Score 2
+130;1;Ryan LAC. / DORIAN ZIE.;Jean-Marc VAL. / Théo VAL.;9;13
+131;1;Sophie LAC. / Véronique CHA.;Laurent TEX. / Christophe GEM.;5;13
+132;1;NICOLAS BON. / Anthony RAB.;Cathy LOH. / Fabienne DIE.;4;13
+133;1;Jean LOH. / Patrick DIE.;Marie-Annick LAM. / Gérard THO.;13;5
+134;1;Jocia JOL. / Philippe JOL.;Shanna LAC. / Anaïs CHA.;-1;4
+135;2;Jean-Marc VAL. / Théo VAL.;Sophie LAC. / Véronique CHA.;13;2
+136;2;Laurent TEX. / Christophe GEM.;NICOLAS BON. / Anthony RAB.;13;-1
+137;2;Cathy LOH. / Fabienne DIE.;Jean LOH. / Patrick DIE.;6;13
+138;2;Marie-Annick LAM. / Gérard THO.;Jocia JOL. / Philippe JOL.;13;6
+139;2;Shanna LAC. / Anaïs CHA.;Ryan LAC. / DORIAN ZIE.;3;13
+140;3;Ryan LAC. / DORIAN ZIE.;Sophie LAC. / Véronique CHA.;12;13
+141;3;Jean-Marc VAL. / Théo VAL.;Laurent TEX. / Christophe GEM.;13;2
+142;3;Jocia JOL. / Philippe JOL.;Cathy LOH. / Fabienne DIE.;12;13
+143;3;Marie-Annick LAM. / Gérard THO.;Shanna LAC. / Anaïs CHA.;13;0
+144;3;NICOLAS BON. / Anthony RAB.;Jean LOH. / Patrick DIE.;5;13
