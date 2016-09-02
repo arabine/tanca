@@ -154,6 +154,10 @@ struct Event
         {
             return QObject::tr("Championnat du club");
         }
+        else if (type == cSwissRounds)
+        {
+            return QObject::tr("Tournoi type Suisse");
+        }
         else
         {
             return QObject::tr("");
