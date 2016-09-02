@@ -91,3 +91,35 @@ void TableHelper::AppendLine(const QList<QVariant> &list, bool selected)
     mRow++;
 }
 
+void TableHelper::Export(const QString &fileName)
+{
+    // FIXME: detect the output format thanks to the file extension
+
+    QFile f( fileName );
+    if (f.open(QFile::WriteOnly))
+    {
+        QTextStream data( &f );
+        QStringList strList;
+
+        // Export header title
+        for( int c = 0; c < mWidget->columnCount(); ++c )
+        {
+            strList << mWidget->horizontalHeaderItem(c)->data(Qt::DisplayRole).toString();
+        }
+
+        data << strList.join(";") << "\n";
+
+        // Export table contents
+        for( int r = 0; r < mWidget->rowCount(); ++r )
+        {
+            strList.clear();
+            for( int c = 0; c < mWidget->columnCount(); ++c )
+            {
+                strList << mWidget->item( r, c )->text();
+            }
+            data << strList.join( ";" ) + "\n";
+        }
+        f.close();
+    }
+}
+

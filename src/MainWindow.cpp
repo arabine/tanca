@@ -350,32 +350,8 @@ void MainWindow::ExportTable(QTableWidget *table, const QString &title)
                                  tr("Excel CSV (*.csv)"));
     if (!fileName.isEmpty())
     {
-        QFile f( fileName );
-        if (f.open(QFile::WriteOnly))
-        {
-            QTextStream data( &f );
-            QStringList strList;
-
-            // Export header title
-            for( int c = 0; c < table->columnCount(); ++c )
-            {
-                strList << table->horizontalHeaderItem(c)->data(Qt::DisplayRole).toString();
-            }
-
-            data << strList.join(";") << "\n";
-
-            // Export table contents
-            for( int r = 0; r < table->rowCount(); ++r )
-            {
-                strList.clear();
-                for( int c = 0; c < table->columnCount(); ++c )
-                {
-                    strList << table->item( r, c )->text();
-                }
-                data << strList.join( ";" ) + "\n";
-            }
-            f.close();
-        }
+        TableHelper helper(table);
+        helper.Export(fileName);
     }
 }
 
