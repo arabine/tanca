@@ -35,6 +35,7 @@ bool TableHelper::GetFirstColumnValue(int &value)
     return ret;
 }
 
+
 void TableHelper::Initialize(const QStringList &header, int rows)
 {
     mWidget->clear();

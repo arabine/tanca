@@ -82,6 +82,7 @@ private slots:
     void slotExportPlayers();
     void slotExportTeams();
     void slotRankingOptionChanged(bool checked);
+    void slotDeleteAllGames();
 private:
     void UpdatePlayersTable();
 
@@ -105,7 +106,7 @@ private:
     Event mCurrentEvent;
     UniqueId mTeamsId;
 
-    void UpdateTeamList(int eventId);
+    void UpdateTeamList();
     bool FindPlayer(int id, Player &player);
     void UpdateGameList();
     void UpdateRanking();

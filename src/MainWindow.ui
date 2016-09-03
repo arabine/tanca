@@ -224,7 +224,7 @@
           </widget>
           <widget class="QTabWidget" name="tabWidget_2">
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="tab_4">
             <attribute name="title">
@@ -457,6 +457,17 @@
                     <property name="icon">
                      <iconset resource="../assets/tanca.qrc">
                       <normaloff>:/icons/delete.png</normaloff>:/icons/delete.png</iconset>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="buttonDeleteAllGames">
+                    <property name="text">
+                     <string>Supprimer tout</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../assets/tanca.qrc">
+                      <normaloff>:/icons/delete_all.png</normaloff>:/icons/delete_all.png</iconset>
                     </property>
                    </widget>
                   </item>

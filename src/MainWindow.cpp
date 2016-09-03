@@ -127,6 +127,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->buttonAddGame, &QPushButton::clicked, this, &MainWindow::slotAddGame);
     connect(ui->buttonEditGame, &QPushButton::clicked, this, &MainWindow::slotEditGame);
     connect(ui->buttonDeleteGame, &QPushButton::clicked, this, &MainWindow::slotDeleteGame);
+    connect(ui->buttonDeleteAllGames, &QPushButton::clicked, this, &MainWindow::slotDeleteAllGames);
     connect(ui->buttonExportGames, &QPushButton::clicked, this, &MainWindow::slotExportGames);
 
     connect(ui->tabWidget_2, SIGNAL(currentChanged(int)), this, SLOT(slotTabChanged(int)));
@@ -372,22 +373,10 @@ void MainWindow::slotRankingOptionChanged(bool checked)
     UpdateRanking();
 }
 
-void MainWindow::UpdateTeamList(int eventId)
+void MainWindow::UpdateTeamList()
 {
-    mTeams = mDatabase.GetTeams(eventId);
+    mTeams = mDatabase.GetTeams(mCurrentEvent.id);
     mPlayersInTeams.clear();
-
-    // Cannot edit teams if some games exist
-    if (mGames.size() == 0)
-    {
-        ui->buttonEditTeam->setEnabled(true);
-        ui->buttonDeleteTeam->setEnabled(true);
-    }
-    else
-    {
-        ui->buttonEditTeam->setEnabled(false);
-        ui->buttonDeleteTeam->setEnabled(false);
-    }
 
     TableHelper helper(ui->teamTable);
     helper.Initialize(gTeamsTableHeader, mTeams.size());
@@ -414,6 +403,18 @@ void MainWindow::UpdateTeamList(int eventId)
     }
 
     helper.Finish();
+
+    // Cannot edit teams if some games exist
+    if (mGames.size() == 0)
+    {
+        ui->buttonEditTeam->setEnabled(true);
+        ui->buttonDeleteTeam->setEnabled(true);
+    }
+    else
+    {
+        ui->buttonEditTeam->setEnabled(false);
+        ui->buttonDeleteTeam->setEnabled(false);
+    }
 }
 
 void MainWindow::slotEventItemActivated()
@@ -431,7 +432,7 @@ void MainWindow::slotEventItemActivated()
             if (mCurrentEvent.IsValid())
             {
                 std::cout << "Current event id: " << mCurrentEvent.id << std::endl;
-                UpdateTeamList(mCurrentEvent.id);
+                UpdateTeamList();
                 UpdateGameList();
                 UpdateRanking();
             }
@@ -534,7 +535,7 @@ void MainWindow::slotAddTeam()
             team.number = teamWindow->GetNumber();
             if (mDatabase.AddTeam(team))
             {
-                UpdateTeamList(mCurrentEvent.id);
+                UpdateTeamList();
             }
         }
         else
@@ -575,7 +576,7 @@ void MainWindow::slotEditTeam()
                         team.number = teamWindow->GetNumber();
                         if (mDatabase.EditTeam(team))
                         {
-                            UpdateTeamList(mCurrentEvent.id);
+                            UpdateTeamList();
                         }
                     }
                 }
@@ -605,7 +606,7 @@ void MainWindow::slotDeleteTeam()
         {
             if (mDatabase.DeleteTeam(id))
             {
-                UpdateTeamList(mCurrentEvent.id);
+                UpdateTeamList();
             }
         }
     }
@@ -834,12 +835,47 @@ void MainWindow::slotDeleteGame()
     }
 }
 
+void MainWindow::slotDeleteAllGames()
+{
+    if (QMessageBox::warning(this, tr("Suppression de toutes les rencontres"),
+                                tr("Attention ! Tous les points associées seront perdus. Continuer ?"),
+                                QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok)
+    {
+
+
+        for( int r = 0; r < ui->gameTable->rowCount(); ++r )
+        {
+            int id = ui->gameTable->item(r, 0)->text().toInt();
+
+            if (!mDatabase.DeleteGame(id))
+            {
+                TLogError("Delete game failure");
+            }
+        }
+
+        UpdateGameList();
+    }
+}
+
 
 void MainWindow::slotTabChanged(int index)
 {
     Q_UNUSED(index);
     // Refresh ranking
     UpdateRanking();
+    // Refresh team buttons
+
+    // Cannot edit teams if some games exist
+    if (mGames.size() == 0)
+    {
+        ui->buttonEditTeam->setEnabled(true);
+        ui->buttonDeleteTeam->setEnabled(true);
+    }
+    else
+    {
+        ui->buttonEditTeam->setEnabled(false);
+        ui->buttonDeleteTeam->setEnabled(false);
+    }
 }
 
 void MainWindow::slotExportRanking()

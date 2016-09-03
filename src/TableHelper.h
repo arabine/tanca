@@ -40,6 +40,7 @@ public:
     void SetSelectedColor(const QColor &color);
     void SetAlternateColors(bool enable);
     void Export(const QString &fileName);
+
 private:
     QTableWidget *mWidget;
     QColor mSelectedColor;
