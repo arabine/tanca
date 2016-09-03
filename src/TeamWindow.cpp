@@ -33,8 +33,17 @@ void TeamWindow::GetTeam(Team &team)
         team.player3Id = mSelection.at(2).id;
     }
 
-    // Update team name
-    DbManager::CreateName(team, mSelection.at(0), mSelection.at(1));
+    QString name = GetName();
+
+    if (name.size() == 0)
+    {
+        // No any team name specified, create one
+        DbManager::CreateName(team, mSelection.at(0), mSelection.at(1));
+    }
+    else
+    {
+        team.teamName = name;
+    }
 }
 
 void TeamWindow::Initialize(const QList<Player> &players, const QList<int> &inTeams)

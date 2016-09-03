@@ -85,6 +85,11 @@ uint32_t SelectionWindow::GetNumber()
     return ui.spinSelectionNumber->value();
 }
 
+QString SelectionWindow::GetName()
+{
+    return ui.lineName->text();
+}
+
 void SelectionWindow::AllowZeroNumber(bool enable)
 {
     if (enable)

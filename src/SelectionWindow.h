@@ -45,6 +45,7 @@ public:
     int GetMaxSize() { return mMaxSize; }
     void SetNumber(uint32_t number);
     uint32_t GetNumber();
+    QString GetName();
     void AllowZeroNumber(bool enable);
 
     // Virtual methods that must be implemented in the child classes

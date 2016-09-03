@@ -29,7 +29,9 @@ TEMPLATE = app
 
 
 VPATH += src
+VPATH += src/lua
 INCLUDEPATH += src
+INCLUDEPATH += src/lua
 
 QMAKE_CXXFLAGS += -std=c++11
 
@@ -54,7 +56,40 @@ SOURCES += main.cpp MainWindow.cpp \
     EventWindow.cpp \
     TableHelper.cpp \
     SelectionWindow.cpp \
-    ScoreWindow.cpp
+    ScoreWindow.cpp \
+    lundump.c \
+    lutf8lib.c \
+    lvm.c \
+    lzio.c \
+    lapi.c \
+    lauxlib.c \
+    lbaselib.c \
+    lbitlib.c \
+    lcode.c \
+    lcorolib.c \
+    lctype.c \
+    ldblib.c \
+    ldebug.c \
+    ldo.c \
+    ldump.c \
+    lfunc.c \
+    lgc.c \
+    linit.c \
+    liolib.c \
+    llex.c \
+    lmathlib.c \
+    lmem.c \
+    loadlib.c \
+    lobject.c \
+    lopcodes.c \
+    loslib.c \
+    lparser.c \
+    lstate.c \
+    lstring.c \
+    lstrlib.c \
+    ltable.c \
+    ltablib.c \
+    ltm.c
 
 HEADERS  += MainWindow.h \
     DbManager.h \
@@ -70,7 +105,32 @@ HEADERS  += MainWindow.h \
     EventWindow.h \
     TableHelper.h \
     SelectionWindow.h \
-    ScoreWindow.h
+    ScoreWindow.h \
+    luaconf.h \
+    lualib.h \
+    lundump.h \
+    lvm.h \
+    lzio.h \
+    lua.hpp \
+    lapi.h \
+    lauxlib.h \
+    lcode.h \
+    lctype.h \
+    ldebug.h \
+    ldo.h \
+    lfunc.h \
+    lgc.h \
+    llex.h \
+    llimits.h \
+    lmem.h \
+    lobject.h \
+    lopcodes.h \
+    lparser.h \
+    lprefix.h \
+    lstate.h \
+    lstring.h \
+    ltable.h \
+    ltm.h
 
 FORMS    += MainWindow.ui \
     PlayerWindow.ui \

@@ -28,6 +28,12 @@ Affichage des matches du tournoi:
 
 ## Historique des versions
 
+### V1.7
+
+ - Possibilité de spécifier un nom d'équipe
+ - Affichage du numéro d'équipe dans la liste des équipes et dans le classement de l'événement
+ - Ajout de l'export de la liste des équipes
+
 ### V1.6
 
  - Affichage de la différence de points dans le classement
@@ -85,6 +91,7 @@ Affichage des matches du tournoi:
 
 ### V2.0
 
+ - Créer un Export Box dédié avec choix du script
  - Intégrer villes.db pour les codes postaux
  - Ranger les événements par rapport à leur date
  - Ajouter un "supprimer tous" les tours de jeu

@@ -80,6 +80,7 @@ private slots:
     void slotExportGames();
     void slotTabChanged(int index);
     void slotExportPlayers();
+    void slotExportTeams();
     void slotRankingOptionChanged(bool checked);
 private:
     void UpdatePlayersTable();

@@ -224,7 +224,7 @@
           </widget>
           <widget class="QTabWidget" name="tabWidget_2">
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_4">
             <attribute name="title">
@@ -282,6 +282,17 @@
                  <property name="icon">
                   <iconset resource="../assets/tanca.qrc">
                    <normaloff>:/icons/delete.png</normaloff>:/icons/delete.png</iconset>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="buttonExportTeams">
+                 <property name="text">
+                  <string>Exporter</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../assets/tanca.qrc">
+                   <normaloff>:/icons/export.png</normaloff>:/icons/export.png</iconset>
                  </property>
                 </widget>
                </item>
@@ -567,7 +578,7 @@
      <x>0</x>
      <y>0</y>
      <width>1045</width>
-     <height>20</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">

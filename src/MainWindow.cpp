@@ -32,7 +32,7 @@
 #include "TableHelper.h"
 #include "ui_MainWindow.h"
 
-static const QString gVersion = "1.6";
+static const QString gVersion = "1.7";
 
 // Table headers
 QStringList gGamesTableHeader;
@@ -117,6 +117,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->buttonAddTeam, &QPushButton::clicked, this, &MainWindow::slotAddTeam);
     connect(ui->buttonEditTeam, &QPushButton::clicked, this, &MainWindow::slotEditTeam);
     connect(ui->buttonDeleteTeam, &QPushButton::clicked, this, &MainWindow::slotDeleteTeam);
+    connect(ui->buttonExportTeams, &QPushButton::clicked, this, &MainWindow::slotExportTeams);
 
     connect(ui->eventTable, SIGNAL(itemSelectionChanged()), this, SLOT(slotEventItemActivated()));
     connect(ui->buttonShowRounds, &QPushButton::clicked, this, &MainWindow::slotShowGames);
@@ -139,8 +140,8 @@ MainWindow::MainWindow(QWidget *parent)
     gEventsTableHeader << tr("Id") << tr("Date") << tr("Type") << tr("Titre") << tr("État");
     gPlayersTableHeader << tr("Id") << tr("UUID") << tr("Prénom") << tr("Nom") << tr("Pseudonyme") << tr("E-mail") << tr("Téléphone (mobile)") << tr("Téléphone (maison)") << tr("Date de naissance") << tr("Rue") << tr("Code postal") << tr("Ville") << tr("Licences") << tr("Commentaires") << tr("Statut") << tr("Divers");
     gSeasonRankingTableHeader << tr("Id") << tr("Joueur") << tr("Parties gagnées") << tr("Parties perdues") << tr("Points marqués") << tr("Points concédés") << tr("Différence");
-    gEventRankingTableHeader << tr("Id") << tr("Équipe") << tr("Parties gagnées") << tr("Parties perdues") << tr("Points marqués") << tr("Points concédés") << tr("Différence");
-    gTeamsTableHeader << tr("Id") << tr("Joueur 1") << tr("Joueur 2") << ("Nom de l'équipe");
+    gEventRankingTableHeader << tr("Id") << tr("Numéro") << tr("Équipe") << tr("Parties gagnées") << tr("Parties perdues") << tr("Points marqués") << tr("Points concédés") << tr("Différence");
+    gTeamsTableHeader << tr("Id") << tr("Numéro") << tr("Joueur 1") << tr("Joueur 2") << ("Nom de l'équipe");
 
     // Initialize views
     UpdatePlayersTable();
@@ -360,6 +361,11 @@ void MainWindow::slotExportPlayers()
     ExportTable(ui->playersWidget, tr("Exporter la base de joueurs au format Excel (CSV)"));
 }
 
+void MainWindow::slotExportTeams()
+{
+     ExportTable(ui->teamTable, tr("Exporter la liste des équipes au format Excel (CSV)"));
+}
+
 void MainWindow::slotRankingOptionChanged(bool checked)
 {
     Q_UNUSED(checked);
@@ -402,7 +408,7 @@ void MainWindow::UpdateTeamList(int eventId)
             mTeamsId.AddId(team.number);
 
             QList<QVariant> rowData;
-            rowData << team.id << p1.FullName() << p2.FullName() << team.teamName;
+            rowData << team.id << team.number << p1.FullName() << p2.FullName() << team.teamName;
             helper.AppendLine(rowData, false);
         }
     }
@@ -943,7 +949,7 @@ void MainWindow::UpdateRanking()
                     if (Team::Find(teams, id, team))
                     {
                         QList<QVariant> rowData;
-                        rowData << team.id << team.teamName << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference();
+                        rowData << team.id << team.number << team.teamName << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference();
                         helper.AppendLine(rowData, false);
                     }
                     else
@@ -965,7 +971,7 @@ void MainWindow::UpdateRanking()
 
     foreach (Event event, mEvents)
     {
-        if ((event.state == Event::cStarted) && (event.type == Event::cClubContest))
+        if (event.state != Event::cCanceled)
         {
             bool ok = true;
             if (!isSeason)
