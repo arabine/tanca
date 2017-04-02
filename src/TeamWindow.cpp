@@ -10,7 +10,23 @@ TeamWindow::TeamWindow(QWidget *parent)
     QStringList header;
     header << tr("Id") << tr("Prénom") << tr("Nom") << tr("Pseudo");
     SetHeader(header);
+
+    connect(ui.buttonOk, SIGNAL(clicked(bool)), this, SLOT(slotAccept()));
 }
+
+
+void TeamWindow::slotAccept()
+{
+    if ((ui.selectionList->count() >= mMinSize) && (ui.selectionList->count() <= mMaxSize))
+    {
+        accept();
+    }
+    else if ((ui.selectionList->count() == 0) && GetName().size() > 0)
+    {
+        accept();
+    }
+}
+
 
 void TeamWindow::SetTeam(const Player &p1, const Player &p2)
 {
@@ -22,15 +38,26 @@ void TeamWindow::SetTeam(const Player &p1, const Player &p2)
 
 void TeamWindow::GetTeam(Team &team)
 {
-    if (mSelection.size() >= 2)
+    if (mSelection.size() == 3)
+    {
+        team.player1Id = mSelection.at(0).id;
+        team.player2Id = mSelection.at(1).id;
+        team.player3Id = mSelection.at(2).id;
+    }
+    else if (mSelection.size() == 2)
     {
         team.player1Id = mSelection.at(0).id;
         team.player2Id = mSelection.at(1).id;
     }
-
-    if (mSelection.size() >= 3)
+    else if (mSelection.size() == 1)
     {
-        team.player3Id = mSelection.at(2).id;
+        team.player1Id = mSelection.at(0).id;
+        team.player2Id = Player::cDummyPlayer;
+    }
+    else
+    {
+        team.player1Id = Player::cDummyPlayer;
+        team.player2Id = Player::cDummyPlayer;
     }
 
     QString name = GetName();

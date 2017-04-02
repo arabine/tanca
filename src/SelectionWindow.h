@@ -58,7 +58,8 @@ private slots:
     void slotClicked();
     void slotPlayerItemActivated();
     void slotSelectionItemActivated(QListWidgetItem *item);
-private:
+
+protected:
     Ui::SelectionWindow ui;
 
     TableHelper mHelper;

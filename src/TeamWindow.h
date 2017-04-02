@@ -19,10 +19,14 @@ public:
     void ClickedRight(int index);
     void ClickedLeft(int id);
 
+
+private slots:
+    void slotAccept();
+
 private:
     QList<Player> mList;
     QList<Player> mSelection;
-    void Update();    
+    void Update();
 };
 
 #endif // TEAM_WINDOW_H

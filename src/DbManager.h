@@ -8,6 +8,8 @@
 
 struct Player
 {
+    static const int cDummyPlayer = 999999999;
+
     int id;
     QString uuid;
     QString name;
@@ -359,7 +361,7 @@ public:
 
     // Player management
     static bool IsValid(const Player &player);
-    bool AddPlayer(const Player &player);
+    bool AddPlayer(const Player &player, int id = -1); // you may specify an ID if you want
     bool EditPlayer(const Player &player);
     bool FindPlayer(int id, Player &player);
     QList<Player> &GetPlayerList();

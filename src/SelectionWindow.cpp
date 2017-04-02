@@ -39,7 +39,6 @@ SelectionWindow::SelectionWindow(QWidget *parent, const QString &title, int minS
 
     mHelper.SetTableWidget(ui.playersTable);
 
-    connect(ui.buttonOk, SIGNAL(clicked(bool)), this, SLOT(slotAccept()));
     connect(ui.buttonCancel, SIGNAL(clicked(bool)), this, SLOT(reject()));
     connect(ui.buttonSwap, &QPushButton::clicked, this, &SelectionWindow::slotClicked);
 

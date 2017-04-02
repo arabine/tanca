@@ -44,6 +44,9 @@ public:
     void ClickedRight(int index);
     void ClickedLeft(int id);
 
+private slots:
+    void slotAccept();
+
 private:
     QList<Team> mList;
     QList<Team> mSelection;

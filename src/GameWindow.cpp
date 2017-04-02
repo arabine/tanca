@@ -31,6 +31,8 @@ GameWindow::GameWindow(QWidget *parent)
     QStringList header;
     header << tr("Id") << tr("Équipe");
     SetHeader(header);
+
+    connect(ui.buttonOk, SIGNAL(clicked(bool)), this, SLOT(slotAccept()));
 }
 
 void GameWindow::GetGame(Game &game)
@@ -101,6 +103,14 @@ void GameWindow::Update()
     }
 
     FinishUpdate();
+}
+
+void GameWindow::slotAccept()
+{
+    if ((ui.selectionList->count() >= mMinSize) && (ui.selectionList->count() <= mMaxSize))
+    {
+        accept();
+    }
 }
 
 

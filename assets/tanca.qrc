@@ -12,4 +12,7 @@
         <file>quit.png</file>
         <file>delete_all.png</file>
     </qresource>
+    <qresource prefix="/qml">
+        <file>brackets.qml</file>
+    </qresource>
 </RCC>

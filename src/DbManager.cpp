@@ -18,6 +18,7 @@
 
 static const QString gBaseVersion = "0.0";
 static const QString gVersion1_0 = "1.0";
+static const QString gVersion1_1 = "1.1";
 
 static QStringList MakeTables()
 {
@@ -121,6 +122,26 @@ void DbManager::Upgrade()
         }
     }
 
+    if (mInfos.version == gVersion1_0)
+    {
+        // Upgrade to the 1.1
+        Player p;
+        p.name = "John";
+        p.lastName = "Doe";
+        p.comments = "Dummy player";
+
+        if(AddPlayer(p, Player::cDummyPlayer))
+        {
+            qDebug() << "Upgrade table 'teams' to 1.1 success";
+            mInfos.version = gVersion1_1;
+            EditInfos();
+        }
+        else
+        {
+            TLogError("Upgrade table 'teams' to 1.1 failed");
+        }
+    }
+
 }
 
 void DbManager::Initialize()
@@ -133,18 +154,38 @@ void DbManager::Initialize()
         QStringList gTables = MakeTables();
         for (int i = 0; i < gTables.size(); i++)
         {
-            QSqlQuery query(gTables[i], mDb);
-            if(!query.exec())
+            // retrieve the table name
+            QRegularExpression re("EXISTS (\\w+) \\(");
+            QRegularExpressionMatch match = re.match(gTables[i]);
+            if (match.hasMatch())
             {
-                qDebug() << "Create table failed: " << query.lastError();
-            }
-            else
-            {
-                QRegularExpression re("EXISTS (\\w+) \\(");
-                QRegularExpressionMatch match = re.match(gTables[i]);
-                if (match.hasMatch())
+                QString tableName = match.captured(1);
+                // Test if table exists
+                QString testTable = "SELECT name FROM sqlite_master WHERE type='table' AND name='" + tableName + "'";
+
+                QSqlQuery testQuery(testTable, mDb);
+                if (testQuery.exec())
                 {
-                    qDebug() << "Created table: " << match.captured(1);
+                    if (testQuery.next())
+                    {
+                        qDebug() << "Found table: " << tableName;
+                    }
+                    else
+                    {
+                        QSqlQuery query(gTables[i], mDb);
+                        if(!query.exec())
+                        {
+                            qDebug() << "Create table failed: " << query.lastError();
+                        }
+                        else
+                        {
+                            qDebug() << "Created table: " << tableName;
+                        }
+                    }
+                }
+                else
+                {
+                    qDebug() << "Cannot search for table: " << tableName;
                 }
             }
         }
@@ -241,15 +282,32 @@ bool DbManager::FindPlayer(int id, Player &player)
     return Player::Find(mPlayers, id, player);
 }
 
-bool DbManager::AddPlayer(const Player& player)
+bool DbManager::AddPlayer(const Player& player, int id)
 {
     bool success = false;
 
     if (IsValid(player))
     {
         QSqlQuery queryAdd(mDb);
-        queryAdd.prepare("INSERT INTO players (uuid, name, last_name, nick_name, email, mobile_phone, home_phone, birth_date, road, post_code, city, membership, comments, state, document) "
-                         "VALUES (:uuid, :name, :last_name, :nick_name, :email, :mobile_phone, :home_phone, :birth_date, :road, :post_code, :city, :membership, :comments, :state, :document)");
+        QString cmd = "INSERT INTO players (uuid, name, last_name, nick_name, email, mobile_phone, home_phone, birth_date, road, post_code, city, membership, comments, state";
+
+        if (id >= 0)
+        {
+            cmd += ", id";
+        }
+
+        cmd += ", document) ";
+
+        cmd += "VALUES (:uuid, :name, :last_name, :nick_name, :email, :mobile_phone, :home_phone, :birth_date, :road, :post_code, :city, :membership, :comments, :state";
+
+        if (id >= 0)
+        {
+            cmd += ", :id";
+        }
+        cmd += ", :document)";
+
+        queryAdd.prepare(cmd);
+
         queryAdd.bindValue(":uuid", QUuid::createUuid().toString());
         queryAdd.bindValue(":name", player.name);
         queryAdd.bindValue(":last_name", player.lastName);
@@ -264,11 +322,17 @@ bool DbManager::AddPlayer(const Player& player)
         queryAdd.bindValue(":membership", player.membership);
         queryAdd.bindValue(":comments", player.comments);
         queryAdd.bindValue(":state", player.state);
+
+        if (id >= 0)
+        {
+            queryAdd.bindValue(":id", id);
+        }
+
         queryAdd.bindValue(":document", player.document);
 
         if(queryAdd.exec())
         {
-            qDebug() << "Add player success";
+            qDebug() << "Add player success with id: " << id;
             success = true;
             mPlayers = UpdatePlayerList();
         }

@@ -120,7 +120,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->buttonExportTeams, &QPushButton::clicked, this, &MainWindow::slotExportTeams);
 
     connect(ui->eventTable, SIGNAL(itemSelectionChanged()), this, SLOT(slotEventItemActivated()));
-    connect(ui->buttonShowRounds, &QPushButton::clicked, this, &MainWindow::slotShowGames);
     connect(ui->comboSeasons, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSeasonChanged(int)));
     connect(ui->buttonRandomizeGames, &QPushButton::clicked, this, &MainWindow::slotRandomizeGames);
 
