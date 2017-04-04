@@ -140,7 +140,7 @@ MainWindow::MainWindow(QWidget *parent)
     gEventsTableHeader << tr("Id") << tr("Date") << tr("Type") << tr("Titre") << tr("État");
     gPlayersTableHeader << tr("Id") << tr("UUID") << tr("Prénom") << tr("Nom") << tr("Pseudonyme") << tr("E-mail") << tr("Téléphone (mobile)") << tr("Téléphone (maison)") << tr("Date de naissance") << tr("Rue") << tr("Code postal") << tr("Ville") << tr("Licences") << tr("Commentaires") << tr("Statut") << tr("Divers");
     gSeasonRankingTableHeader << tr("Id") << tr("Joueur") << tr("Parties gagnées") << tr("Parties perdues") << tr("Points marqués") << tr("Points concédés") << tr("Différence");
-    gEventRankingTableHeader << tr("Id") << tr("Numéro") << tr("Équipe") << tr("Parties gagnées") << tr("Parties perdues") << tr("Points marqués") << tr("Points concédés") << tr("Différence");
+    gEventRankingTableHeader << tr("Id") << tr("Numéro") << tr("Équipe") << tr("Parties gagnées") << tr("Parties perdues") << tr("Points marqués") << tr("Points concédés") << tr("Différence") << tr("Buchholz");
     gTeamsTableHeader << tr("Id") << tr("Numéro") << tr("Joueur 1") << tr("Joueur 2") << ("Nom de l'équipe");
 
     // Initialize views
@@ -655,7 +655,7 @@ void MainWindow::slotRandomizeGames()
 {
     if (mGames.size() == 0)
     {
-        QList<Game> games = bracketWindow->BuildRounds(mTeams, ui->spinNbRounds->value());
+        QList<Game> games = bracketWindow->BuildRoundRobinRounds(mTeams, ui->spinNbRounds->value());
 
         if (games.size() > 0)
         {

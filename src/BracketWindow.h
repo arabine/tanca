@@ -206,7 +206,7 @@ class BracketWindow : public QDialog
 public:
     explicit BracketWindow(QWidget *parent = 0);
 
-    QList<Game> BuildRounds(const QList<Team> &tlist, int nbRounds);
+    QList<Game> BuildRoundRobinRounds(const QList<Team> &tlist, int nbRounds);
     void SetGames(const QList<Game> &games, const QList<Team> &teams);
 
 private:

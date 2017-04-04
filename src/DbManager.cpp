@@ -191,7 +191,7 @@ void DbManager::Initialize()
         }
 
         Upgrade();
-        mPlayers = UpdatePlayerList();
+        UpdatePlayerList();
     }
     else
     {
@@ -236,7 +236,7 @@ bool DbManager::DeletePlayer(int id)
     {
         qDebug() << "Delete player success";
         success = true;
-        mPlayers = UpdatePlayerList();
+        UpdatePlayerList();
     }
     else
     {
@@ -246,10 +246,10 @@ bool DbManager::DeletePlayer(int id)
     return success;
 }
 
-QList<Player> DbManager::UpdatePlayerList()
+void DbManager::UpdatePlayerList()
 {
     QSqlQuery query("SELECT * FROM players", mDb);
-    QList<Player> result;
+    mPlayers.clear();
 
     while (query.next())
     {
@@ -272,9 +272,11 @@ QList<Player> DbManager::UpdatePlayerList()
         player.state = query.value("state").toInt();
         player.document = query.value("document").toString();
 
-        result.append(player);
+        if (player.id != Player::cDummyPlayer)
+        {
+            mPlayers.append(player);
+        }
     }
-    return result;
 }
 
 bool DbManager::FindPlayer(int id, Player &player)
@@ -334,7 +336,7 @@ bool DbManager::AddPlayer(const Player& player, int id)
         {
             qDebug() << "Add player success with id: " << id;
             success = true;
-            mPlayers = UpdatePlayerList();
+            UpdatePlayerList();
         }
         else
         {
@@ -381,7 +383,7 @@ bool DbManager::EditPlayer(const Player& player)
         {
             qDebug() << "Edit player success";
             success = true;
-            mPlayers = UpdatePlayerList();
+            UpdatePlayerList();
         }
         else
         {

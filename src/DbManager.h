@@ -61,13 +61,21 @@ struct Player
     {
         bool found = false;
 
-        foreach (Player p, players)
+        if (id == Player::cDummyPlayer)
         {
-            if (p.id == id)
+            found = true;
+            player.lastName = "--";
+        }
+        else
+        {
+            foreach (Player p, players)
             {
-                player = p;
-                found = true;
-                break;
+                if (p.id == id)
+                {
+                    player = p;
+                    found = true;
+                    break;
+                }
             }
         }
         return found;
@@ -113,8 +121,9 @@ struct Event
     static const int cCanceled = 2;
 
     // Type
-    static const int cClubContest = 0;
-    static const int cSwissRounds = 1;
+    static const int cClubContest   = 0;
+    static const int cRoundRobin    = 1;
+    static const int cSwissRounds   = 2;
 
     Event()
         : id(-1)
@@ -155,6 +164,10 @@ struct Event
         if (type == cClubContest)
         {
             return QObject::tr("Championnat du club");
+        }
+        else if (type == cRoundRobin)
+        {
+            return QObject::tr("Tournoi type toutes rondes");
         }
         else if (type == cSwissRounds)
         {
@@ -405,7 +418,7 @@ private:
     QList<Player> mPlayers; // Cached player list
     Infos mInfos;
 
-    QList<Player> UpdatePlayerList();
+    void UpdatePlayerList();
     void Upgrade();
     bool EditInfos();
 };

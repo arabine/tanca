@@ -181,7 +181,7 @@ void RoundBox::AddMatch(MatchGroup *match)
 }
 
 /*****************************************************************************/
-QList<Game> BracketWindow::BuildRounds(const QList<Team> &tlist, int nbRounds)
+QList<Game> BracketWindow::BuildRoundRobinRounds(const QList<Team> &tlist, int nbRounds)
 {
     mGames.clear();
     QList<Team> teams = tlist; // Local copy to manipulate the list
@@ -239,7 +239,13 @@ QList<Game> BracketWindow::BuildRounds(const QList<Team> &tlist, int nbRounds)
     return mGames;
 }
 
+/*****************************************************************************/
+QList<Game> BracketWindow::BuildSwissRounds(const QList<Team> &tlist, int nbRounds)
+{
+    // todo!
+}
 
+/*****************************************************************************/
 void BracketWindow::SetGames(const QList<Game>& games, const QList<Team> &teams)
 {
     mGames = games;
