@@ -26,8 +26,8 @@ TARGET = Tanca
 TEMPLATE = app
 
 
-VPATH += src
-INCLUDEPATH += src
+VPATH += src src/ui
+INCLUDEPATH += src src/ui
 
 QMAKE_CXXFLAGS += -std=c++11
 
@@ -52,7 +52,8 @@ SOURCES += main.cpp MainWindow.cpp \
     EventWindow.cpp \
     TableHelper.cpp \
     SelectionWindow.cpp \
-    ScoreWindow.cpp
+    ScoreWindow.cpp \
+    Tournament.cpp
 
 HEADERS  += MainWindow.h \
     DbManager.h \
@@ -68,7 +69,8 @@ HEADERS  += MainWindow.h \
     EventWindow.h \
     TableHelper.h \
     SelectionWindow.h \
-    ScoreWindow.h
+    ScoreWindow.h \
+    Tournament.h
 
 FORMS    += MainWindow.ui \
     PlayerWindow.ui \

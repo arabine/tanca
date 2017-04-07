@@ -30,13 +30,13 @@
 #include "DbManager.h"
 #include "PlayerWindow.h"
 #include "DatePickerWindow.h"
-#include "BracketWindow.h"
 #include "TeamWindow.h"
 #include "GameWindow.h"
 #include "ScoreWindow.h"
 #include "EventWindow.h"
 #include "UniqueId.h"
 #include "ui_AboutWindow.h"
+#include "Tournament.h"
 
 namespace Ui {
 class MainWindow;
@@ -57,7 +57,6 @@ private slots:
     void slotDeletePlayer();
 
     void slotAddGame();
-    void slotShowGames();
     void slotEditGame();
     void slotDeleteGame();
 
@@ -90,7 +89,6 @@ private:
     Ui::MainWindow *ui;
     Ui::AboutWindow uiAboutBox;
     PlayerWindow *playerWindow;
-    BracketWindow *bracketWindow;
     DatePickerWindow *datePickerWindow;
     TeamWindow *teamWindow;
     GameWindow *gameWindow;
@@ -105,6 +103,7 @@ private:
     QList<Game> mGames;
     Event mCurrentEvent;
     UniqueId mTeamsId;
+   // Tournament mTournament;
 
     void UpdateTeamList();
     bool FindPlayer(int id, Player &player);

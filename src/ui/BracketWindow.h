@@ -208,6 +208,7 @@ public:
 
     QList<Game> BuildRoundRobinRounds(const QList<Team> &tlist, int nbRounds);
     void SetGames(const QList<Game> &games, const QList<Team> &teams);
+    QList<Game> BuildSwissRounds(const QList<Team> &tlist, int nbRounds);
 
 private:
     Scene *mScene;

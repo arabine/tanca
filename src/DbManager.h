@@ -279,7 +279,7 @@ struct Team
 struct Game
 {
     int id;
-    int eventId; // Also include te match id to avoid too complex DB queries
+    int eventId; // Also include the event id to avoid too complex DB queries
     int turn;       // Round turn (1 turn, 2nd turn ...)
     int team1Id;
     int team2Id;
@@ -376,7 +376,7 @@ public:
     static bool IsValid(const Player &player);
     bool AddPlayer(const Player &player, int id = -1); // you may specify an ID if you want
     bool EditPlayer(const Player &player);
-    bool FindPlayer(int id, Player &player);
+    bool FindPlayer(int id, Player &player) const;
     QList<Player> &GetPlayerList();
     bool PlayerExists(const Player &player) const;
     bool DeletePlayer(int id);
@@ -392,14 +392,15 @@ public:
 
     // Team management
     bool AddTeam(const Team &team);
-    QList<Team> GetTeams(int eventId);
+    QList<Team> GetTeams(int eventId) const;
     QList<Team> GetTeamsByPlayerId(int playerId);
     bool EditTeam(const Team &team);
     bool DeleteTeam(int id);
     bool DeleteTeamByEventId(int eventId);
 
     // Game management
-    QList<Game> GetGames(int event_id);
+    QList<Game> GetGamesByEventId(int event_id) const;
+    Game GetGameById(int game_id) const;
     QList<Game> GetGamesByTeamId(int teamId);
     bool AddGames(const QList<Game> &games);
     bool EditGame(const Game &game);
@@ -411,7 +412,6 @@ public:
 
     // Static members
     static void CreateName(Team &team, const Player &p1, const Player &p2);
-
 private:
     QSqlDatabase mDb;
     QSqlDatabase mCities;

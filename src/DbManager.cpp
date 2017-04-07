@@ -279,7 +279,7 @@ void DbManager::UpdatePlayerList()
     }
 }
 
-bool DbManager::FindPlayer(int id, Player &player)
+bool DbManager::FindPlayer(int id, Player &player) const
 {
     return Player::Find(mPlayers, id, player);
 }
@@ -626,7 +626,7 @@ bool DbManager::AddGames(const QList<Game>& games)
     return success;
 }
 
-QList<Game> DbManager::GetGames(int event_id)
+QList<Game> DbManager::GetGamesByEventId(int event_id) const
 {
     QSqlQuery query(mDb);
     query.prepare("SELECT * FROM games WHERE event_id = :event_id");
@@ -641,6 +641,24 @@ QList<Game> DbManager::GetGames(int event_id)
             Game game;
             game.FillFrom(query);
             result.append(game);
+        }
+    }
+    return result;
+}
+
+Game DbManager::GetGameById(int game_id) const
+{
+    QSqlQuery query(mDb);
+    query.prepare("SELECT * FROM games WHERE id = :game_id");
+    query.bindValue(":game_id", game_id);
+
+    Game result;
+
+    if(query.exec())
+    {
+        if (query.next())
+        {
+            result.FillFrom(query);
         }
     }
     return result;
@@ -772,7 +790,7 @@ bool DbManager::AddTeam(const Team &team)
     return success;
 }
 
-QList<Team> DbManager::GetTeams(int eventId)
+QList<Team> DbManager::GetTeams(int eventId) const
 {
     QSqlQuery query(mDb);
     query.prepare("SELECT * FROM teams WHERE event_id = :event_id");

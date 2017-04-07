@@ -3,6 +3,8 @@
 
 #include <QtCore>
 #include <QTableWidget>
+#include "DbManager.h"
+#include "Tournament.h"
 
 /**
  * @brief Custom table cell to enable column sorting with integers
@@ -40,6 +42,7 @@ public:
     void SetSelectedColor(const QColor &color);
     void SetAlternateColors(bool enable);
     void Export(const QString &fileName);
+    void Show(QTableWidget *table, const QList<Player> &players, const QList<Team> &teams, bool isSeason, const QMap<int, Rank> &list);
 
 private:
     QTableWidget *mWidget;

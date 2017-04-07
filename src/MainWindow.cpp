@@ -38,9 +38,7 @@ static const QString gVersion = "1.7";
 QStringList gGamesTableHeader;
 QStringList gEventsTableHeader;
 QStringList gPlayersTableHeader;
-QStringList gSeasonRankingTableHeader;
 QStringList gTeamsTableHeader;
-QStringList gEventRankingTableHeader;
 
 #ifdef USE_WINDOWS_OS
 QString gAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tanca";
@@ -66,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , mDatabase(gDbFullPath)
     , mTeamsId(0U, 2000000U)
+  //  , mTournament(mDatabase)
 {
     Log::SetLogPath(gAppDataPath.toStdString());
     Log::RegisterListener(consoleOutput);
@@ -80,9 +79,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     datePickerWindow = new DatePickerWindow(this);
     datePickerWindow->hide();
-
-    bracketWindow = new BracketWindow(this);
-    bracketWindow->hide();
 
     teamWindow = new TeamWindow(this);
     teamWindow->hide();
@@ -139,8 +135,6 @@ MainWindow::MainWindow(QWidget *parent)
     gGamesTableHeader << tr("Id") << tr("Partie") << tr("Équipe 1") << tr("Équipe 2") << tr("Score 1") << tr("Score 2");
     gEventsTableHeader << tr("Id") << tr("Date") << tr("Type") << tr("Titre") << tr("État");
     gPlayersTableHeader << tr("Id") << tr("UUID") << tr("Prénom") << tr("Nom") << tr("Pseudonyme") << tr("E-mail") << tr("Téléphone (mobile)") << tr("Téléphone (maison)") << tr("Date de naissance") << tr("Rue") << tr("Code postal") << tr("Ville") << tr("Licences") << tr("Commentaires") << tr("Statut") << tr("Divers");
-    gSeasonRankingTableHeader << tr("Id") << tr("Joueur") << tr("Parties gagnées") << tr("Parties perdues") << tr("Points marqués") << tr("Points concédés") << tr("Différence");
-    gEventRankingTableHeader << tr("Id") << tr("Numéro") << tr("Équipe") << tr("Parties gagnées") << tr("Parties perdues") << tr("Points marqués") << tr("Points concédés") << tr("Différence") << tr("Buchholz");
     gTeamsTableHeader << tr("Id") << tr("Numéro") << tr("Joueur 1") << tr("Joueur 2") << ("Nom de l'équipe");
 
     // Initialize views
@@ -655,7 +649,8 @@ void MainWindow::slotRandomizeGames()
 {
     if (mGames.size() == 0)
     {
-        QList<Game> games = bracketWindow->BuildRoundRobinRounds(mTeams, ui->spinNbRounds->value());
+        int rounds = ui->spinNbRounds->value();
+        QList<Game> games;// = mTournament.BuildRoundRobinRounds(mTeams, rounds);
 
         if (games.size() > 0)
         {
@@ -672,6 +667,9 @@ void MainWindow::slotRandomizeGames()
         else
         {
             TLogError("Cannot build rounds!");
+            (void) QMessageBox::warning(this, tr("Tanca"),
+                                        tr("Il n'y a pas assez d'équipes pour jouer %1 parties.").arg(rounds),
+                                        QMessageBox::Ok);
         }
     }
     else
@@ -688,14 +686,6 @@ void MainWindow::slotAboutBox()
     QDialog about;
     uiAboutBox.setupUi(&about);
     about.exec();
-}
-
-void MainWindow::slotShowGames()
-{
-    UpdateGameList();
-    bracketWindow->setWindowModality(Qt::NonModal);
-    bracketWindow->show();
-
 }
 
 bool MainWindow::FindGame(const int id, Game &game)
@@ -716,8 +706,9 @@ bool MainWindow::FindGame(const int id, Game &game)
 
 void MainWindow::UpdateGameList()
 {
-    mGames = mDatabase.GetGames(mCurrentEvent.id);
-    bracketWindow->SetGames(mGames, mTeams);
+    mGames = mDatabase.GetGamesByEventId(mCurrentEvent.id);
+
+    //bracketWindow->SetGames(mGames, mTeams); // FIXME: now target QML window !!
 
     TableHelper helper(ui->gameTable);
     helper.Initialize(gGamesTableHeader, mGames.size());
@@ -889,179 +880,12 @@ void MainWindow::slotExportGames()
 
 void MainWindow::UpdateRanking()
 {
-    struct Rank
-    {
-        int pointsWon;
-        int pointsLost;
-        int gamesWon;
-        int gamesLost;
-        Rank()
-            : pointsWon(0)
-            , pointsLost(0)
-            , gamesWon(0)
-            , gamesLost(0)
-        {
-
-        }
-
-        int Difference()
-        {
-            return (pointsWon - pointsLost);
-        }
-    };
-
-    class Ranking
-    {
-    public:
-
-        void Add(int playerId, int score, int opponent)
-        {
-            if (mList.contains(playerId))
-            {
-                score       += mList[playerId].pointsWon;
-                opponent    += mList[playerId].pointsLost;
-            }
-            mList[playerId].pointsWon = score;
-            mList[playerId].pointsLost = opponent;
-
-            if (opponent > score)
-            {
-                mList[playerId].gamesLost++;
-            }
-            else if (score > opponent)
-            {
-                mList[playerId].gamesWon++;
-            }
-            else
-            {
-                // Draw
-            }
-        }
-
-        void Show(QTableWidget *table, const QList<Player> &players, const QList<Team> &teams, bool isSeason)
-        {
-            TableHelper helper(table);
-            helper.SetSelectedColor(QColor(245,245,220));
-            helper.SetAlternateColors(true);
-
-            if (isSeason)
-            {
-                helper.Initialize(gSeasonRankingTableHeader, mList.size());
-            }
-            else
-            {
-                helper.Initialize(gEventRankingTableHeader, mList.size());
-            }
-
-            QMapIterator<int, Rank> i(mList);
-            while (i.hasNext())
-            {
-                i.next();
-
-                // Fill the line
-                Rank rank = i.value();
-                int id = i.key();
-
-                if (isSeason)
-                {
-                    // Show the whole season ranking
-                    Player player;
-                    if (Player::Find(players, id, player))
-                    {
-                        QList<QVariant> rowData;
-                        rowData << player.id << player.FullName() << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference();
-                        helper.AppendLine(rowData, false);
-                    }
-                    else
-                    {
-                        TLogError("Cannot find player to create ranking!");
-                    }
-                }
-                else
-                {
-                    // Show the event result
-                    Team team;
-                    if (Team::Find(teams, id, team))
-                    {
-                        QList<QVariant> rowData;
-                        rowData << team.id << team.number << team.teamName << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference();
-                        helper.AppendLine(rowData, false);
-                    }
-                    else
-                    {
-                        TLogError("Cannot find team to create ranking!");
-                    }
-                }
-            }
-
-            helper.Finish();
-        }
-
-    private:
-        QMap<int, Rank> mList;
-    };
-
-    Ranking ranking; // player id, Rank
+    /*
     bool isSeason = ui->radioSeason->isChecked(); // Display option
 
-    foreach (Event event, mEvents)
-    {
-        if (event.state != Event::cCanceled)
-        {
-            bool ok = true;
-            if (!isSeason)
-            {
-                // We want to show only the current event ranking
-                if (event.id != mCurrentEvent.id)
-                {
-                    ok = false;
-                }
-            }
-
-            if (ok)
-            {
-                // Search for every game played for this event
-                QList<Game> games = mDatabase.GetGames(event.id);
-                QList<Team> teams = mDatabase.GetTeams(event.id);
-
-                foreach (Game game, games)
-                {
-                    if (game.IsPlayed())
-                    {
-                        Team team;
-
-                        if (Team::Find(teams, game.team1Id, team))
-                        {
-                            if (isSeason)
-                            {
-                                ranking.Add(team.player1Id, game.team1Score, game.team2Score);
-                                ranking.Add(team.player2Id, game.team1Score, game.team2Score);
-                            }
-                            else
-                            {
-                                ranking.Add(team.id, game.team1Score, game.team2Score);
-                            }
-                        }
-
-                        if (Team::Find(teams, game.team2Id, team))
-                        {
-                            if (isSeason)
-                            {
-                                ranking.Add(team.player1Id, game.team2Score, game.team1Score);
-                                ranking.Add(team.player2Id, game.team2Score, game.team1Score);
-                            }
-                            else
-                            {
-                                ranking.Add(team.id, game.team2Score, game.team1Score);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     ranking.Show(ui->tableContest, mDatabase.GetPlayerList(), mTeams, isSeason);
     ui->tableContest->sortByColumn(4, Qt::DescendingOrder);
+    */
 }
 
