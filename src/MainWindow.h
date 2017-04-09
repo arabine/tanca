@@ -50,6 +50,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void Initialize();
 
 private slots:
     void slotAddPlayer();
@@ -82,8 +83,10 @@ private slots:
     void slotExportTeams();
     void slotRankingOptionChanged(bool checked);
     void slotDeleteAllGames();
+
 private:
     void UpdatePlayersTable();
+
 
     // Windows
     Ui::MainWindow *ui;
@@ -103,7 +106,7 @@ private:
     QList<Game> mGames;
     Event mCurrentEvent;
     UniqueId mTeamsId;
-   // Tournament mTournament;
+    Tournament mTournament;
 
     void UpdateTeamList();
     bool FindPlayer(int id, Player &player);

@@ -46,6 +46,11 @@ SelectionWindow::SelectionWindow(QWidget *parent, const QString &title, int minS
     connect(ui.selectionList, &QListWidget::itemClicked, this, &SelectionWindow::slotSelectionItemActivated);
 }
 
+void SelectionWindow::SetLabelNumber(const QString &name)
+{
+    ui.label_number->setText(name);
+}
+
 void SelectionWindow::SetHeader(const QStringList &tableHeader)
 {
     mTableHeader = tableHeader;

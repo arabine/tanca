@@ -18,11 +18,23 @@
 
 #include "MainWindow.h"
 #include <QApplication>
+#include <QtQuick>
+/*
+#include <chrono>
+#include <thread>
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+*/
+#include "Tournament.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    // Register our component type with QML.
+    qmlRegisterType<Tournament>("Tanca", 1, 0, "Tournament");
+
     MainWindow w;
+    w.Initialize();
     w.show();
 
     return a.exec();

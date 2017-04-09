@@ -27,6 +27,8 @@
 #include <iostream>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QtQuick>
+
 #include "Log.h"
 #include "MainWindow.h"
 #include "TableHelper.h"
@@ -64,7 +66,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , mDatabase(gDbFullPath)
     , mTeamsId(0U, 2000000U)
-  //  , mTournament(mDatabase)
 {
     Log::SetLogPath(gAppDataPath.toStdString());
     Log::RegisterListener(consoleOutput);
@@ -137,14 +138,32 @@ MainWindow::MainWindow(QWidget *parent)
     gPlayersTableHeader << tr("Id") << tr("UUID") << tr("Prénom") << tr("Nom") << tr("Pseudonyme") << tr("E-mail") << tr("Téléphone (mobile)") << tr("Téléphone (maison)") << tr("Date de naissance") << tr("Rue") << tr("Code postal") << tr("Ville") << tr("Licences") << tr("Commentaires") << tr("Statut") << tr("Divers");
     gTeamsTableHeader << tr("Id") << tr("Numéro") << tr("Joueur 1") << tr("Joueur 2") << ("Nom de l'équipe");
 
-    // Initialize views
-    UpdatePlayersTable();
-    UpdateSeasons();
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+
+
+
+void MainWindow::Initialize()
+{
+
+    // Initialize views
+    UpdatePlayersTable();
+    UpdateSeasons();
+
+    /*
+    QQmlContext* ctx = ui->quickWidget->rootContext();
+    ctx->setContextProperty("tournament", &mTournament);
+*/
+    /*
+    QObject::connect(this, SIGNAL(sigDraw(QVariant)),
+                     ui->quickWidget->rootObject(), SLOT(draw(QVariant)));
+                     */
 }
 
 void MainWindow::UpdatePlayersTable()
@@ -650,7 +669,7 @@ void MainWindow::slotRandomizeGames()
     if (mGames.size() == 0)
     {
         int rounds = ui->spinNbRounds->value();
-        QList<Game> games;// = mTournament.BuildRoundRobinRounds(mTeams, rounds);
+        QList<Game> games = mTournament.BuildRoundRobinRounds(mTeams, rounds);
 
         if (games.size() > 0)
         {
@@ -704,12 +723,23 @@ bool MainWindow::FindGame(const int id, Game &game)
     return found;
 }
 
+
 void MainWindow::UpdateGameList()
 {
     mGames = mDatabase.GetGamesByEventId(mCurrentEvent.id);
 
-    //bracketWindow->SetGames(mGames, mTeams); // FIXME: now target QML window !!
+    mTournament.SetGames(mGames);
 
+/*
+    QVariant returnedValue;
+    QVariant t1, t2;
+    QMetaObject::invokeMethod(ui->quickWidget->rootObject(), "drawGame",
+            Q_RETURN_ARG(QVariant, returnedValue),
+            Q_ARG(QVariant, 0),
+            Q_ARG(QVariant, 0),
+            Q_ARG(QVariant, t1),
+            Q_ARG(QVariant, t2));
+*/
     TableHelper helper(ui->gameTable);
     helper.Initialize(gGamesTableHeader, mGames.size());
 

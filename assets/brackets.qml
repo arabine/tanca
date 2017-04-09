@@ -1,16 +1,191 @@
-import QtQuick 2.0
+import QtQuick 2.4
+import QtQuick.Controls 1.4
+import Tanca 1.0
 
 Canvas {
 
-    id: mycanvas
-    onPaint: {
+    id: canvas
+    objectName: "canvas"
+
+     onPaint: {
         var ctx = getContext("2d");
         ctx.fillStyle = "#AFBFC9";
         ctx.fillRect(0, 0, width, height);
 
+        createHeader(ctx, 4);
+
+         /*
+         var gameString = '{
+            "t1": { "name": "glob", "score":"13", "number":"27"},
+            "t2": { "name": "biziii", "score":"2", "number":"4"}
+          }';
+*/
+       //  db.rounds = 2;
+
+         var gameString = db.rounds;
+         console.log(gameString);
+         var game= JSON.parse(gameString);
+
+         drawGame(0, 0, game.t1, game.t2);
+
+
+        /*
+        drawGame(0, 0,
+                         {number:"10", name:"Les chardons pointus", score:"13" },
+                         {number:"27", name:"René et Bernard", score:"2" });
+
+        drawGame(3, 3,
+                         {number:"10", name:"Les chardons pointus", score:"13" },
+                         {number:"27", name:"René et Bernard", score:"2" });
+
+        drawGame(3, 0,
+                         {number:"10", name:"Les chardons pointus", score:"13" },
+                         {number:"27", name:"René et Bernard", score:"2" });
+
+        drawGame(2, 2,
+                         {number:"10", name:"Les chardons pointus", score:"13" },
+                         {number:"27", name:"René et Bernard", score:"2" });
+
+        drawGame(1, 0,
+                         {number:"10", name:"Les chardons pointus", score:"13" },
+                         {number:"27", name:"René et Bernard", score:"2" });
+
+        drawGame(0, 1,
+                         {number:"10", name:"Les chardons pointus", score:"13" },
+                         {number:"27", name:"René et Bernard", score:"2" });
+
+                         */
+    }
+
+
+     Tournament {
+         id: db
+         onRoundsChanged: {
+             requestPaint();
+             console.log('coucou');
+
+             //if (canvas.available) {
+         //       draw("Coucou");
+            // }
+
+
+         }
+     }
+
+     Component.onCompleted: {
+
+     }
+
+    function draw(text)
+    {
+        drawGame(0, 0,
+                         {number:"10", name: text, score:"13" },
+                         {number:"27", name:"René et Bernard", score:"2" });
+
+    }
+
+    function createHeader(ctx, rounds) {
+
+        if (available)
+        {
+            var WIDTH = 250;
+            var HEIGHT = 30;
+
+            ctx.textAlign="center";
+
+            ctx.font = '18px Arial';
+
+            // 4 Rounds
+            for (var i = 0; i < rounds; i++) {
+                ctx.fillStyle = "#AFBFC9";
+                roundRect(ctx, 4 + i*WIDTH, 5, WIDTH, HEIGHT, {tl:0, tr:0, br:0, bl:0}, true);
+
+                // Header text at the middle
+                ctx.fillStyle = "#000000";
+                ctx.fillText("Tour " + (i+1), 4 + (i*WIDTH + WIDTH/2), 26);
+            }
+        }
+    }
+
+    // Round number [0..n]
+    // position number top to bottom [0..M]
+    // t1, t2 teams objects
+    function drawGame(round, position, t1, t2) {
+
+        var ctx = getContext("2d");
+        var START_X = 10;
+        var START_Y = 40;
+
+        var TOTAL_WIDTH = 250;
+        var TOTAL_HEIGHT = 50;
+
+        createOneBracket(ctx, START_X + round*TOTAL_WIDTH, START_Y + position*TOTAL_HEIGHT, t1, t2);
+    }
+
+    // Pass an object for each team
+    // {number: "", name: "", score: ""}
+    function createOneBracket(ctx, x, y, t1, t2) {
+
+        var SPACE = 4;
+        var WIDTH1 = 30;
+        var WIDTH2 = 170;
+        var HEIGHT = 20;
+
+        var MIDDLE_BOX_X = x + SPACE + WIDTH1;
+        var RIGTH_BOX_X = x + (2*SPACE) + WIDTH1 + WIDTH2;
+        var LOWER_Y = y + HEIGHT + SPACE;
+
         //ctx.strokeStyle = "rgb(255, 0, 0)";
         ctx.fillStyle = "#547588";
-        roundRect(ctx, 100, 5, 100, 50, {tl:10, tr:10, br:0, bl:0}, true);
+        ctx.textAlign="left";
+
+        // Upper team number box
+        roundRect(ctx, x, y, WIDTH1, HEIGHT, {tl:10, tr:0, br:0, bl:0}, true);
+        // Upper bracket
+        roundRect(ctx, MIDDLE_BOX_X, y, WIDTH2, HEIGHT, {tl:0, tr:0, br:0, bl:0}, true);
+        // Upper team score
+        roundRect(ctx, RIGTH_BOX_X, y, WIDTH1, HEIGHT, {tl:0, tr:10, br:0, bl:0}, true);
+
+        // Lower team number box
+        roundRect(ctx, x, LOWER_Y, WIDTH1, HEIGHT, {tl:0, tr:0, br:0, bl:10}, true);
+        // Lower bracket
+        roundRect(ctx, MIDDLE_BOX_X, LOWER_Y, WIDTH2, HEIGHT, {tl:0, tr:0, br:0, bl:0}, true);
+        // Lower team score
+        roundRect(ctx, RIGTH_BOX_X, LOWER_Y, WIDTH1, HEIGHT, {tl:0, tr:0, br:10, bl:0}, true);
+
+
+        // Draw text
+        var defaulText = {number: "", name: "", score: ""};
+        if (typeof t1 === 'undefined') {
+            t1 = defaulText;
+        } else {
+            for (var txt in defaulText) {
+              t1[txt] = t1[txt] || defaulText[txt];
+            }
+        }
+
+        if (typeof t2 === 'undefined') {
+            t2 = defaulText;
+        } else {
+            for (var txt in defaulText) {
+              t2[txt] = t2[txt] || defaulText[txt];
+            }
+        }
+
+        var TEXT_Y = y + 16;
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = '16px Arial';
+
+        // Upper team
+        ctx.fillText(t1.number, x + SPACE, TEXT_Y);
+        ctx.fillText(t1.name, MIDDLE_BOX_X + SPACE, TEXT_Y);
+        ctx.fillText(t1.score, RIGTH_BOX_X + SPACE, TEXT_Y);
+
+        // Lower team
+        ctx.fillText(t2.number, x + SPACE, TEXT_Y + HEIGHT + SPACE);
+        ctx.fillText(t2.name, MIDDLE_BOX_X + SPACE, TEXT_Y + HEIGHT + SPACE);
+        ctx.fillText(t2.score, RIGTH_BOX_X + SPACE, TEXT_Y + HEIGHT + SPACE);
     }
 
     /**
@@ -66,3 +241,4 @@ Canvas {
 
     }
 }
+

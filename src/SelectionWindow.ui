@@ -125,7 +125,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="label_number">
            <property name="text">
             <string>Numéro :</string>
            </property>

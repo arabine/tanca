@@ -29,8 +29,10 @@ GameWindow::GameWindow(QWidget *parent)
     : SelectionWindow(parent, tr("Créer un jeu"), 1, 2)
 {
     QStringList header;
-    header << tr("Id") << tr("Équipe");
+    header << tr("Id") << tr("N°") << tr("Équipe");
     SetHeader(header);
+
+    SetLabelNumber(tr("Tour :"));
 
     connect(ui.buttonOk, SIGNAL(clicked(bool)), this, SLOT(slotAccept()));
 }
@@ -93,7 +95,7 @@ void GameWindow::Update()
     foreach (Team t, mList)
     {
         QList<QVariant> rowData;
-        rowData << t.id << t.teamName;
+        rowData << t.id << t.number << t.teamName;
         AddLeftEntry(rowData);
     }
 

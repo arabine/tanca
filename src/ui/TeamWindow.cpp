@@ -11,6 +11,8 @@ TeamWindow::TeamWindow(QWidget *parent)
     header << tr("Id") << tr("Prénom") << tr("Nom") << tr("Pseudo");
     SetHeader(header);
 
+    SetLabelNumber(tr("Équipe N°:"));
+
     connect(ui.buttonOk, SIGNAL(clicked(bool)), this, SLOT(slotAccept()));
 }
 

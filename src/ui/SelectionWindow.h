@@ -52,6 +52,7 @@ public:
     virtual void ClickedRight(int index) = 0;
     virtual void ClickedLeft(int id) = 0;
 
+    void SetLabelNumber(const QString &name);
 private slots:
     void slotAccept();
 

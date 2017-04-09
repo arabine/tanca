@@ -3,6 +3,11 @@
 
 #include <iostream>
 
+
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonDocument>
+
 #include <QMessageBox>
 
 
@@ -35,10 +40,52 @@ void Rank::AddPoints(int gameId, int score, int oppScore)
 
 
 
-Tournament::Tournament(const DbManager &db)
-    : mDb(db)
-    , mIsTeam(false)
+Tournament::Tournament()
+    : mIsTeam(false)
+    , mRounds("[]")
 {
+
+}
+
+Tournament::~Tournament()
+{
+
+}
+
+QString Tournament::getRounds()
+{
+    return mRounds;
+}
+
+void Tournament::SetGames(const QList<Game> &games)
+{
+    if (games.size() > 0)
+    {
+        QJsonObject json;
+
+        QJsonObject t1;
+        t1["name"] = "team 1";
+        t1["number"] = games.at(0).team1Id;
+        t1["score"] = games.at(0).team1Score;
+
+        QJsonObject t2;
+        t2["name"] = "team 2";
+        t2["number"] = games.at(0).team2Id;
+        t2["score"] = games.at(0).team2Score;
+
+        json["t1"] = t1;
+        json["t2"] = t2;
+
+        QJsonDocument saveDoc(json);
+        mRounds = saveDoc.toJson();
+
+        // Redraw
+        emit roundsChanged();
+    }
+    else
+    {
+        mRounds = "[]";
+    }
 
 }
 
@@ -55,7 +102,7 @@ void Tournament::Add(int id, int gameId, int score, int opponent)
 
 // Find all the matches played by each opponent
 // Sum the points won, this is the Buchholz points
-void Tournament::ComputeBuchholz()
+void Tournament::ComputeBuchholz(const DbManager &mDb)
 {
     // Loop on each team
     auto iter = mList.begin();
@@ -87,7 +134,7 @@ void Tournament::ComputeBuchholz()
 }
 
 
-void Tournament::GeneratePlayerRanking(const QList<Event> &events)
+void Tournament::GeneratePlayerRanking(const DbManager &mDb, const QList<Event> &events)
 {
     mList.clear();
 
@@ -129,7 +176,7 @@ void Tournament::GeneratePlayerRanking(const QList<Event> &events)
 }
 
 
-void Tournament::GenerateTeamRanking(const QList<Event> &events,
+void Tournament::GenerateTeamRanking(const DbManager &mDb, const QList<Event> &events,
                                       const Event &currentEvent)
 {
     mList.clear();

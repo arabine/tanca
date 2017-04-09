@@ -90,6 +90,11 @@
           </item>
           <item>
            <property name="text">
+            <string>Tournoi type &quot;Toutes rondes&quot; (round-robin)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>Tournoi type &quot;Système Suisse&quot;</string>
            </property>
           </item>
