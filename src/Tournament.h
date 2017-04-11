@@ -3,6 +3,7 @@
 
 #include "DbManager.h"
 #include <QObject>
+#include <list>
 
 struct Rank
 {
@@ -13,6 +14,7 @@ public:
     int gamesLost;
     int gamesDraw;
     int pointsOpponents;
+    int id;
 
     QList<int> mGames;
 
@@ -27,6 +29,10 @@ public:
 
     }
 
+    bool operator==(const Rank &other) const {
+        return (id == other.id);
+    }
+
     int Difference();
     void AddPoints(int gameId, int score, int oppScore);
 };
@@ -36,34 +42,33 @@ class Tournament : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(QString rounds READ getRounds NOTIFY roundsChanged)
-
 public:
     Tournament();
     ~Tournament();
 
-    //
-    QString getRounds();
-    void SetGames(const QList<Game> &games);
+    QString ToJsonString(const QList<Game> &games, const QList<Team> &teams);
 
-    void GenerateTeamRanking(const DbManager &mDb, const QList<Event> &events, const Event &currentEvent);
+    void GenerateTeamRanking(const QList<Game> &games, const QList<Team> &teams);
     void GeneratePlayerRanking(const DbManager &mDb, const QList<Event> &events);
 
-    QList<Game> BuildRoundRobinRounds(const QList<Team> &tlist, int nbRounds);
-    QList<Game> BuildSwissRounds(const QList<Game> &previous, const QList<Team> &tlist);
+    QString BuildRoundRobinRounds(const QList<Team> &tlist, int nbRounds, QList<Game> &games);
+    QString BuildSwissRounds(const QList<Game> &games, const QList<Team> &teams, QList<Game> &newRounds);
 
-    void ComputeBuchholz(const DbManager &mDb);
+    void ComputeBuchholz(const QList<Game> &games);
 
-   // void Draw() { emit  sigDraw("coucou"); }
+    bool Contains(int id);
+    int Find(int id);
 
-signals:
-  void roundsChanged();
-
+    std::string RankingToString();
+    static int Generate(int min, int max);
 private:
     bool mIsTeam;
-    QString mRounds;
 
-    QMap<int, Rank> mList;  // player or team id, Rank
+    std::vector<Rank> mList;
+    std::vector<int> mByeTeams; // list of teams that has a bye for that event
+
+
+
     void Add(int id, int gameId, int score, int opponent);
 };
 

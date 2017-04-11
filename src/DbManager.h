@@ -199,13 +199,20 @@ struct Team
     // Version 1.0
     int number;
 
+    static const int cDummyTeam = Player::cDummyPlayer;
+
+    // State of the team
+    static const int cStateValid    = 0;   // Valid team
+    static const int cStateInvalid  = 1; // Invalid team (excluded etc.)
+
     Team()
-        : id(-1)
+        : id(cDummyTeam)
         , eventId(-1)
-        , player1Id(-1)
-        , player2Id(-1)
-        , player3Id(-1)
-        , state(-1)
+        , teamName("Dummy")
+        , player1Id(Player::cDummyPlayer)
+        , player2Id(Player::cDummyPlayer)
+        , player3Id(Player::cDummyPlayer)
+        , state(cStateValid)
     {
 
     }
@@ -288,6 +295,23 @@ struct Game
     int state;
     QString document;  // JSON document, reserved to store anything in the future
 
+
+    bool HasBye() const
+    {
+        bool ret = false;
+        if ((team1Id == Team::cDummyTeam) ||
+            (team2Id == Team::cDummyTeam))
+        {
+            ret = true;
+        }
+        return ret;
+    }
+
+    int GetByeTeam() const
+    {
+        return (team1Id == Team::cDummyTeam) ? team2Id : team1Id;
+    }
+
     void FillFrom(const QSqlQuery &query)
     {
         id = query.value("id").toInt();
@@ -301,8 +325,31 @@ struct Game
         document = query.value("document").toString();
     }
 
+    /**
+     * @brief Find a game id within a list
+     * @param teams
+     * @param id
+     * @param team
+     * @return
+     */
+    static bool Find(const QList<Game> &games, const int id, Game &game)
+    {
+        bool found = false;
+        for (int i = 0; i < games.size(); i++)
+        {
+            if (games[i].id == id)
+            {
+                found = true;
+                game = games[i];
+                break;
+            }
+        }
 
-    bool IsPlayed()
+        return found;
+    }
+
+
+    bool IsPlayed() const
     {
         bool active = false;
         if ((team1Score != -1) && (team2Score != -1))
