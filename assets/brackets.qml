@@ -22,11 +22,30 @@ Canvas {
 */
        //  db.rounds = 2;
 
-         var gameString = db.rounds;
+         var gameString = brackets.rounds;
          console.log(gameString);
-         var game= JSON.parse(gameString);
+         var gameList = JSON.parse(gameString);
 
-         drawGame(0, 0, game.t1, game.t2);
+
+         if (Array.isArray(gameList)) {
+
+             var  nbGames = gameList.length;
+             var pos = new Array(nbGames);
+             for (var j = nbGames-1; j >= 0; -- j) {
+                 pos[j] = 0;
+             }
+
+             for (var i = 0; i < nbGames; i++) {
+                 var position = pos[gameList[i].round];
+
+                 console.log(position);
+                 console.log(gameList[i].t1.name);
+                 drawGame(gameList[i].round, position, gameList[i].t1, gameList[i].t2);
+
+                 position++;
+                 pos[gameList[i].round] = position;
+             }
+         }
 
 
         /*
@@ -58,17 +77,11 @@ Canvas {
     }
 
 
-     Tournament {
-         id: db
+     Brackets {
+         id: brackets
+         objectName: "brackets"
          onRoundsChanged: {
              requestPaint();
-             console.log('coucou');
-
-             //if (canvas.available) {
-         //       draw("Coucou");
-            // }
-
-
          }
      }
 

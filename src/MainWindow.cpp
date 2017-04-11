@@ -33,6 +33,7 @@
 #include "MainWindow.h"
 #include "TableHelper.h"
 #include "ui_MainWindow.h"
+#include "Brackets.h"
 
 static const QString gVersion = "1.7";
 
@@ -118,7 +119,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->eventTable, SIGNAL(itemSelectionChanged()), this, SLOT(slotEventItemActivated()));
     connect(ui->comboSeasons, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSeasonChanged(int)));
-    connect(ui->buttonRandomizeGames, &QPushButton::clicked, this, &MainWindow::slotRandomizeGames);
+    connect(ui->buttonCreateGames, &QPushButton::clicked, this, &MainWindow::slotGenerateGames);
 
     connect(ui->buttonAddGame, &QPushButton::clicked, this, &MainWindow::slotAddGame);
     connect(ui->buttonEditGame, &QPushButton::clicked, this, &MainWindow::slotEditGame);
@@ -664,38 +665,39 @@ void MainWindow::slotSeasonChanged(int index)
     UpdateEventsTable();
 }
 
-void MainWindow::slotRandomizeGames()
+void MainWindow::slotGenerateGames()
 {
-    if (mGames.size() == 0)
+    QList<Game> games;
+    QString error;
+
+    if (mCurrentEvent.type == Event::cRoundRobin)
     {
         int rounds = ui->spinNbRounds->value();
-        QList<Game> games = mTournament.BuildRoundRobinRounds(mTeams, rounds);
-
-        if (games.size() > 0)
-        {
-            mCurrentEvent.state = Event::cStarted;
-            mDatabase.UpdateEventState(mCurrentEvent);
-
-            if (!mDatabase.AddGames(games))
-            {
-                TLogError("Cannot store rounds!");
-            }
-
-            UpdateGameList();
-        }
-        else
-        {
-            TLogError("Cannot build rounds!");
-            (void) QMessageBox::warning(this, tr("Tanca"),
-                                        tr("Il n'y a pas assez d'équipes pour jouer %1 parties.").arg(rounds),
-                                        QMessageBox::Ok);
-        }
+        error = mTournament.BuildRoundRobinRounds(mTeams, rounds, games);
     }
     else
     {
+        // Swiss algorithm
+        error = mTournament.BuildSwissRounds(mGames, mTeams, games);
+    }
+
+    if (games.size() > 0)
+    {
+        mCurrentEvent.state = Event::cStarted;
+        mDatabase.UpdateEventState(mCurrentEvent);
+
+        if (!mDatabase.AddGames(games))
+        {
+            TLogError("Cannot store rounds!");
+        }
+
+        UpdateGameList();
+    }
+    else
+    {
+        TLogError("Cannot build rounds!");
         (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Des rencontres existent déjà.\n"
-                                       "Videz la liste en supprimant les rencontres."),
+                                    tr("Impossible de générer les parties : ") + error,
                                     QMessageBox::Ok);
     }
 }
@@ -728,8 +730,13 @@ void MainWindow::UpdateGameList()
 {
     mGames = mDatabase.GetGamesByEventId(mCurrentEvent.id);
 
-    mTournament.SetGames(mGames);
+    QString json = mTournament.ToJsonString(mGames, mTeams);
 
+    Brackets *item = ui->quickWidget->rootObject()->findChild<Brackets*>("brackets");
+    if (item)
+    {
+        item->setProperty("rounds", json);
+    }
 /*
     QVariant returnedValue;
     QVariant t1, t2;
@@ -896,6 +903,8 @@ void MainWindow::slotTabChanged(int index)
         ui->buttonEditTeam->setEnabled(false);
         ui->buttonDeleteTeam->setEnabled(false);
     }
+
+    ui->quickWidget->update();
 }
 
 void MainWindow::slotExportRanking()

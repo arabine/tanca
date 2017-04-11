@@ -224,7 +224,7 @@
           </widget>
           <widget class="QTabWidget" name="tabWidget_2">
            <property name="currentIndex">
-            <number>3</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="tab_4">
             <attribute name="title">
@@ -352,7 +352,7 @@
                 <item row="0" column="0">
                  <layout class="QHBoxLayout" name="horizontalLayout_5">
                   <item>
-                   <widget class="QPushButton" name="buttonRandomizeGames">
+                   <widget class="QPushButton" name="buttonCreateGames">
                     <property name="text">
                      <string>Générer auto.</string>
                     </property>
@@ -597,7 +597,7 @@
      <x>0</x>
      <y>0</y>
      <width>1045</width>
-     <height>19</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFichier">

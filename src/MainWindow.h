@@ -72,7 +72,7 @@ private slots:
     void slotSeasonChanged(int index);
     void slotEventItemActivated();
 
-    void slotRandomizeGames();
+    void slotGenerateGames();
     void slotAboutBox();
 
     void slotImportFile();

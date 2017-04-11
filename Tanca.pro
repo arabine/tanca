@@ -53,7 +53,8 @@ SOURCES += main.cpp MainWindow.cpp \
     TableHelper.cpp \
     SelectionWindow.cpp \
     ScoreWindow.cpp \
-    Tournament.cpp
+    Tournament.cpp \
+    src/ui/Brackets.cpp
 
 HEADERS  += MainWindow.h \
     DbManager.h \
@@ -70,7 +71,8 @@ HEADERS  += MainWindow.h \
     TableHelper.h \
     SelectionWindow.h \
     ScoreWindow.h \
-    Tournament.h
+    Tournament.h \
+    src/ui/Brackets.h
 
 FORMS    += MainWindow.ui \
     PlayerWindow.ui \
