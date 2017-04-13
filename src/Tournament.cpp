@@ -1,7 +1,6 @@
 #include "Tournament.h"
 #include "DbManager.h"
 #include "Log.h"
-#include "hungarian.hpp"
 
 #include <iostream>
 #include <algorithm>
@@ -565,8 +564,18 @@ QString Tournament::BuildSwissRounds(const QList<Game> &games, const QList<Team>
         }
         else
         {
+            // Check if all games are played
+            bool allFinished = true;
+            for (auto &game : games)
+            {
+                if (!game.IsPlayed())
+                {
+                    allFinished = false;
+                }
+            }
+
             // Figure out where we are
-            if (IsMultipleOf(games.size(), nbGames))
+            if (IsMultipleOf(games.size(), nbGames) && allFinished)
             {
                 int turn = (games.size() / nbGames);
 

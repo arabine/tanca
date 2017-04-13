@@ -152,19 +152,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::Initialize()
 {
-
     // Initialize views
     UpdatePlayersTable();
     UpdateSeasons();
-
-    /*
-    QQmlContext* ctx = ui->quickWidget->rootContext();
-    ctx->setContextProperty("tournament", &mTournament);
-*/
-    /*
-    QObject::connect(this, SIGNAL(sigDraw(QVariant)),
-                     ui->quickWidget->rootObject(), SLOT(draw(QVariant)));
-                     */
 }
 
 void MainWindow::UpdatePlayersTable()
@@ -670,35 +660,45 @@ void MainWindow::slotGenerateGames()
     QList<Game> games;
     QString error;
 
-    if (mCurrentEvent.type == Event::cRoundRobin)
+    if (mGames.size()%2)
     {
-        int rounds = ui->spinNbRounds->value();
-        error = mTournament.BuildRoundRobinRounds(mTeams, rounds, games);
+        (void) QMessageBox::warning(this, tr("Tanca"),
+                                    tr("Nombre impair d'équipes, ajoutez une équipe fictive"),
+                                    QMessageBox::Ok);
     }
     else
     {
-        // Swiss algorithm
-        error = mTournament.BuildSwissRounds(mGames, mTeams, games);
-    }
 
-    if (games.size() > 0)
-    {
-        mCurrentEvent.state = Event::cStarted;
-        mDatabase.UpdateEventState(mCurrentEvent);
-
-        if (!mDatabase.AddGames(games))
+        if (mCurrentEvent.type == Event::cRoundRobin)
         {
-            TLogError("Cannot store rounds!");
+            int rounds = ui->spinNbRounds->value();
+            error = mTournament.BuildRoundRobinRounds(mTeams, rounds, games);
+        }
+        else
+        {
+            // Swiss algorithm
+            error = mTournament.BuildSwissRounds(mGames, mTeams, games);
         }
 
-        UpdateGameList();
-    }
-    else
-    {
-        TLogError("Cannot build rounds!");
-        (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Impossible de générer les parties : ") + error,
-                                    QMessageBox::Ok);
+        if (games.size() > 0)
+        {
+            mCurrentEvent.state = Event::cStarted;
+            mDatabase.UpdateEventState(mCurrentEvent);
+
+            if (!mDatabase.AddGames(games))
+            {
+                TLogError("Cannot store rounds!");
+            }
+
+            UpdateGameList();
+        }
+        else
+        {
+            TLogError("Cannot build rounds!");
+            (void) QMessageBox::warning(this, tr("Tanca"),
+                                        tr("Impossible de générer les parties : ") + error,
+                                        QMessageBox::Ok);
+        }
     }
 }
 

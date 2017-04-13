@@ -31,8 +31,10 @@
 #include "Tournament.h"
 #include "Log.h"
 
-#define UNIT_TESTS
+//#define UNIT_TESTS
 
+
+#ifdef UNIT_TESTS
 void ReadFile(const std::string &filename, std::vector<std::string> &output)
 {
     std::string line;
@@ -106,6 +108,7 @@ void PlayGames(QList<Game> &g)
         gameIds++;
     }
 }
+#endif
 
 /*****************************************************************************/
 class Logger : public Observer<std::string>
