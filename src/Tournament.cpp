@@ -1,6 +1,7 @@
 #include "Tournament.h"
 #include "DbManager.h"
 #include "Log.h"
+#include "hungarian.hpp"
 
 #include <iostream>
 #include <algorithm>
@@ -142,23 +143,23 @@ void Tournament::Add(int id, int gameId, int score, int opponent)
         // Create entry
         Rank rank;
         rank.id = id;
-        mList.push_back(rank);
+        mRanking.push_back(rank);
     }
 
-    int index = Find(id);
+    int index = FindRankIndex(id);
 
     if (index >= 0)
     {
-        mList[index].AddPoints(gameId, score, opponent);
+        mRanking[index].AddPoints(gameId, score, opponent);
     }
 }
 
-int Tournament::Find(int id)
+int Tournament::FindRankIndex(int id)
 {
     int index = -1;
-    for (unsigned int i = 0; i < mList.size(); i++)
+    for (unsigned int i = 0; i < mRanking.size(); i++)
     {
-        if (mList[i].id == id)
+        if (mRanking[i].id == id)
         {
             index = (int)i;
             break;
@@ -168,7 +169,7 @@ int Tournament::Find(int id)
 }
 bool Tournament::Contains(int id)
 {
-    return (Find(id) >= 0);
+    return (FindRankIndex(id) >= 0);
 }
 
 // Find all the matches played by each opponent
@@ -176,7 +177,7 @@ bool Tournament::Contains(int id)
 void Tournament::ComputeBuchholz(const QList<Game> &games)
 {
     // Loop on each team
-    for (auto &rank : mList)
+    for (auto &rank : mRanking)
     {
         // 1. Loop through all the games played
         for (auto gameId :  rank.mGames)
@@ -190,7 +191,7 @@ void Tournament::ComputeBuchholz(const QList<Game> &games)
                 int oppTeam = (game.team1Id == rank.id) ? game.team2Id : game.team1Id;
 
                 // 4. Add the opponent points, search for it in the list
-                for (auto &rank2 : mList)
+                for (auto &rank2 : mRanking)
                 {
                     if (rank2.id == oppTeam)
                     {
@@ -209,7 +210,7 @@ void Tournament::ComputeBuchholz(const QList<Game> &games)
 
 void Tournament::GeneratePlayerRanking(const DbManager &mDb, const QList<Event> &events)
 {
-    mList.clear();
+    mRanking.clear();
 
     mIsTeam = false;
 
@@ -251,8 +252,8 @@ void Tournament::GeneratePlayerRanking(const DbManager &mDb, const QList<Event> 
 
 void Tournament::GenerateTeamRanking(const QList<Game> &games, const QList<Team> &teams)
 {
-    mList.clear();
-    mByeTeams.clear();
+    mRanking.clear();
+    mByeTeamIds.clear();
     mIsTeam = true;
 
     foreach (auto &game, games)
@@ -271,7 +272,7 @@ void Tournament::GenerateTeamRanking(const QList<Game> &games, const QList<Team>
                     int dummyScore = (bye == game.team2Id) ? game.team1Score : game.team2Score;
 
                     Add(team.id, game.id, byeScore, dummyScore);
-                    mByeTeams.push_back(team.id);
+                    mByeTeamIds.push_back(team.id);
                 }
             }
             else
@@ -353,6 +354,190 @@ inline bool IsMultipleOf(const T i_value, const T i_multiple)
            : false;
 }
 
+bool Tournament::HasPlayed(const QList<Game> &games, const Rank &rank, int oppId)
+{
+    bool hasPlayed = false;
+    // 1. Loop through all the games played
+    for (auto gameId :  rank.mGames)
+    {
+        // 2. Get the game
+        Game game;
+
+        if (Game::Find(games, gameId, game))
+        {
+            // 3. Find the opponent for this game
+            int oppTeam = (game.team1Id == rank.id) ? game.team2Id : game.team1Id;
+            if (oppTeam == oppId)
+            {
+                hasPlayed = true;
+            }
+        }
+    }
+
+    return hasPlayed;
+}
+
+// Take the first player in the list
+// Find the opponent, never played with it, with the nearest level
+int Tournament::FindtUnplayedIndex(const QList<Game> &games, const std::vector<int> &ranking)
+{
+    int index = -1;
+    if (ranking.size() >= 2)
+    {
+        // Get the rank for the first team
+        int rankIndex = FindRankIndex(ranking[0]);
+
+        if (rankIndex >= 0)
+        {
+            unsigned int i = 1;
+            do
+            {
+                // look for all the games played
+                if (!HasPlayed(games, mRanking[rankIndex], ranking[i]))
+                {
+                    index = (int)i;
+                }
+                i++;
+            } while ((index < 0) && (i < ranking.size()));
+        }
+        else
+        {
+            TLogError("Internal rank index finder problem");
+        }
+    }
+    else
+    {
+        TLogError("Not enough teams to create game");
+    }
+
+    return index;
+}
+
+bool Tournament::AlreadyPlayed(const QList<Game> &games, int p1Id, int p2Id)
+{
+    // Get the rank for the first team
+    int rankIndex = FindRankIndex(p1Id);
+    return HasPlayed(games, mRanking[rankIndex], p2Id);
+}
+
+
+void PrintMatrix(const std::vector<int> &row, const std::vector<std::vector<int>> &matrix)
+{
+    // Print header
+    for (unsigned int i = 0; i < row.size(); i++)
+    {
+        std::cout << "\t" << row[i];
+    }
+
+    for (unsigned int i = 0; i < row.size(); i++)
+    {
+        std::cout << "\n" << row[i] << " [ ";
+        for (unsigned int j = 0; j < row.size(); j++)
+        {
+            std::cout << "\t" << matrix[i][j];
+        }
+        std::cout << " ] ";
+    }
+    std::cout << std::endl;
+}
+
+
+void Tournament::BuildPairing(const std::vector<int> &ranking,
+                              const std::vector<std::vector<int>> &cost,
+                              std::vector<std::vector<int>> &pairing,
+                              QList<Game> &newRounds)
+{
+    unsigned int size = cost[0].size();
+    std::vector<int> columns_taken(size);
+
+    for (unsigned int i = 0; i < size; i++)
+    {
+        columns_taken[i] = 0;
+    }
+
+    // Resolve, by line
+    for (unsigned int i = 0; i < size; i++)
+    {
+        // If the team has already be assigned to a game, don't perform the research
+        if (columns_taken[i] == 0)
+        {
+            int lowest_column = -1;
+            int lowest_value = 999999999;
+            // Find lowest column for this line
+            for (unsigned int j = 0; j < size; j++)
+            {
+                if (cost[i][j] < lowest_value)
+                {
+                    // Skip column or line if taken
+                    if (columns_taken[j] == 0)
+                    {
+                        lowest_value = cost[i][j];
+                        lowest_column = j;
+                    }
+                }
+            }
+            if (lowest_column >= 0)
+            {
+                pairing[i][lowest_column] = 1; // Debug purpose
+                columns_taken[lowest_column] = 1;
+                columns_taken[i] = 1;
+
+                // Create game
+                Game game;
+
+                game.team1Id = ranking[lowest_column];
+                game.team2Id = ranking[i];
+
+                newRounds.append(game);
+            }
+            else
+            {
+                std::cout << "Cannot find opponent" << std::endl;
+            }
+        }
+    }
+}
+
+void Tournament::BuildCost(const QList<Game> &games,
+                           std::vector<int> &ranking,
+                           std::vector<std::vector<int>> &cost_matrix,
+                           std::vector<std::vector<int>> &pairing)
+{
+    int size = ranking.size();
+
+    // Init matrix
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            int cost = 0;
+
+            if (ranking[j] == ranking[i])
+            {
+                // Same player
+                cost = 10000;
+            }
+            else if (AlreadyPlayed(games, ranking[j], ranking[i]))
+            {
+                cost = 1000;
+            }
+            else
+            {
+                // compute cost
+                cost = std::abs(mRanking[j].Difference() - mRanking[i].Difference());
+            }
+
+            cost_matrix[i].push_back(cost);
+            pairing[i].push_back(0);
+        }
+    }
+}
+
+
+bool IsOdd(int size)
+{
+    return size%2;
+}
 
 QString Tournament::BuildSwissRounds(const QList<Game> &games, const QList<Team> &teams, QList<Game> &newRounds)
 {
@@ -392,25 +577,31 @@ QString Tournament::BuildSwissRounds(const QList<Game> &games, const QList<Team>
                 ComputeBuchholz(games);
 
                 //create a list of sorted players
-                std::sort(mList.begin(), mList.end(), RankHighFirst);
-
-                QList<Team> tt = teams;
+                std::sort(mRanking.begin(), mRanking.end(), RankHighFirst);
 
                 // Prepare dummy team if needed
                 Team dummy;
                 dummy.eventId = eventId;
 
-                int byeTeam = 0;
+                // Create a local list of the ranking, keep only ids
+                std::vector<int> ranking;
+                for (auto &rank : mRanking)
+                {
+                    ranking.push_back(rank.id);
+                }
+
+                int byeTeamId = 0;
                 if (hasDummy)
                 {
                     // Choose the bye team
                     bool found = false;
-                    int max = teams.size() - 1;
+                    int max = ranking.size() - 1;
                     while (!found)
                     {
-                        byeTeam = Generate(0, max);
+                        byeTeamId = ranking[Generate(0, max)];
 
-                        if (std::find(mByeTeams.begin(), mByeTeams.end(), byeTeam) == mByeTeams.end())
+                        // Make sure to give the bye to a different team each turn
+                        if (std::find(mByeTeamIds.begin(), mByeTeamIds.end(), byeTeamId) == mByeTeamIds.end())
                         {
                             // Not found in previous match, this team has a bye for this round
                             found = true;
@@ -418,38 +609,91 @@ QString Tournament::BuildSwissRounds(const QList<Game> &games, const QList<Team>
                     }
                 }
 
-                // FIXME: add the dummy team in the Rank at a random place
-                // Make sure to give the bye to a different team each turn
+                // Split in two vectors
+                unsigned int rank_size = ranking.size() / 2;
 
-                // Create matches for this turn
-                int j = 0;
-                for (; j < tt.size();)
+                if (IsOdd(rank_size))
                 {
-                    Rank team1;
-                    Rank team2;
+                    rank_size++;
+                }
 
-                    if ((j == byeTeam) && hasDummy)
+                std::vector<int> winners(ranking.begin(), ranking.begin() + rank_size);
+                std::vector<int> loosers(ranking.begin() + rank_size, ranking.end());
+
+             //   ranking = winners;
+             //   std::size_t const rank_size = ranking.size();
+
+                // Create a matrix and fill it
+                std::vector<std::vector<int>> cost_matrix(rank_size);
+                std::vector<std::vector<int>> pairing_matrix(rank_size);
+
+                std::cout << "---------------  WINNERS COST MATRIX -------------------" << std::endl;
+                BuildCost(games, winners, cost_matrix, pairing_matrix);
+                PrintMatrix(winners, cost_matrix);
+                std::cout << "---------------  WINNERS PAIRING MATRIX -------------------" << std::endl;
+                BuildPairing(winners, cost_matrix, pairing_matrix, newRounds);
+                PrintMatrix(winners, pairing_matrix);
+
+                std::cout << "---------------  LOOSERS COST MATRIX -------------------" << std::endl;
+                // Create a matrix and fill it
+                std::vector<std::vector<int>> cost_matrix2(loosers.size());
+                std::vector<std::vector<int>> pairing_matrix2(loosers.size());
+
+                BuildCost(games, loosers, cost_matrix2, pairing_matrix2);
+                PrintMatrix(loosers, cost_matrix2);
+                std::cout << "---------------  LOOSERS PAIRING MATRIX -------------------" << std::endl;
+                BuildPairing(loosers, cost_matrix2, pairing_matrix2, newRounds);
+                PrintMatrix(loosers, pairing_matrix2);
+
+
+                for (auto &game : newRounds)
+                {
+                    game.eventId = eventId;
+                    game.turn = turn;
+                }
+
+
+                /*
+                while (ranking.size() > 0)
+                {
+                    // Create matches for this turn, start with first player of the list
+                    int team1Id = ranking[0];
+                    int team2Id = -1;
+
+                    if ((team1Id == byeTeamId) && hasDummy)
                     {
-                        // Use dummy
+                        // Use dummy for team2
+                        team2Id = Team::cDummyTeam;
                     }
                     else
                     {
-                       team1 = mList[j];
-                       j++;
+                        int index = FindtUnplayedIndex(games, ranking);
+                        if (index >= 0)
+                        {
+                            team2Id = ranking[index];
+                            ranking.erase(ranking.begin() + index);
+                        }
+                        else
+                        {
+                            TLogError("Cannot find next player to play with");
+                        }
                     }
 
-                    team2 = mList[j];
-                    j++;
+                    // Always remove first team of the list
+                    ranking.erase(ranking.begin());
 
                     Game game;
 
                     game.eventId = eventId;
                     game.turn = turn;
-                    game.team1Id = team1.id;
-                    game.team2Id = team2.id;
+                    game.team1Id = team1Id;
+                    game.team2Id = team2Id;
 
                     newRounds.append(game);
                 }
+
+                */
+
             }
             else
             {
@@ -471,7 +715,7 @@ std::string Tournament::RankingToString()
     std::stringstream ss;
     ss << "ID\t" << "Won\t" << "Lost\t" << "Draw\t" << "Diff\t" << "Buchholz\t" << std::endl;
 
-    for (auto &rank : mList)
+    for (auto &rank : mRanking)
     {
         ss << rank.id << "\t"
            << rank.gamesWon << "\t"

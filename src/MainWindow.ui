@@ -224,7 +224,7 @@
           </widget>
           <widget class="QTabWidget" name="tabWidget_2">
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_4">
             <attribute name="title">
@@ -490,8 +490,8 @@
                <property name="title">
                 <string>Filtre</string>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_4">
-                <item>
+               <layout class="QGridLayout" name="gridLayout_8">
+                <item row="0" column="0">
                  <widget class="QRadioButton" name="radioSeason">
                   <property name="text">
                    <string>Saison</string>
@@ -501,12 +501,39 @@
                   </property>
                  </widget>
                 </item>
-                <item>
+                <item row="1" column="0">
                  <widget class="QRadioButton" name="radioEvent">
                   <property name="text">
                    <string>Événement</string>
                   </property>
                  </widget>
+                </item>
+                <item row="1" column="1">
+                 <layout class="QHBoxLayout" name="horizontalLayout_7">
+                  <item>
+                   <spacer name="horizontalSpacer_7">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="label_2">
+                    <property name="text">
+                     <string>Tour</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QSpinBox" name="spinRound"/>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </widget>

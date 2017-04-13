@@ -29,6 +29,7 @@
 */
 #include "Brackets.h"
 #include "Tournament.h"
+#include "Log.h"
 
 #define UNIT_TESTS
 
@@ -106,8 +107,27 @@ void PlayGames(QList<Game> &g)
     }
 }
 
+/*****************************************************************************/
+class Logger : public Observer<std::string>
+{
+public:
+    Logger()
+        : Observer(0xFFU)
+    {
+
+    }
+
+    void Update(const std::string &info)
+    {
+        std::cout << info << std::endl;
+    }
+};
+
 int main(int argc, char *argv[])
 {
+
+    Logger logger;
+    Log::RegisterListener(logger);
 
 #ifdef UNIT_TESTS
     (void) argc;
