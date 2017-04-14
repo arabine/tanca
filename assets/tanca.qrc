@@ -11,6 +11,8 @@
         <file>import.png</file>
         <file>quit.png</file>
         <file>delete_all.png</file>
+        <file>arrow_left.png</file>
+        <file>arrow_right.png</file>
     </qresource>
     <qresource prefix="/qml">
         <file>brackets.qml</file>
