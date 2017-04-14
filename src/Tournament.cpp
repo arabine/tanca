@@ -35,7 +35,7 @@ bool RankHighFirst (Rank &i, Rank &j)
     return ret;
 }
 
-int Rank::Difference()
+int Rank::Difference() const
 {
     return (pointsWon - pointsLost);
 }
@@ -249,7 +249,7 @@ void Tournament::GeneratePlayerRanking(const DbManager &mDb, const QList<Event> 
 }
 
 
-void Tournament::GenerateTeamRanking(const QList<Game> &games, const QList<Team> &teams)
+void Tournament::GenerateTeamRanking(const QList<Game> &games, const QList<Team> &teams, int maxTurn)
 {
     mRanking.clear();
     mByeTeamIds.clear();
@@ -257,7 +257,7 @@ void Tournament::GenerateTeamRanking(const QList<Game> &games, const QList<Team>
 
     foreach (auto &game, games)
     {
-        if (game.IsPlayed())
+        if (game.IsPlayed() && (game.turn <= maxTurn))
         {
             Team team;
 
@@ -288,6 +288,18 @@ void Tournament::GenerateTeamRanking(const QList<Game> &games, const QList<Team>
             }
         }
     }
+
+
+    // Compute Buchholtz points for all players to avoid equalities
+    ComputeBuchholz(games);
+
+    //create a list of sorted players
+    std::sort(mRanking.begin(), mRanking.end(), RankHighFirst);
+}
+
+std::vector<Rank> Tournament::GetRanking()
+{
+    return mRanking;
 }
 
 /*****************************************************************************/
@@ -580,13 +592,7 @@ QString Tournament::BuildSwissRounds(const QList<Game> &games, const QList<Team>
                 int turn = (games.size() / nbGames);
 
                 // Create ranking
-                GenerateTeamRanking(games, teams);
-
-                // Compute Buchholtz points for all players to avoid equalities
-                ComputeBuchholz(games);
-
-                //create a list of sorted players
-                std::sort(mRanking.begin(), mRanking.end(), RankHighFirst);
+                GenerateTeamRanking(games, teams, turn);
 
                 // Prepare dummy team if needed
                 Team dummy;

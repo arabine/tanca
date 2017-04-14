@@ -130,6 +130,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->tabWidget_2, SIGNAL(currentChanged(int)), this, SLOT(slotTabChanged(int)));
     connect(ui->radioEvent, &QRadioButton::toggled, this, &MainWindow::slotRankingOptionChanged);
     connect(ui->radioSeason, &QRadioButton::toggled, this, &MainWindow::slotRankingOptionChanged);
+
+    connect(ui->spinRound, SIGNAL(valueChanged(int)), this, SLOT(slotRankingRoundChanged(int)));
     connect(ui->buttonExportRanking, &QPushButton::clicked, this, &MainWindow::slotExportRanking);
 
     // Setup other stuff
@@ -373,6 +375,12 @@ void MainWindow::slotExportTeams()
 void MainWindow::slotRankingOptionChanged(bool checked)
 {
     Q_UNUSED(checked);
+    UpdateRanking();
+}
+
+void MainWindow::slotRankingRoundChanged(int value)
+{
+    Q_UNUSED(value);
     UpdateRanking();
 }
 
@@ -657,10 +665,7 @@ void MainWindow::slotSeasonChanged(int index)
 
 void MainWindow::slotGenerateGames()
 {
-    QList<Game> games;
-    QString error;
-
-    if (mGames.size()%2)
+    if (mTeams.size()%2)
     {
         (void) QMessageBox::warning(this, tr("Tanca"),
                                     tr("Nombre impair d'équipes, ajoutez une équipe fictive"),
@@ -668,6 +673,8 @@ void MainWindow::slotGenerateGames()
     }
     else
     {
+        QList<Game> games;
+        QString error;
 
         if (mCurrentEvent.type == Event::cRoundRobin)
         {
@@ -737,16 +744,7 @@ void MainWindow::UpdateGameList()
     {
         item->setProperty("rounds", json);
     }
-/*
-    QVariant returnedValue;
-    QVariant t1, t2;
-    QMetaObject::invokeMethod(ui->quickWidget->rootObject(), "drawGame",
-            Q_RETURN_ARG(QVariant, returnedValue),
-            Q_ARG(QVariant, 0),
-            Q_ARG(QVariant, 0),
-            Q_ARG(QVariant, t1),
-            Q_ARG(QVariant, t2));
-*/
+
     TableHelper helper(ui->gameTable);
     helper.Initialize(gGamesTableHeader, mGames.size());
 
@@ -919,12 +917,24 @@ void MainWindow::slotExportGames()
 
 void MainWindow::UpdateRanking()
 {
-    /*
     bool isSeason = ui->radioSeason->isChecked(); // Display option
+    TableHelper helper(ui->tableContest);
 
+    int nbGames = mTeams.size() / 2;
+    if (mTeams.size()%2)
+    {
+        nbGames += 1;
+    }
 
-    ranking.Show(ui->tableContest, mDatabase.GetPlayerList(), mTeams, isSeason);
-    ui->tableContest->sortByColumn(4, Qt::DescendingOrder);
-    */
+    int maxTurn = (mGames.size() / nbGames);
+    ui->spinRound->setMinimum(1);
+    ui->spinRound->setMaximum(maxTurn);
+
+    int turn = ui->spinRound->value();
+
+    mTournament.GenerateTeamRanking(mGames, mTeams, turn - 1);
+
+    helper.Show(mDatabase.GetPlayerList(), mTeams, isSeason, mTournament.GetRanking());
+//    ui->tableContest->sortByColumn(4, Qt::DescendingOrder);
 }
 

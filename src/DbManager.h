@@ -283,6 +283,26 @@ struct Team
     }
 };
 
+
+struct Reward
+{
+    static const int cStateNoReward = -1;
+    static const int cStateRewardCanceled = 0;
+
+    int id;
+    int eventId;
+    int teamId;
+    int total; // total of the reward offered to the team for this event
+    int state;
+    QString comment; // comment for this reward
+    QString document;  // JSON document, reserved to store anything in the future
+
+    static QString Table() {
+        return "CREATE TABLE IF NOT EXISTS rewards (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER, team_id INTEGER, "
+               "total INTEGER, state INTEGER, document TEXT);";
+    }
+};
+
 struct Game
 {
     int id;

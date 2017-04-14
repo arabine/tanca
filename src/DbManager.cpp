@@ -29,6 +29,7 @@ static QStringList MakeTables()
     tables << Team::Table();
     tables << Game::Table();
     tables << Infos::Table();
+    tables << Reward::Table();
 
     return tables;
 }

@@ -42,7 +42,7 @@ public:
     void SetSelectedColor(const QColor &color);
     void SetAlternateColors(bool enable);
     void Export(const QString &fileName);
-    void Show(QTableWidget *table, const QList<Player> &players, const QList<Team> &teams, bool isSeason, const QMap<int, Rank> &list);
+    void Show(const QList<Player> &players, const QList<Team> &teams, bool isSeason, const std::vector<Rank> &list);
 
 private:
     QTableWidget *mWidget;

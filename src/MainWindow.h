@@ -82,6 +82,7 @@ private slots:
     void slotExportPlayers();
     void slotExportTeams();
     void slotRankingOptionChanged(bool checked);
+    void slotRankingRoundChanged(int value);
     void slotDeleteAllGames();
 
 private:

@@ -33,7 +33,7 @@ public:
         return (id == other.id);
     }
 
-    int Difference();
+    int Difference() const;
     void AddPoints(int gameId, int score, int oppScore);
 };
 
@@ -45,6 +45,11 @@ class Tournament : public QObject
 public:
     Tournament();
     ~Tournament();
+
+    void GeneratePlayerRanking(const DbManager &mDb, const QList<Event> &events);
+    void GenerateTeamRanking(const QList<Game> &games, const QList<Team> &teams, int maxTurn);
+
+    std::vector<Rank> GetRanking();
 
     QString ToJsonString(const QList<Game> &games, const QList<Team> &teams);
     std::string RankingToString();
@@ -61,8 +66,6 @@ private:
     std::vector<int> mByeTeamIds; // list of teams that has a bye for that event
 
     void ComputeBuchholz(const QList<Game> &games);
-    void GenerateTeamRanking(const QList<Game> &games, const QList<Team> &teams);
-    void GeneratePlayerRanking(const DbManager &mDb, const QList<Event> &events);
     bool Contains(int id);
     int FindRankIndex(int id);
     void Add(int id, int gameId, int score, int opponent);

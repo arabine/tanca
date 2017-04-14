@@ -7,8 +7,28 @@
 #include "TableHelper.h"
 #include "Log.h"
 
-QStringList gEventRankingTableHeader;
-QStringList gSeasonRankingTableHeader;
+
+QStringList InitEventRanking()
+{
+    QStringList list;
+    list << QObject::tr("Id") << QObject::tr("Numéro") << QObject::tr("Équipe")
+         << QObject::tr("Parties gagnées") << QObject::tr("Parties perdues") << QObject::tr("Points marqués")
+         << QObject::tr("Points concédés") << QObject::tr("Différence") << QObject::tr("Buchholz");
+    return list;
+}
+
+
+QStringList InitSeasonRanking()
+{
+    QStringList list;
+    list << QObject::tr("Id") << QObject::tr("Joueur") << QObject::tr("Parties gagnées")
+         << QObject::tr("Parties perdues") << QObject::tr("Points marqués")
+         << QObject::tr("Points concédés") << QObject::tr("Différence");
+    return list;
+}
+
+QStringList gEventRankingTableHeader = InitEventRanking();
+QStringList gSeasonRankingTableHeader = InitSeasonRanking();
 
 
 TableHelper::TableHelper(QTableWidget *widget)
@@ -17,8 +37,6 @@ TableHelper::TableHelper(QTableWidget *widget)
     , mRow(0)
 {
 
-    gEventRankingTableHeader << tr("Id") << tr("Numéro") << tr("Équipe") << tr("Parties gagnées") << tr("Parties perdues") << tr("Points marqués") << tr("Points concédés") << tr("Différence") << tr("Buchholz");
-    gSeasonRankingTableHeader << tr("Id") << tr("Joueur") << tr("Parties gagnées") << tr("Parties perdues") << tr("Points marqués") << tr("Points concédés") << tr("Différence");
 }
 
 bool TableHelper::GetFirstColumnValue(int &value)
@@ -131,7 +149,7 @@ void TableHelper::Export(const QString &fileName)
     }
 }
 
-void TableHelper::Show(QTableWidget *table, const QList<Player> &players, const QList<Team> &teams, bool isSeason, const QMap<int, Rank> &list)
+void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, bool isSeason, const std::vector<Rank> &list)
 {
     SetSelectedColor(QColor(245,245,220));
     SetAlternateColors(true);
@@ -145,20 +163,13 @@ void TableHelper::Show(QTableWidget *table, const QList<Player> &players, const 
         Initialize(gEventRankingTableHeader, list.size());
     }
 
-    QMapIterator<int, Rank> i(list);
-    while (i.hasNext())
+    for (auto &rank : list)
     {
-        i.next();
-
-        // Fill the line
-        Rank rank = i.value();
-        int id = i.key();
-
         if (isSeason)
         {
             // Show the whole season ranking
             Player player;
-            if (Player::Find(players, id, player))
+            if (Player::Find(players, rank.id, player))
             {
                 QList<QVariant> rowData;
                 rowData << player.id << player.FullName() << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference();
@@ -173,10 +184,10 @@ void TableHelper::Show(QTableWidget *table, const QList<Player> &players, const 
         {
             // Show the event result
             Team team;
-            if (Team::Find(teams, id, team))
+            if (Team::Find(teams, rank.id, team))
             {
                 QList<QVariant> rowData;
-                rowData << team.id << team.number << team.teamName << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference();
+                rowData << team.id << team.number << team.teamName << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference() << rank.pointsOpponents;
                 AppendLine(rowData, false);
             }
             else

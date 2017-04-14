@@ -14,16 +14,8 @@ Canvas {
 
         createHeader(ctx, 4);
 
-         /*
-         var gameString = '{
-            "t1": { "name": "glob", "score":"13", "number":"27"},
-            "t2": { "name": "biziii", "score":"2", "number":"4"}
-          }';
-*/
-       //  db.rounds = 2;
-
          var gameString = brackets.rounds;
-         console.log(gameString);
+     //    console.log(gameString);
          var gameList = JSON.parse(gameString);
 
 
@@ -38,42 +30,14 @@ Canvas {
              for (var i = 0; i < nbGames; i++) {
                  var position = pos[gameList[i].round];
 
-                 console.log(position);
-                 console.log(gameList[i].t1.name);
+             //    console.log(position);
+              //   console.log(gameList[i].t1.name);
                  drawGame(gameList[i].round, position, gameList[i].t1, gameList[i].t2);
 
                  position++;
                  pos[gameList[i].round] = position;
              }
          }
-
-
-        /*
-        drawGame(0, 0,
-                         {number:"10", name:"Les chardons pointus", score:"13" },
-                         {number:"27", name:"René et Bernard", score:"2" });
-
-        drawGame(3, 3,
-                         {number:"10", name:"Les chardons pointus", score:"13" },
-                         {number:"27", name:"René et Bernard", score:"2" });
-
-        drawGame(3, 0,
-                         {number:"10", name:"Les chardons pointus", score:"13" },
-                         {number:"27", name:"René et Bernard", score:"2" });
-
-        drawGame(2, 2,
-                         {number:"10", name:"Les chardons pointus", score:"13" },
-                         {number:"27", name:"René et Bernard", score:"2" });
-
-        drawGame(1, 0,
-                         {number:"10", name:"Les chardons pointus", score:"13" },
-                         {number:"27", name:"René et Bernard", score:"2" });
-
-        drawGame(0, 1,
-                         {number:"10", name:"Les chardons pointus", score:"13" },
-                         {number:"27", name:"René et Bernard", score:"2" });
-
-                         */
     }
 
 
@@ -88,14 +52,6 @@ Canvas {
      Component.onCompleted: {
 
      }
-
-    function draw(text)
-    {
-        drawGame(0, 0,
-                         {number:"10", name: text, score:"13" },
-                         {number:"27", name:"René et Bernard", score:"2" });
-
-    }
 
     function createHeader(ctx, rounds) {
 
@@ -123,6 +79,12 @@ Canvas {
     // Round number [0..n]
     // position number top to bottom [0..M]
     // t1, t2 teams objects
+    // Example:
+    /*
+    drawGame(0, 1,
+                     {number:"10", name:"Les chardons pointus", score:"13" },
+                     {number:"27", name:"René et Bernard", score:"2" });
+    */
     function drawGame(round, position, t1, t2) {
 
         var ctx = getContext("2d");
@@ -188,7 +150,7 @@ Canvas {
         var TEXT_Y = y + 16;
 
         ctx.fillStyle = "#ffffff";
-        ctx.font = '16px Arial';
+        ctx.font = '12px Arial';
 
         // Upper team
         ctx.fillText(t1.number, x + SPACE, TEXT_Y);
