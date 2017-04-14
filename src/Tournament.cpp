@@ -103,13 +103,27 @@ QString Tournament::ToJsonString(const QList<Game> &games, const QList<Team> &te
             {
                 QJsonObject t1;
                 t1["name"] = team1.teamName;
-                t1["number"] = g.team1Id;
-                t1["score"] = g.team1Score;
+                t1["number"] = team1.number;
+                if (g.team1Score == -1)
+                {
+                    t1["score"] = "";
+                }
+                else
+                {
+                    t1["score"] = g.team1Score;
+                }
 
                 QJsonObject t2;
                 t2["name"] = team2.teamName;
-                t2["number"] = g.team2Id;
-                t2["score"] = g.team2Score;
+                t2["number"] = team2.number;
+                if (g.team1Score == -1)
+                {
+                    t2["score"] = "";
+                }
+                else
+                {
+                    t2["score"] = g.team2Score;
+                }
 
                 QJsonObject game;
                 game["round"] = g.turn;
