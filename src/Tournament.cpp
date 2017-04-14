@@ -271,7 +271,7 @@ void Tournament::GenerateTeamRanking(const QList<Game> &games, const QList<Team>
 
     foreach (auto &game, games)
     {
-        if (game.IsPlayed() && (game.turn <= maxTurn))
+        if (game.IsPlayed() && (game.turn < maxTurn))
         {
             Team team;
 

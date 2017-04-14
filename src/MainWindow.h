@@ -82,12 +82,12 @@ private slots:
     void slotExportPlayers();
     void slotExportTeams();
     void slotRankingOptionChanged(bool checked);
-    void slotRankingRoundChanged(int value);
+    void slotRankingLeft();
+    void slotRankingRight();
     void slotDeleteAllGames();
 
 private:
     void UpdatePlayersTable();
-
 
     // Windows
     Ui::MainWindow *ui;
@@ -108,6 +108,7 @@ private:
     Event mCurrentEvent;
     UniqueId mTeamsId;
     Tournament mTournament;
+    int mCurrentRankingRound;
 
     void UpdateTeamList();
     bool FindPlayer(int id, Player &player);
@@ -117,6 +118,7 @@ private:
     void UpdateSeasons();
     void UpdateEventsTable();
     void ExportTable(QTableWidget *table, const QString &title);
+    void UpdateBrackets();
 };
 
 #endif // MAINWINDOW_H

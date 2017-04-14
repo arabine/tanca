@@ -35,7 +35,7 @@
 #include "ui_MainWindow.h"
 #include "Brackets.h"
 
-static const QString gVersion = "1.7";
+static const QString gVersion = "1.8";
 
 // Table headers
 QStringList gGamesTableHeader;
@@ -67,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , mDatabase(gDbFullPath)
     , mTeamsId(0U, 2000000U)
+    , mCurrentRankingRound(1)
 {
     Log::SetLogPath(gAppDataPath.toStdString());
     Log::RegisterListener(consoleOutput);
@@ -131,7 +132,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->radioEvent, &QRadioButton::toggled, this, &MainWindow::slotRankingOptionChanged);
     connect(ui->radioSeason, &QRadioButton::toggled, this, &MainWindow::slotRankingOptionChanged);
 
-    connect(ui->spinRound, SIGNAL(valueChanged(int)), this, SLOT(slotRankingRoundChanged(int)));
+    connect(ui->btnRankingLeft, &QPushButton::clicked, this,  &MainWindow::slotRankingLeft);
+    connect(ui->btnRankingRight,&QPushButton::clicked, this,  &MainWindow::slotRankingRight);
     connect(ui->buttonExportRanking, &QPushButton::clicked, this, &MainWindow::slotExportRanking);
 
     // Setup other stuff
@@ -140,17 +142,12 @@ MainWindow::MainWindow(QWidget *parent)
     gEventsTableHeader << tr("Id") << tr("Date") << tr("Type") << tr("Titre") << tr("État");
     gPlayersTableHeader << tr("Id") << tr("UUID") << tr("Prénom") << tr("Nom") << tr("Pseudonyme") << tr("E-mail") << tr("Téléphone (mobile)") << tr("Téléphone (maison)") << tr("Date de naissance") << tr("Rue") << tr("Code postal") << tr("Ville") << tr("Licences") << tr("Commentaires") << tr("Statut") << tr("Divers");
     gTeamsTableHeader << tr("Id") << tr("Numéro") << tr("Joueur 1") << tr("Joueur 2") << ("Nom de l'équipe");
-
-
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-
-
-
 
 void MainWindow::Initialize()
 {
@@ -378,9 +375,29 @@ void MainWindow::slotRankingOptionChanged(bool checked)
     UpdateRanking();
 }
 
-void MainWindow::slotRankingRoundChanged(int value)
+void MainWindow::slotRankingLeft()
 {
-    Q_UNUSED(value);
+    if (mCurrentRankingRound > 1)
+    {
+        mCurrentRankingRound--;
+    }
+    UpdateRanking();
+}
+
+void MainWindow::slotRankingRight()
+{
+    int nbGames = mTeams.size() / 2;
+    if (mTeams.size()%2)
+    {
+        nbGames += 1;
+    }
+
+    int maxTurn = (nbGames == 0) ? 0 : (mGames.size() / nbGames);
+
+    if (mCurrentRankingRound < maxTurn)
+    {
+        mCurrentRankingRound++;
+    }
     UpdateRanking();
 }
 
@@ -430,6 +447,7 @@ void MainWindow::UpdateTeamList()
 
 void MainWindow::slotEventItemActivated()
 {
+    mCurrentRankingRound = 1;
     int row = ui->eventTable->currentRow();
     if (row > -1)
     {
@@ -461,6 +479,7 @@ void MainWindow::UpdateSeasons()
 
     ui->comboSeasons->clear();
     ui->comboSeasons->addItems(seasons);
+    ui->comboSeasons->setCurrentIndex(seasons.size() - 1);
 
     UpdateEventsTable();
 }
@@ -732,11 +751,8 @@ bool MainWindow::FindGame(const int id, Game &game)
     return found;
 }
 
-
-void MainWindow::UpdateGameList()
+void MainWindow::UpdateBrackets()
 {
-    mGames = mDatabase.GetGamesByEventId(mCurrentEvent.id);
-
     QString json = mTournament.ToJsonString(mGames, mTeams);
 
     Brackets *item = ui->quickWidget->rootObject()->findChild<Brackets*>("brackets");
@@ -744,6 +760,14 @@ void MainWindow::UpdateGameList()
     {
         item->setProperty("rounds", json);
     }
+}
+
+
+void MainWindow::UpdateGameList()
+{
+    mGames = mDatabase.GetGamesByEventId(mCurrentEvent.id);
+
+    UpdateBrackets();
 
     TableHelper helper(ui->gameTable);
     helper.Initialize(gGamesTableHeader, mGames.size());
@@ -757,7 +781,10 @@ void MainWindow::UpdateGameList()
         (void) Team::Find(mTeams, game.team1Id, t1);
         (void) Team::Find(mTeams, game.team2Id, t2);
 
-        gameData << game.id << (int)(game.turn + 1) << t1.teamName << t2.teamName << game.team1Score << game.team2Score;
+        gameData << game.id << (int)(game.turn + 1)
+                 << QString("(%1) ").arg(t1.number) + t1.teamName
+                 << QString("(%1) ").arg(t2.number) + t2.teamName
+                 << game.team1Score << game.team2Score;
         helper.AppendLine(gameData, game.IsPlayed());
 
     }
@@ -902,7 +929,7 @@ void MainWindow::slotTabChanged(int index)
         ui->buttonDeleteTeam->setEnabled(false);
     }
 
-    ui->quickWidget->update();
+    ui->quickWidget->resize(ui->quickWidget->size());
 }
 
 void MainWindow::slotExportRanking()
@@ -920,21 +947,11 @@ void MainWindow::UpdateRanking()
     bool isSeason = ui->radioSeason->isChecked(); // Display option
     TableHelper helper(ui->tableContest);
 
-    int nbGames = mTeams.size() / 2;
-    if (mTeams.size()%2)
-    {
-        nbGames += 1;
-    }
+    ui->lblRankingRound->setText(QString().number(mCurrentRankingRound));
 
-    int maxTurn = (mGames.size() / nbGames);
-    ui->spinRound->setMinimum(1);
-    ui->spinRound->setMaximum(maxTurn);
-
-    int turn = ui->spinRound->value();
-
-    mTournament.GenerateTeamRanking(mGames, mTeams, turn - 1);
-
+    mTournament.GenerateTeamRanking(mGames, mTeams, mCurrentRankingRound);
     helper.Show(mDatabase.GetPlayerList(), mTeams, isSeason, mTournament.GetRanking());
-//    ui->tableContest->sortByColumn(4, Qt::DescendingOrder);
+
+    UpdateBrackets();
 }
 
