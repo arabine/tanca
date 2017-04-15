@@ -15,6 +15,8 @@ Fonctionnalités:
   * Nombre illimité de joueurs, de parties et de concours
   * Fichier adhérents du club
   * Export / import de joueurs (CSV)
+  * Gestion des récompenses par équipe
+  * Affichage graphique des matches pour tous les tours de jeu
 
 ## Captures d'écrans
 
