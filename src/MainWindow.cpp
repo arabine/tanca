@@ -33,6 +33,7 @@
 #include "MainWindow.h"
 #include "TableHelper.h"
 #include "ui_MainWindow.h"
+#include "ui_RewardWindow.h"
 #include "Brackets.h"
 
 static const QString gVersion = "1.8";
@@ -42,6 +43,7 @@ QStringList gGamesTableHeader;
 QStringList gEventsTableHeader;
 QStringList gPlayersTableHeader;
 QStringList gTeamsTableHeader;
+QStringList gRewardsTableHeader;
 
 #ifdef USE_WINDOWS_OS
 QString gAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tanca";
@@ -66,7 +68,6 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , mDatabase(gDbFullPath)
-    , mTeamsId(0U, 2000000U)
     , mCurrentRankingRound(1)
 {
     Log::SetLogPath(gAppDataPath.toStdString());
@@ -118,7 +119,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->buttonDeleteTeam, &QPushButton::clicked, this, &MainWindow::slotDeleteTeam);
     connect(ui->buttonExportTeams, &QPushButton::clicked, this, &MainWindow::slotExportTeams);
 
+    connect(ui->btnAddReward, &QPushButton::clicked, this, &MainWindow::slotAddReward);
+    connect(ui->btnDeleteReward, &QPushButton::clicked, this, &MainWindow::slotDeleteReward);
+
     connect(ui->eventTable, SIGNAL(itemSelectionChanged()), this, SLOT(slotEventItemActivated()));
+    connect(ui->teamTable, SIGNAL(itemSelectionChanged()), this, SLOT(slotTeamItemActivated()));
     connect(ui->comboSeasons, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSeasonChanged(int)));
     connect(ui->buttonCreateGames, &QPushButton::clicked, this, &MainWindow::slotGenerateGames);
 
@@ -142,6 +147,7 @@ MainWindow::MainWindow(QWidget *parent)
     gEventsTableHeader << tr("Id") << tr("Date") << tr("Type") << tr("Titre") << tr("État");
     gPlayersTableHeader << tr("Id") << tr("UUID") << tr("Prénom") << tr("Nom") << tr("Pseudonyme") << tr("E-mail") << tr("Téléphone (mobile)") << tr("Téléphone (maison)") << tr("Date de naissance") << tr("Rue") << tr("Code postal") << tr("Ville") << tr("Licences") << tr("Commentaires") << tr("Statut") << tr("Divers");
     gTeamsTableHeader << tr("Id") << tr("Numéro") << tr("Joueur 1") << tr("Joueur 2") << ("Nom de l'équipe");
+    gRewardsTableHeader << tr("Id") << tr("Montant") << tr("Commentaire");
 }
 
 MainWindow::~MainWindow()
@@ -408,26 +414,26 @@ void MainWindow::UpdateTeamList()
 
     TableHelper helper(ui->teamTable);
     helper.Initialize(gTeamsTableHeader, mTeams.size());
-    mTeamsId.Clear();
+    teamWindow->ClearIds();
 
     foreach (Team team, mTeams)
     {
         Player p1, p2, p3;
-        bool valid = mDatabase.FindPlayer(team.player1Id, p1);
-        valid = valid && mDatabase.FindPlayer(team.player2Id, p2);
-        (void) mDatabase.FindPlayer(team.player3Id, p3); // Player 3 is optional
-
-        if (valid)
+        if (mDatabase.FindPlayer(team.player1Id, p1))
         {
             mPlayersInTeams.append(team.player1Id);
-            mPlayersInTeams.append(team.player2Id);
-
-            mTeamsId.AddId(team.number);
-
-            QList<QVariant> rowData;
-            rowData << team.id << team.number << p1.FullName() << p2.FullName() << team.teamName;
-            helper.AppendLine(rowData, false);
         }
+
+        if (mDatabase.FindPlayer(team.player2Id, p2))
+        {
+            mPlayersInTeams.append(team.player2Id);
+        }
+
+        teamWindow->AddId(team.number);
+
+        QList<QVariant> rowData;
+        rowData << team.id << team.number << p1.FullName() << p2.FullName() << team.teamName;
+        helper.AppendLine(rowData, false);
     }
 
     helper.Finish();
@@ -443,6 +449,8 @@ void MainWindow::UpdateTeamList()
         ui->buttonEditTeam->setEnabled(false);
         ui->buttonDeleteTeam->setEnabled(false);
     }
+
+    teamWindow->ListIds();
 }
 
 void MainWindow::slotEventItemActivated()
@@ -470,6 +478,52 @@ void MainWindow::slotEventItemActivated()
                 TLogError("Invalid event!");
             }
         }
+    }
+}
+
+void MainWindow::UpdateRewards()
+{
+    TableHelper helper(ui->tableRewards);
+    QList<Reward> rewards = mDatabase.GetRewardsForTeam(mSelectedTeam);
+
+    helper.Initialize(gRewardsTableHeader, rewards.size());
+
+    foreach (Reward reward, rewards)
+    {
+        QList<QVariant> rewardData;
+
+        rewardData << reward.id
+                 << QString("%1 €").arg(reward.total)
+                 << reward.comment;
+        helper.AppendLine(rewardData, false);
+    }
+
+    helper.Finish();
+}
+
+void MainWindow::slotTeamItemActivated()
+{
+    int row = ui->teamTable->currentRow();
+    if (row > -1)
+    {
+        int id;
+        TableHelper helper(ui->teamTable);
+
+        if (helper.GetFirstColumnValue(id))
+        {
+            mSelectedTeam = id;
+        }
+
+        mTournament.GenerateTeamRanking(mGames, mTeams, 99);
+
+        Rank rank;
+        if (mTournament.GetTeamRank(mSelectedTeam, rank))
+        {
+            ui->lblPlayedGames->setText(QString("%1").arg(rank.gamesLost + rank.gamesWon + rank.gamesDraw));
+            ui->lblWonGames->setText(QString("%1").arg(rank.gamesWon));
+        }
+
+        UpdateRewards();
     }
 }
 
@@ -552,10 +606,8 @@ void MainWindow::slotAddTeam()
     int selection = ui->eventTable->currentRow();
     if (selection > -1)
     {
-        // Prepare widget contents
-        std::uint32_t id = mTeamsId.TakeId();
-        teamWindow->Initialize(mDatabase.GetPlayerList(), mPlayersInTeams);
-        teamWindow->SetNumber(id);
+        // Prepare widget contents        
+        teamWindow->Initialize(mDatabase.GetPlayerList(), mPlayersInTeams, false);
 
         if (teamWindow->exec() == QDialog::Accepted)
         {
@@ -567,11 +619,6 @@ void MainWindow::slotAddTeam()
             {
                 UpdateTeamList();
             }
-        }
-        else
-        {
-            // release the unused id
-            mTeamsId.ReleaseId(id);
         }
     }
 }
@@ -589,30 +636,22 @@ void MainWindow::slotEditTeam()
             if (Team::Find(mTeams, id, team))
             {
                 // Prepare widget contents
-                teamWindow->Initialize(mDatabase.GetPlayerList(), mPlayersInTeams);
+                teamWindow->Initialize(mDatabase.GetPlayerList(), mPlayersInTeams, true);
 
                 Player p1, p2;
-                bool found = mDatabase.FindPlayer(team.player1Id, p1);
-                found = found && mDatabase.FindPlayer(team.player2Id, p2);
+                (void) mDatabase.FindPlayer(team.player1Id, p1);
+                (void) mDatabase.FindPlayer(team.player2Id, p2);
 
-                if (found)
+                teamWindow->SetTeam(p1, p2, team);
+
+                if (teamWindow->exec() == QDialog::Accepted)
                 {
-                    teamWindow->SetTeam(p1, p2);
-                    teamWindow->SetNumber(team.number);
-
-                    if (teamWindow->exec() == QDialog::Accepted)
+                    teamWindow->GetTeam(team);
+                    team.number = teamWindow->GetNumber();
+                    if (mDatabase.EditTeam(team))
                     {
-                        teamWindow->GetTeam(team);
-                        team.number = teamWindow->GetNumber();
-                        if (mDatabase.EditTeam(team))
-                        {
-                            UpdateTeamList();
-                        }
+                        UpdateTeamList();
                     }
-                }
-                else
-                {
-                    TLogError("Cannot find players");
                 }
             }
         }
@@ -645,6 +684,47 @@ void MainWindow::slotDeleteTeam()
         (void) QMessageBox::warning(this, tr("Tanca"),
                                     tr("Impossible de supprimer une équipe, des rencontres existent."),
                                     QMessageBox::Ok);
+    }
+}
+
+void MainWindow::slotAddReward()
+{
+    QDialog dialog;
+    Ui::RewardWindow ui;
+    ui.setupUi(&dialog);
+
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        Reward reward;
+
+        reward.eventId = mCurrentEvent.id;
+        reward.teamId = mSelectedTeam;
+        reward.total = ui.spinReward->value();
+        reward.state = Reward::cStateRewardOk;
+        reward.comment = ui.lineRewardComment->text();
+
+        if (mDatabase.AddReward(reward))
+        {
+            UpdateRewards();
+        }
+        else
+        {
+            TLogError("Add reward failure");
+        }
+    }
+}
+
+void MainWindow::slotDeleteReward()
+{
+    TableHelper helper(ui->tableRewards);
+
+    int id;
+    if (helper.GetFirstColumnValue(id))
+    {
+        if (mDatabase.DeleteReward(id))
+        {
+            UpdateRewards();
+        }
     }
 }
 

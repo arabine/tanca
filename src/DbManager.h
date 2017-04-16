@@ -34,11 +34,11 @@ struct Player
 
     void Reset()
     {
-        id = -1;
+        id = cDummyPlayer;
         postCode = -1;
         uuid = "";
         name = "";
-        lastName = "";
+        lastName = "--";
         nickName = "";
         email = "";
         mobilePhone = "";
@@ -287,7 +287,8 @@ struct Team
 struct Reward
 {
     static const int cStateNoReward = -1;
-    static const int cStateRewardCanceled = 0;
+    static const int cStateRewardOk = 0;
+    static const int cStateRewardCanceled = 1;
 
     int id;
     int eventId;
@@ -297,9 +298,30 @@ struct Reward
     QString comment; // comment for this reward
     QString document;  // JSON document, reserved to store anything in the future
 
+    Reward()
+        : id(-1)
+        , eventId(-1)
+        , teamId(-1)
+        , total(0)
+        , state(cStateNoReward)
+    {
+
+    }
+
+    void FillFrom(const QSqlQuery &query)
+    {
+        id = query.value("id").toInt();
+        eventId = query.value("event_id").toInt();
+        teamId = query.value("team_id").toInt();
+        total = query.value("total").toInt();
+        comment = query.value("comment").toString();
+        state = query.value("state").toInt();
+        document = query.value("document").toString();
+    }
+
     static QString Table() {
         return "CREATE TABLE IF NOT EXISTS rewards (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER, team_id INTEGER, "
-               "total INTEGER, state INTEGER, document TEXT);";
+               "total INTEGER, comment TEXT, state INTEGER, document TEXT);";
     }
 };
 
@@ -473,6 +495,11 @@ public:
     bool EditGame(const Game &game);
     bool DeleteGame(int id);
     bool DeleteGameByEventId(int eventId);
+
+    // Rewards
+    QList<Reward> GetRewardsForTeam(int team_id);
+    bool AddReward(const Reward &reward);
+    bool DeleteReward(int id);
 
     // From ICities
     virtual QStringList GetCities(int postCode);

@@ -34,7 +34,6 @@
 #include "GameWindow.h"
 #include "ScoreWindow.h"
 #include "EventWindow.h"
-#include "UniqueId.h"
 #include "ui_AboutWindow.h"
 #include "Tournament.h"
 
@@ -65,6 +64,9 @@ private slots:
     void slotEditTeam();
     void slotDeleteTeam();
 
+    void slotAddReward();
+    void slotDeleteReward();
+
     void slotAddEvent();
     void slotDeleteEvent();
     void slotEditEvent();
@@ -85,7 +87,7 @@ private slots:
     void slotRankingLeft();
     void slotRankingRight();
     void slotDeleteAllGames();
-
+    void slotTeamItemActivated();
 private:
     void UpdatePlayersTable();
 
@@ -106,9 +108,9 @@ private:
     QList<Team> mTeams;
     QList<Game> mGames;
     Event mCurrentEvent;
-    UniqueId mTeamsId;
     Tournament mTournament;
     int mCurrentRankingRound;
+    int mSelectedTeam;
 
     void UpdateTeamList();
     bool FindPlayer(int id, Player &player);
@@ -119,6 +121,7 @@ private:
     void UpdateEventsTable();
     void ExportTable(QTableWidget *table, const QString &title);
     void UpdateBrackets();
+    void UpdateRewards();
 };
 
 #endif // MAINWINDOW_H

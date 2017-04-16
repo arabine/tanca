@@ -761,6 +761,75 @@ bool DbManager::DeleteGameByEventId(int eventId)
     return success;
 }
 
+QList<Reward> DbManager::GetRewardsForTeam(int team_id)
+{
+    QSqlQuery query(mDb);
+    query.prepare("SELECT * FROM rewards WHERE team_id = :teamId");
+    query.bindValue(":teamId", team_id);
+
+    QList<Reward> result;
+
+    if(query.exec())
+    {
+        while (query.next())
+        {
+            Reward reward;
+            reward.FillFrom(query);
+            result.append(reward);
+        }
+    }
+    return result;
+}
+
+bool DbManager::AddReward(const Reward &reward)
+{
+    bool success = false;
+
+    QSqlQuery queryAdd(mDb);
+    queryAdd.prepare("INSERT INTO rewards (event_id, team_id, total, comment, state, document) "
+                     "VALUES (:event_id, :team_id, :total, :comment, :state, :document)");
+    queryAdd.bindValue(":event_id", reward.eventId);
+    queryAdd.bindValue(":team_id", reward.teamId);
+    queryAdd.bindValue(":total", reward.total);
+    queryAdd.bindValue(":comment", reward.comment);
+    queryAdd.bindValue(":state", reward.state);
+    queryAdd.bindValue(":document", reward.document);
+
+    if(queryAdd.exec())
+    {
+        qDebug() << "Add reward success";
+        success = true;
+    }
+    else
+    {
+        TLogError("Add reward failed: " + queryAdd.lastError().text().toStdString());
+        success = false;
+    }
+
+    return success;
+}
+
+bool DbManager::DeleteReward(int id)
+{
+    bool success = false;
+
+    QSqlQuery queryDel(mDb);
+    queryDel.prepare("DELETE FROM rewards WHERE id= :id");
+    queryDel.bindValue(":id", id);
+
+    if(queryDel.exec())
+    {
+        qDebug() << "Delete reward success";
+        success = true;
+    }
+    else
+    {
+        TLogError("Delete reward failed: " + queryDel.lastError().text().toStdString());
+    }
+
+    return success;
+}
+
 
 bool DbManager::AddTeam(const Team &team)
 {
