@@ -43,6 +43,7 @@ public:
     void AddLeftEntry(const QList<QVariant> &rowData);
     void AddRightEntry(const QString &text);
     int GetMaxSize() { return mMaxSize; }
+    void SetName(const QString &name);
     void SetNumber(uint32_t number);
     uint32_t GetNumber();
     QString GetName();

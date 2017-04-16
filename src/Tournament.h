@@ -50,6 +50,7 @@ public:
     void GenerateTeamRanking(const QList<Game> &games, const QList<Team> &teams, int maxTurn);
 
     std::vector<Rank> GetRanking();
+    bool GetTeamRank(int id, Rank &outRank);
 
     QString ToJsonString(const QList<Game> &games, const QList<Team> &teams);
     std::string RankingToString();
@@ -58,7 +59,6 @@ public:
     QString BuildSwissRounds(const QList<Game> &games, const QList<Team> &teams, QList<Game> &newRounds);
 
     static int Generate(int min, int max);
-
 private:
     bool mIsTeam;
 

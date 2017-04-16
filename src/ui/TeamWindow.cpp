@@ -2,10 +2,12 @@
 #include "TableHelper.h"
 #include "Log.h"
 
+#include <QMessageBox>
 
 
 TeamWindow::TeamWindow(QWidget *parent)
     : SelectionWindow(parent, tr("Créer/modifier une équipe"), 2, 2)
+    , mTeamsId(0U, 2000000U)
 {
     QStringList header;
     header << tr("Id") << tr("Prénom") << tr("Nom") << tr("Pseudo");
@@ -19,22 +21,50 @@ TeamWindow::TeamWindow(QWidget *parent)
 
 void TeamWindow::slotAccept()
 {
-    if ((ui.selectionList->count() >= mMinSize) && (ui.selectionList->count() <= mMaxSize))
+    std::uint32_t newId = GetNumber();
+    // Accept only if id is valid
+    if (!mTeamsId.IsTaken(newId))
     {
-        accept();
+        bool ok = false;
+        if ((ui.selectionList->count() >= mMinSize) && (ui.selectionList->count() <= mMaxSize))
+        {
+            ok = true;
+        }
+        else if ((ui.selectionList->count() == 0) && GetName().size() > 0)
+        {
+            ok = true;
+        }
+
+        if (ok)
+        {
+            // if id was changed, release it
+            mTeamsId.AddId(newId);
+            accept();
+        }
+        else
+        {
+            (void) QMessageBox::warning(this, tr("Tanca"),
+                                        tr("Varifiez les champs."),
+                                        QMessageBox::Ok);
+        }
     }
-    else if ((ui.selectionList->count() == 0) && GetName().size() > 0)
+    else
     {
-        accept();
+        (void) QMessageBox::warning(this, tr("Tanca"),
+                                    tr("Numéro d'équipe déjà pris."),
+                                    QMessageBox::Ok);
     }
 }
 
 
-void TeamWindow::SetTeam(const Player &p1, const Player &p2)
+void TeamWindow::SetTeam(const Player &p1, const Player &p2, const Team &team)
 {
     mSelection.clear();
     mSelection.append(p1);
     mSelection.append(p2);
+
+    SetName(team.teamName);
+    SetNumber(team.number);
     Update();
 }
 
@@ -75,7 +105,7 @@ void TeamWindow::GetTeam(Team &team)
     }
 }
 
-void TeamWindow::Initialize(const QList<Player> &players, const QList<int> &inTeams)
+void TeamWindow::Initialize(const QList<Player> &players, const QList<int> &inTeams, bool isEdit)
 {
     // Create a list of players that are still alone
     mList.clear();
@@ -86,6 +116,16 @@ void TeamWindow::Initialize(const QList<Player> &players, const QList<int> &inTe
         {
             mList.append(p);
         }
+    }
+
+    if (!isEdit)
+    {
+        SetNumber(mTeamsId.FindId());
+        ui.spinSelectionNumber->setEnabled(true);
+    }
+    else
+    {
+        ui.spinSelectionNumber->setEnabled(false);
     }
 
     mSelection.clear();
@@ -117,6 +157,11 @@ void TeamWindow::ClickedLeft(int id)
     }
 
     Update();
+}
+
+void TeamWindow::ListIds()
+{
+    mTeamsId.Dump();
 }
 
 void TeamWindow::Update()

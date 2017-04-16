@@ -24,6 +24,7 @@
  */
 
 #include <algorithm>
+#include <iostream>
 #include "UniqueId.h"
 
 /*****************************************************************************/
@@ -75,6 +76,22 @@ std::uint32_t UniqueId::TakeId()
     return id;
 }
 /*****************************************************************************/
+uint32_t UniqueId::FindId()
+{
+    std::uint32_t id = 0U;
+
+    for (std::uint32_t i = mMin; i <= mMax; i++)
+    {
+        if (std::find(mUsedIds.begin(), mUsedIds.end(), i) == mUsedIds.end())
+        {
+            // Id not used
+            id = i;
+            break;
+        }
+    }
+    return id;
+}
+/*****************************************************************************/
 void UniqueId::AddId(uint32_t id)
 {
     if (!IsTaken(id))
@@ -99,6 +116,15 @@ bool UniqueId::ReleaseId(std::uint32_t id)
 bool UniqueId::IsTaken(std::uint32_t id)
 {
     return (std::find(mUsedIds.begin(), mUsedIds.end(), id) != mUsedIds.end());
+}
+/*****************************************************************************/
+void UniqueId::Dump()
+{
+    for (auto id: mUsedIds)
+    {
+        std::cout << id <<", ";
+    }
+    std::cout << std::endl;
 }
 
 //=============================================================================

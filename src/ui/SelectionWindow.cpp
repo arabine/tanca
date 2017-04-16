@@ -79,6 +79,11 @@ void SelectionWindow::AddRightEntry(const QString &text)
     ui.selectionList->addItem(text);
 }
 
+void SelectionWindow::SetName(const QString &name)
+{
+    ui.lineName->setText(name);
+}
+
 void SelectionWindow::SetNumber(std::uint32_t number)
 {
     ui.spinSelectionNumber->setValue(number);

@@ -262,6 +262,20 @@ void Tournament::GeneratePlayerRanking(const DbManager &mDb, const QList<Event> 
     }
 }
 
+bool Tournament::GetTeamRank(int id, Rank &outRank)
+{
+    bool ret = false;
+    for (auto &rank : mRanking)
+    {
+        if (rank.id == id)
+        {
+            outRank = rank;
+            ret = true;
+            break;
+        }
+    }
+    return ret;
+}
 
 void Tournament::GenerateTeamRanking(const QList<Game> &games, const QList<Team> &teams, int maxTurn)
 {
