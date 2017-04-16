@@ -8,6 +8,7 @@
 TeamWindow::TeamWindow(QWidget *parent)
     : SelectionWindow(parent, tr("Créer/modifier une équipe"), 2, 2)
     , mTeamsId(0U, 2000000U)
+    , mIsEdit(false)
 {
     QStringList header;
     header << tr("Id") << tr("Prénom") << tr("Nom") << tr("Pseudo");
@@ -21,38 +22,47 @@ TeamWindow::TeamWindow(QWidget *parent)
 
 void TeamWindow::slotAccept()
 {
-    std::uint32_t newId = GetNumber();
-    // Accept only if id is valid
-    if (!mTeamsId.IsTaken(newId))
-    {
-        bool ok = false;
-        if ((ui.selectionList->count() >= mMinSize) && (ui.selectionList->count() <= mMaxSize))
-        {
-            ok = true;
-        }
-        else if ((ui.selectionList->count() == 0) && GetName().size() > 0)
-        {
-            ok = true;
-        }
+    bool ok = false;
 
-        if (ok)
-        {
-            // if id was changed, release it
-            mTeamsId.AddId(newId);
-            accept();
-        }
-        else
-        {
-            (void) QMessageBox::warning(this, tr("Tanca"),
-                                        tr("Varifiez les champs."),
-                                        QMessageBox::Ok);
-        }
+    if ((ui.selectionList->count() >= mMinSize) && (ui.selectionList->count() <= mMaxSize))
+    {
+        ok = true;
+    }
+    else if ((ui.selectionList->count() == 0) && GetName().size() > 0)
+    {
+        ok = true;
     }
     else
     {
         (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Numéro d'équipe déjà pris."),
+                                    tr("Vérifiez les champs."),
                                     QMessageBox::Ok);
+    }
+
+    if (!mIsEdit)
+    {
+        std::uint32_t newId = GetNumber();
+        // Accept only if id is valid
+        if (!mTeamsId.IsTaken(newId))
+        {
+            if (ok)
+            {
+                // if id was changed, release it
+                mTeamsId.AddId(newId);
+                ok = true;
+            }
+        }
+        else
+        {
+            (void) QMessageBox::warning(this, tr("Tanca"),
+                                        tr("Numéro d'équipe déjà pris."),
+                                        QMessageBox::Ok);
+        }
+    }
+
+    if (ok)
+    {
+        accept();
     }
 }
 
@@ -118,6 +128,7 @@ void TeamWindow::Initialize(const QList<Player> &players, const QList<int> &inTe
         }
     }
 
+    mIsEdit = isEdit;
     if (!isEdit)
     {
         SetNumber(mTeamsId.FindId());

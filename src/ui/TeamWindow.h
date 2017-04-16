@@ -31,6 +31,7 @@ private:
     QList<Player> mList;
     QList<Player> mSelection;
     UniqueId mTeamsId;
+    bool mIsEdit;
 
     void Update();
 };
