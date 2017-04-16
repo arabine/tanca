@@ -23,19 +23,39 @@ Fonctionnalités:
 Liste des joueurs:
 ![Capture](doc/screen_joueurs.png)
 
-Classement de la saison du tournoi Suisse:
+Edition ou création d'un joueur, fiche complète pour la gestion du club:
+![Capture](doc/screen_fiche_joueur.png)
+
+Classement de la saison du tournoi Suisse, avec départage par différence de points et Buchholz. Il est
+possible de voir les classements intermédiaires après chaque tour de jeu.
 ![Capture](doc/screen_classements.png)
 
-Liste des matches:
+La liste des matches permet d'effectuer le pointage (le marquage des scores). La génération automatique
+vous aide à générer les rencontres aléatoires (toutes rondes) ou selon le classement intermédiaire
+(système Suisse). Il est possible de gérer les rencontres manuellement (ajout/édition/suppression).
 ![Capture](doc/screen_matches.png)
 
-Liste des équipe participant à un événement:
+Liste des équipe participant à un événement. Cet écran permet également de gérer un système de récompenses
+par équipe en fonction des parties gagnées.
 ![Capture](doc/screen_teams.png)
 
-Affichage des matches du tournoi:
+Affichage des matches du tournoi: le graphique intégré permet de visualiser facilement les rencontres jouées
+ou à jouer. Sur la partie gauche d'une équipe son numéro est indiqué, et à sa droite le score du match, vide
+s'il n'est pas encore terminé.
 ![Capture](doc/screen_tournament.png)
 
 ## Historique des versions
+
+### V1.8
+
+ - Graphique du tournois intégré au logiciel
+ - Nouveau style de graphique de tournois
+ - Ajout de joueur optionnel pour la création d'équipe
+ - Deux types de tournois: toutes rondes ou système suisse
+ - Tournoi Suisse à appairage rapide "les bons jouent contre les bons" ==> nouvel algorithme performant !
+ - Tournoi toutes rondes séparé du système Suisse
+ - Beaucoup d'améliorations graphiques et de bugs corrigés
+ - Visualisation des classements intermédiaires pour le classement par événements
 
 ### V1.7
 
