@@ -120,6 +120,13 @@ s'il n'est pas encore terminé.
 
 ### V2.0
 
+HOT:
+
+ - Editer le nom d'équipe même quand les matchs ont commencé
+ - Ajouter le numéro d'équipe dans la fenêtre de pointage
+
+Backlog:
+ 
  - Créer un Export Box dédié avec choix du script
  - Intégrer villes.db pour les codes postaux
  - Ranger les événements par rapport à leur date
@@ -134,6 +141,8 @@ s'il n'est pas encore terminé.
  - Support des catégories (Vétéran, Sénior, Junior, Cadet, Minime, Benjamin)
  - Implémenter des statistiques pour un événement
  - Progression d'un joueur en graphique
+
+ - 
 
 ## Swisss (round-robin) tournament algorithm
 
