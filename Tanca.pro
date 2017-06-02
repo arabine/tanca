@@ -53,7 +53,8 @@ SOURCES += main.cpp MainWindow.cpp \
     SelectionWindow.cpp \
     ScoreWindow.cpp \
     Tournament.cpp \
-    Brackets.cpp
+    Brackets.cpp \
+    tests/test_tournament.cpp
 
 HEADERS  += MainWindow.h \
     DbManager.h \

@@ -423,6 +423,25 @@ struct Game
 
     }
 
+    Game(int i,
+        int e,
+        int t,
+        int t1Id,
+        int t2Id,
+        int t1Score,
+        int t2Score)
+        : id(i)
+        , eventId(e)
+        , turn(t)
+        , team1Id(t1Id)
+        , team2Id(t2Id)
+        , team1Score(t1Score)
+        , team2Score(t2Score)
+        , state(-1)
+    {
+
+    }
+
     static QString Table() {
         return "CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER, turn INTEGER, team1_id INTEGER, "
                 "team2_id INTEGER, team1_score INTEGER, team2_score INTEGER, state INTEGER, document TEXT);";

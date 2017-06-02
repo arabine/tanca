@@ -506,60 +506,169 @@ void PrintMatrix(const std::vector<int> &row, const std::vector<std::vector<int>
 }
 
 
-void Tournament::BuildPairing(const std::vector<int> &ranking,
+struct Point
+{
+    int col;
+    int row;
+};
+
+struct Solution {
+    QList<Point> tree;
+    int totalCost;
+    std::vector<int> taken;  // 1 if column is taken
+    int depth;
+
+    Solution(int size)
+        : totalCost(0)
+        , depth(0)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            taken.push_back(0);
+        }
+    }
+
+    std::uint32_t Size()
+    {
+        return taken.size();
+    }
+
+private:
+    Solution();
+};
+
+
+void FindSolution(QList<Solution> &list, Solution &s, const std::vector<int> &teamIds, const std::vector<std::vector<int>> &cost, std::uint32_t &col, std::uint32_t &row)
+{
+    s.depth++;
+    do
+    {
+        // Free team
+        if (s.taken[row] == 0)
+        {
+            // memorize where we are and continue to find pairs for this path
+            std::uint32_t r = row;
+            std::uint32_t c = col;
+
+            std::cout << "Current: c=" << (int)col << ", r=" << (int)row << ", depth: " << (int)s.depth << std::endl;
+
+            // try all the paths for this row
+            do
+            {
+                Solution s2 = s; // start new solution branch
+
+                if (s.taken[c] == 0)
+                {
+                    // This team is free, create match with it
+                    // Create game
+                    Point p;
+                    p.col = c;
+                    p.row = r;
+
+                    s2.taken[c] = 1;
+                    s2.taken[r] = 1;
+
+                    s2.tree.append(p);
+
+                    // continues this path for the other rows
+                    r++;
+                    c = r + 1; // start at the beginning of the row
+                }
+                else
+                {
+                    // Continue in this column
+                    c++;
+                }
+
+                if ((r < (s.Size()-1)) && (c < s.Size()))
+                {
+                    FindSolution(list, s2, teamIds, cost, c, r);
+                }
+                else
+                {
+                    list.append(s2);
+                }
+            }
+            while(c < s.Size());
+        }
+        row++;
+        col = row + 1;
+    }
+    while (row < (s.Size() - 1));
+}
+
+
+
+void Tournament::BuildPairing(const QList<Game> &games, // for verification only
+                              const std::vector<int> &ranking,
                               const std::vector<std::vector<int>> &cost,
                               std::vector<std::vector<int>> &pairing,
                               QList<Game> &newRounds)
 {
     unsigned int size = cost[0].size();
-    std::vector<int> columns_taken(size);
+    QList<Solution> solutions;
 
-    for (unsigned int i = 0; i < size; i++)
+    std::uint32_t row = 0;
+    std::uint32_t col = 1;
+
+    Solution s(size);
+    FindSolution(solutions, s, ranking, cost, col, row);
+
+    std::cout << "Found " << solutions.size() << " solutions" << std::endl;
+
+    int i = 1;
+    for (auto &s : solutions)
     {
-        columns_taken[i] = 0;
+        std::cout << "\r\n ----------- Solution " << i << std::endl;
+        for (auto &p : s.tree)
+        {
+            std::cout << ranking[p.col] << " <--> " << ranking[p.row] << std::endl;
+        }
+        i++;
     }
 
-    // Resolve, by line
-    for (unsigned int i = 0; i < size; i++)
-    {
-        // If the team has already be assigned to a game, don't perform the research
-        if (columns_taken[i] == 0)
-        {
-            int lowest_column = -1;
-            int lowest_value = 999999999;
-            // Find lowest column for this line
-            for (unsigned int j = 0; j < size; j++)
-            {
-                if (cost[i][j] < lowest_value)
+
+
+                /*
+                int lowest_column = -1;
+                int lowest_value = 999999999;
+                // Find lowest column for this line
+                for (unsigned int j = 0; j < size; j++)
                 {
-                    // Skip column or line if taken
-                    if (columns_taken[j] == 0)
+                    if (cost[i][j] < lowest_value)
                     {
-                        lowest_value = cost[i][j];
-                        lowest_column = j;
+                        // Skip column or line if taken
+                        if (columns_taken[j] == 0)
+                        {
+                            lowest_value = cost[i][j];
+                            lowest_column = j;
+                        }
                     }
                 }
-            }
-            if (lowest_column >= 0)
-            {
-                pairing[i][lowest_column] = 1; // Debug purpose
-                columns_taken[lowest_column] = 1;
-                columns_taken[i] = 1;
+                if (lowest_column >= 0)
+                {
+                    pairing[i][lowest_column] = 1; // Debug purpose
+                    columns_taken[lowest_column] = 1;
+                    columns_taken[i] = 1;
 
-                // Create game
-                Game game;
+                    // Create game
+                    Game game;
 
-                game.team1Id = ranking[lowest_column];
-                game.team2Id = ranking[i];
+                    game.team1Id = ranking[lowest_column];
+                    game.team2Id = ranking[i];
 
-                newRounds.append(game);
-            }
-            else
-            {
-                std::cout << "Cannot find opponent" << std::endl;
-            }
-        }
-    }
+                    if (AlreadyPlayed(games, game.team1Id, game.team2Id))
+                    {
+                        std::cout << "Pairing error, already played! Players: " << game.team1Id << " and " << game.team2Id <<  std::endl;
+                    }
+
+                   // newRounds.append(game);
+                }
+                else
+                {
+                    std::cout << "Cannot find opponent" << std::endl;
+                }
+                */
 }
 
 void Tournament::BuildCost(const QList<Game> &games,
@@ -583,7 +692,7 @@ void Tournament::BuildCost(const QList<Game> &games,
             }
             else if (AlreadyPlayed(games, ranking[j], ranking[i]))
             {
-                cost = 1000;
+                cost = 10000;
             }
             else
             {
@@ -699,7 +808,7 @@ QString Tournament::BuildSwissRounds(const QList<Game> &games, const QList<Team>
                 BuildCost(games, winners, cost_matrix, pairing_matrix);
                 PrintMatrix(winners, cost_matrix);
                 std::cout << "---------------  WINNERS PAIRING MATRIX -------------------" << std::endl;
-                BuildPairing(winners, cost_matrix, pairing_matrix, newRounds);
+                BuildPairing(games, winners, cost_matrix, pairing_matrix, newRounds);
                 PrintMatrix(winners, pairing_matrix);
 
                 std::cout << "---------------  LOOSERS COST MATRIX -------------------" << std::endl;
@@ -710,7 +819,7 @@ QString Tournament::BuildSwissRounds(const QList<Game> &games, const QList<Team>
                 BuildCost(games, loosers, cost_matrix2, pairing_matrix2);
                 PrintMatrix(loosers, cost_matrix2);
                 std::cout << "---------------  LOOSERS PAIRING MATRIX -------------------" << std::endl;
-                BuildPairing(loosers, cost_matrix2, pairing_matrix2, newRounds);
+                BuildPairing(games, loosers, cost_matrix2, pairing_matrix2, newRounds);
                 PrintMatrix(loosers, pairing_matrix2);
 
 

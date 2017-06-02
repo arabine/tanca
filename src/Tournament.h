@@ -97,7 +97,7 @@ private:
     bool HasPlayed(const QList<Game> &games, const Rank &rank, int oppId);
     int FindtUnplayedIndex(const QList<Game> &games, const std::vector<int> &ranking);
     bool AlreadyPlayed(const QList<Game> &games, int p1Id, int p2Id);
-    void BuildPairing(const std::vector<int> &ranking,
+    void BuildPairing(const QList<Game> &games, const std::vector<int> &ranking,
                       const std::vector<std::vector<int> > &cost,
                       std::vector<std::vector<int> > &pairing,
                       QList<Game> &newRounds);
