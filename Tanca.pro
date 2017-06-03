@@ -2,7 +2,7 @@
 # Tanca Petanque contest manager
 #-------------------------------------------------
 
-BASE_DIR = $${PWD}/..
+BASE_DIR = $${PWD}
 
 CONFIG(debug, debug|release) {
 debug:      DESTDIR = $$BASE_DIR/build-tanca/debug

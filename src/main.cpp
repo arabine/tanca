@@ -31,7 +31,7 @@
 #include "Tournament.h"
 #include "Log.h"
 
-#define UNIT_TESTS
+//#define UNIT_TESTS
 
 
 /*****************************************************************************/

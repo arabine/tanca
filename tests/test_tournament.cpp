@@ -96,8 +96,8 @@ void RandomMatches()
     QList<Team> teams;
     QList<Game> games;
 
-    ReadFile("../../tanca/tests/first_names.txt", first_names);
-    ReadFile("../../tanca/tests/last_names.txt", last_names);
+    ReadFile("../../tests/first_names.txt", first_names);
+    ReadFile("../../tests/last_names.txt", last_names);
 
     GenerateTeams(teams, 10, first_names, last_names);
     DumpTeams(teams);
@@ -192,8 +192,7 @@ void PairingProblem()
 
 void RunTests()
 {
-  //  RandomMatches();
-
+    RandomMatches();
     PairingProblem();
 }
 
