@@ -46,6 +46,13 @@ s'il n'est pas encore terminé.
 
 ## Historique des versions
 
+### V1.9
+
+ - Importante correction de l'algorithme d'appairement en mode "tournoi suisse"
+ - L'écran de pointage permet d'éditer le tour et affiche le numéro des équipes
+ - TODO: Choix prise en compte d'un tournoi dans le calcul du championnat
+ - TODO: classement du championnat à corriger
+
 ### V1.8
 
  - Graphique du tournois intégré au logiciel

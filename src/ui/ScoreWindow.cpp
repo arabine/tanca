@@ -37,6 +37,9 @@ ScoreWindow::ScoreWindow(QWidget *parent)
 
 void ScoreWindow::SetGame(const Game &game, const Team &team1, const Team &team2)
 {
+    ui.roundSpinBox->setValue(game.turn + 1);
+    ui.team1GroupBox->setTitle(tr("Équipe n° %1").arg(team1.number));
+    ui.team2GroupBox->setTitle(tr("Équipe n° %1").arg(team2.number));
     ui.labelTeam1Name->setText(team1.teamName);
     ui.labelTeam2Name->setText(team2.teamName);
     int value = (game.team1Score == -1) ? 0 : game.team1Score;
@@ -49,6 +52,7 @@ void ScoreWindow::GetGame(Game &game)
 {
     game.team1Score = ui.spinScore1->value();
     game.team2Score = ui.spinScore2->value();
+    game.turn = ui.roundSpinBox->value() - 1;
 }
 
 
