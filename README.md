@@ -46,7 +46,13 @@ s'il n'est pas encore terminé.
 
 ## Historique des versions
 
-### V1.9
+### V2.0 (Backlog)
+
+ - Tournois simple et double élémination
+ - Tournoi avec poules qualiticatives
+
+
+### V1.9 (Next)
 
  - Importante correction de l'algorithme d'appairement en mode "tournoi suisse"
  - L'écran de pointage permet d'éditer le tour et affiche le numéro des équipes
