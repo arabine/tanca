@@ -58,6 +58,7 @@ s'il n'est pas encore terminé.
  - L'écran de pointage permet d'éditer le tour et affiche le numéro des équipes
  - TODO: Choix prise en compte d'un tournoi dans le calcul du championnat
  - TODO: classement du championnat à corriger
+ - Brackets dans navigateur via websockets
 
 ### V1.8
 
