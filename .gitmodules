@@ -1,0 +1,3 @@
+[submodule "src/icl"]
+	path = src/icl
+	url = https://github.com/arabine/icl.git
