@@ -41,10 +41,11 @@ QMAKE_CXXFLAGS += -std=c++11
 
 win32 {
     DEFINES += USE_WINDOWS_OS
-    LIBS += -lpsapi
+    LIBS += -lpsap libws2_32 -lpsapi
 
 } else {
     DEFINES += USE_UNIX_OS
+    LIBS += -ldl
 }
 
 
@@ -58,7 +59,6 @@ SOURCES += main.cpp MainWindow.cpp \
     PlayerWindow.cpp \
     TeamWindow.cpp \
     DatePickerWindow.cpp \
-    Log.cpp \
     GameWindow.cpp \
     EventWindow.cpp \
     TableHelper.cpp \
@@ -73,7 +73,6 @@ HEADERS  += MainWindow.h \
     PlayerWindow.h \
     TeamWindow.h \
     DatePickerWindow.h \
-    Log.h \
     Observer.h \
     GameWindow.h \
     EventWindow.h \
