@@ -12,6 +12,10 @@ CONFIG(release, debug|release) {
 release:    DESTDIR = $$BASE_DIR/build-tanca/release
 }
 
+# ------------------------------------------------------------------------------
+# Where to find header files
+# ------------------------------------------------------------------------------
+
 UI_DIR          = $$DESTDIR/ui
 UI_HEADERS_DIR  = $$DESTDIR/include
 UI_SOURCES_DIR  = $$DESTDIR/src
@@ -19,10 +23,14 @@ OBJECTS_DIR     = $$DESTDIR/obj
 RCC_DIR         = $$DESTDIR/rcc
 MOC_DIR         = $$DESTDIR/moc
 
-QT       += core gui sql widgets quickwidgets
+ICL_DIR = $$BASE_DIR/src/icl
+include($$ICL_DIR/icl.pri)
 
+# ------------------------------------------------------------------------------
+# Compiler definitions
+# ------------------------------------------------------------------------------
+QT       += core gui sql widgets quickwidgets
 RC_FILE = assets/icon.rc
-TARGET = Tanca
 TEMPLATE = app
 
 
@@ -39,14 +47,18 @@ win32 {
     DEFINES += USE_UNIX_OS
 }
 
+
+TARGET = Tanca
+
+# ------------------------------------------------------------------------------
+# Source files
+# ------------------------------------------------------------------------------
 SOURCES += main.cpp MainWindow.cpp \
     DbManager.cpp \
     PlayerWindow.cpp \
     TeamWindow.cpp \
     DatePickerWindow.cpp \
     Log.cpp \
-    Util.cpp \
-    UniqueId.cpp \
     GameWindow.cpp \
     EventWindow.cpp \
     TableHelper.cpp \
@@ -62,8 +74,6 @@ HEADERS  += MainWindow.h \
     TeamWindow.h \
     DatePickerWindow.h \
     Log.h \
-    Util.h \
-    UniqueId.h \
     Observer.h \
     GameWindow.h \
     EventWindow.h \
@@ -87,3 +97,5 @@ RESOURCES += assets/tanca.qrc
 
 DISTFILES += \
     assets/brackets.qml
+
+# End of project file
