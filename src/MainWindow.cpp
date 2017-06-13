@@ -27,14 +27,12 @@
 #include <iostream>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QtQuick>
 
 #include "Log.h"
 #include "MainWindow.h"
 #include "TableHelper.h"
 #include "ui_MainWindow.h"
 #include "ui_RewardWindow.h"
-#include "Brackets.h"
 
 static const QString gVersion = "1.8";
 
@@ -835,11 +833,7 @@ void MainWindow::UpdateBrackets()
 {
     QString json = mTournament.ToJsonString(mGames, mTeams);
 
-    Brackets *item = ui->quickWidget->rootObject()->findChild<Brackets*>("brackets");
-    if (item)
-    {
-        item->setProperty("rounds", json);
-    }
+    // FIXME: Send json document to all connected clients
 }
 
 
@@ -1008,8 +1002,6 @@ void MainWindow::slotTabChanged(int index)
         ui->buttonEditTeam->setEnabled(false);
         ui->buttonDeleteTeam->setEnabled(false);
     }
-
-    ui->quickWidget->resize(ui->quickWidget->size());
 }
 
 void MainWindow::slotExportRanking()

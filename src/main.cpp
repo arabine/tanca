@@ -18,7 +18,6 @@
 
 #include "MainWindow.h"
 #include <QApplication>
-#include <QtQuick>
 
 #include <iostream>
 #include <fstream>
@@ -27,7 +26,6 @@
 #include <thread>
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 */
-#include "Brackets.h"
 #include "Tournament.h"
 #include "Log.h"
 
@@ -67,9 +65,6 @@ int main(int argc, char *argv[])
     Log::RegisterListener(logger);
 
     QApplication a(argc, argv);
-
-    // Register our component type with QML.
-    qmlRegisterType<Brackets>("Tanca", 1, 0, "Brackets");
 
     MainWindow w;
     w.Initialize();

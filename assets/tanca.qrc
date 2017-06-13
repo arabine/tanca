@@ -14,7 +14,4 @@
         <file>arrow_left.png</file>
         <file>arrow_right.png</file>
     </qresource>
-    <qresource prefix="/qml">
-        <file>brackets.qml</file>
-    </qresource>
 </RCC>

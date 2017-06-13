@@ -29,7 +29,7 @@ include($$ICL_DIR/icl.pri)
 # ------------------------------------------------------------------------------
 # Compiler definitions
 # ------------------------------------------------------------------------------
-QT       += core gui sql widgets quickwidgets
+QT       += core gui sql widgets
 RC_FILE = assets/icon.rc
 TEMPLATE = app
 
@@ -41,7 +41,7 @@ QMAKE_CXXFLAGS += -std=c++11
 
 win32 {
     DEFINES += USE_WINDOWS_OS
-    LIBS += -lpsap libws2_32 -lpsapi
+    LIBS += libws2_32 libpsapi
 
 } else {
     DEFINES += USE_UNIX_OS
@@ -64,8 +64,7 @@ SOURCES += main.cpp MainWindow.cpp \
     TableHelper.cpp \
     SelectionWindow.cpp \
     ScoreWindow.cpp \
-    Tournament.cpp \
-    Brackets.cpp \
+    Tournament.cpp
     tests/test_tournament.cpp
 
 HEADERS  += MainWindow.h \
@@ -79,8 +78,7 @@ HEADERS  += MainWindow.h \
     TableHelper.h \
     SelectionWindow.h \
     ScoreWindow.h \
-    Tournament.h \
-    Brackets.h
+    Tournament.h
 
 FORMS    += MainWindow.ui \
     PlayerWindow.ui \
@@ -93,8 +91,5 @@ FORMS    += MainWindow.ui \
 OTHER_FILES += README.md LICENSE
 
 RESOURCES += assets/tanca.qrc
-
-DISTFILES += \
-    assets/brackets.qml
 
 # End of project file

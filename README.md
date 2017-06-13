@@ -46,6 +46,12 @@ s'il n'est pas encore terminé.
 
 ## Historique des versions
 
+### Fonctions serveur
+
+  - Calendrier club (événements)
+  - Calendrier Bureau (absences, réunions)
+
+
 ### V2.0 (Backlog)
 
  - Tournois simple et double élémination

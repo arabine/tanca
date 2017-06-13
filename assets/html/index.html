@@ -1,44 +1,15 @@
-/*=============================================================================
- * Tanca - brackets.qml
- *=============================================================================
- * Brackets graphics generation using HTML5 Canvas2D
- *=============================================================================
- * Tanca ( https://github.com/belegar/tanca ) - This file is part of Tanca
- * Copyright (C) 2003-2999 - Anthony Rabine
- * anthony.rabine@tarotclub.fr
- *
- * TarotClub is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * TarotClub is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with TarotClub.  If not, see <http://www.gnu.org/licenses/>.
- *
- *=============================================================================
- */
+<html>
+	<head></head>
+	
 
-import QtQuick 2.4
-import QtQuick.Controls 1.4
-import Tanca 1.0
-
-ScrollView
-{
-
-    Canvas {
-
-        id: canvas
-        objectName: "canvas"
-        width: 1000
-        height: 1000 //window.height
-
-         onPaint: {
-            var ctx = getContext("2d");
+	
+	
+	<script>
+	
+		function drawBrackets()
+		{
+			var c = document.getElementById("myCanvas");
+            var ctx = c.getContext("2d");
             ctx.fillStyle = "#AFBFC9";
             ctx.fillRect(0, 0, width, height);
 
@@ -68,20 +39,8 @@ ScrollView
                      pos[gameList[i].round] = position;
                  }
              }
-        }
+		}
 
-
-         Brackets {
-             id: brackets
-             objectName: "brackets"
-             onRoundsChanged: {
-                 canvas.requestPaint();
-             }
-         }
-
-         Component.onCompleted: {
-
-         }
 
         function createHeader(ctx, rounds) {
 
@@ -113,7 +72,7 @@ ScrollView
         /*
         drawGame(0, 1,
                          {number:"10", name:"Les chardons pointus", score:"13" },
-                         {number:"27", name:"RenÃ© et Bernard", score:"2" });
+                         {number:"27", name:"René et Bernard", score:"2" });
         */
         function drawGame(round, position, t1, t2) {
 
@@ -245,5 +204,8 @@ ScrollView
           }
 
         }
-    }
-}
+	</script>
+<body>
+<canvas id="myCanvas" width="200" height="100"></canvas>	
+</body>
+</html>
