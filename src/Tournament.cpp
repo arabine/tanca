@@ -283,6 +283,8 @@ void Tournament::GeneratePlayerRanking(const DbManager &mDb, const QList<Event> 
             }
         }
     }
+
+    std::sort(mRanking.begin(), mRanking.end(), RankHighFirst);
 }
 
 bool Tournament::GetTeamRank(int id, Rank &outRank)
