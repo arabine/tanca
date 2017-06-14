@@ -34,7 +34,7 @@
 #include "ui_MainWindow.h"
 #include "ui_RewardWindow.h"
 
-static const QString gVersion = "1.8";
+static const QString gVersion = "1.9";
 
 // Table headers
 QStringList gGamesTableHeader;
