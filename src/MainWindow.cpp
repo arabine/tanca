@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("Tanca " + gVersion + " - Logiciel de gestion de club et de concours de pétanque.");
 
     // Setup signals for the menu
-    connect(ui->actionImporter, &QAction::triggered, this, &MainWindow::slotImportFile);
+    connect(ui->actionImporter, &QAction::triggered, this, &MainWindow::slotImportPlayerFile);
     connect(ui->actionQuitter, &QAction::triggered, this, &QCoreApplication::quit);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::slotAboutBox);
 
@@ -160,6 +160,48 @@ void MainWindow::Initialize()
     UpdateSeasons();
 }
 
+void MainWindow::ExportTable(QTableWidget *table, const QString &title)
+{
+    QString fileName = QFileDialog::getSaveFileName(this, title,
+                                 QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
+                                 tr("Excel CSV (*.csv)"));
+    if (!fileName.isEmpty())
+    {
+        TableHelper helper(table);
+        helper.Export(fileName);
+    }
+}
+
+void MainWindow::slotTabChanged(int index)
+{
+    Q_UNUSED(index);
+    // Refresh ranking
+    UpdateRanking();
+    // Refresh team buttons
+
+    // Cannot edit teams if some games exist
+    if (mGames.size() == 0)
+    {
+        ui->buttonEditTeam->setEnabled(true);
+        ui->buttonDeleteTeam->setEnabled(true);
+    }
+    else
+    {
+        ui->buttonEditTeam->setEnabled(false);
+        ui->buttonDeleteTeam->setEnabled(false);
+    }
+}
+
+void MainWindow::slotAboutBox()
+{
+    QDialog about;
+    uiAboutBox.setupUi(&about);
+    about.exec();
+}
+
+// ===========================================================================================
+// PLAYERS MANAGEMENT
+// ===========================================================================================
 void MainWindow::UpdatePlayersTable()
 {
     TableHelper helper(ui->playersWidget);
@@ -184,182 +226,27 @@ void MainWindow::UpdatePlayersTable()
     helper.Finish();
 }
 
-void MainWindow::slotImportFile()
-{
-    QString fileName = QFileDialog::getOpenFileName(this,
-         tr("Ouvrir un fichier CSV"), QStandardPaths::displayName(QStandardPaths::DocumentsLocation), tr("Fichier CSV (*.csv)"));
-
-    QFile file(fileName);
-
-    if (file.exists())
-    {
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            TLogError("Cannot open CSV file: " + fileName.toStdString());
-        }
-        else
-        {
-            while (!file.atEnd())
-            {
-                QString line = file.readLine();
-                QStringList exploded = line.split(";");
-
-                // We need at least 5 information for a player
-                if (exploded.size() >= 5)
-                {
-                    // Add this new player, if not already exist in the database
-                    Player p;
-
-                    p.lastName = exploded.at(0);
-                    p.name = exploded.at(1);
-                    p.road = exploded.at(2);
-                    p.email = exploded.at(3);
-                    p.mobilePhone = exploded.at(4);
-
-                    QString fullname = p.name + " " + p.lastName;
-
-                    if (!mDatabase.PlayerExists(p) && mDatabase.IsValid(p))
-                    {
-                        if (mDatabase.AddPlayer(p))
-                        {
-                            std::cout << "Imported player: " << fullname.toStdString() << std::endl;
-                        }
-                        else
-                        {
-                            TLogError("Import failed for player: " + fullname.toStdString());
-                        }
-                    }
-                    else
-                    {
-                        TLogError("Player " + fullname.toStdString() + " is invalid or already exists in the database, cannot import it");
-                    }
-                }
-                else
-                {
-                    TLogError("Bad CSV file format");
-                }
-            }
-        }
-    }
-    else
-    {
-        TLogError("Cannot find CSV file: " + fileName.toStdString());
-    }
-}
-
-
 void MainWindow::slotAddPlayer()
 {
-    Player newPlayer;
-    playerWindow->SetPlayer(newPlayer);
-    if (playerWindow->exec() == QDialog::Accepted)
+    if (playerWindow->AddPlayer(mDatabase))
     {
-        playerWindow->GetPlayer(newPlayer);
-        if (mDatabase.AddPlayer(newPlayer))
-        {
-            UpdatePlayersTable();
-        }
-        else
-        {
-            TLogError("Cannot add player!");
-        }
+        UpdatePlayersTable();
     }
 }
 
 void MainWindow::slotEditPlayer()
 {
-    TableHelper helper(ui->playersWidget);
-
-    int id;
-    if (helper.GetFirstColumnValue(id))
+    if (playerWindow->EditPlayer(mDatabase, ui->playersWidget))
     {
-        Player p;
-        if (mDatabase.FindPlayer(id, p))
-        {
-            playerWindow->SetPlayer(p);
-            if (playerWindow->exec() == QDialog::Accepted)
-            {
-                playerWindow->GetPlayer(p);
-                if (mDatabase.EditPlayer(p))
-                {
-                    UpdatePlayersTable();
-                }
-                else
-                {
-                    TLogError("Cannot edit player!");
-                }
-            }
-        }
+        UpdatePlayersTable();
     }
 }
 
 void MainWindow::slotDeletePlayer()
 {
-
-    TableHelper helper(ui->playersWidget);
-
-    int id;
-    if (helper.GetFirstColumnValue(id))
+    if (playerWindow->DeletePlayer(mDatabase, ui->playersWidget))
     {
-        Player p;
-        if (mDatabase.FindPlayer(id, p))
-        {
-            bool canDelete = true;
-            // We allow deleting a player if there is no any game finished for him
-            QList<Team> teams = mDatabase.GetTeamsByPlayerId(id);
-
-            if (teams.size() > 0)
-            {
-                // Check if the player has played some games
-                foreach (Team team, teams)
-                {
-                    Event event = mDatabase.GetEvent(team.eventId);
-
-                    if (event.IsValid())
-                    {
-                        canDelete = false;
-                    }
-                }
-            }
-
-            if (canDelete)
-            {
-                // Granted to delete, actually do it!
-                if (mDatabase.DeletePlayer(id))
-                {
-                    UpdatePlayersTable();
-                    (void)QMessageBox::information(this, tr("Suppression d'un joueur"),
-                                        tr("Suppression du joueur réussie."),
-                                        QMessageBox::Ok);
-                }
-                else
-                {
-                    (void)QMessageBox::critical(this, tr("Suppression d'un joueur"),
-                                        tr("La tentative de suppression a échoué."),
-                                        QMessageBox::Ok);
-                }
-            }
-            else
-            {
-                (void)QMessageBox::critical(this, tr("Suppression d'un joueur"),
-                                        tr("Impossible de supprimer un joueur ayant participé à un événement.\n"
-                                           "Supprimez l'événement d'abord."),
-                                        QMessageBox::Ok);
-            }
-        }
-    }
-}
-
-
-void MainWindow::ExportTable(QTableWidget *table, const QString &title)
-{
-    QString fileName = QFileDialog::getSaveFileName(this, title,
-                                 QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
-                                 tr("Excel CSV (*.csv)"));
-    if (!fileName.isEmpty())
-    {
-        TableHelper helper(table);
-        helper.Export(fileName);
+        UpdatePlayersTable();
     }
 }
 
@@ -368,41 +255,20 @@ void MainWindow::slotExportPlayers()
     ExportTable(ui->playersWidget, tr("Exporter la base de joueurs au format Excel (CSV)"));
 }
 
+void MainWindow::slotImportPlayerFile()
+{
+    if (playerWindow->ImportPlayerFile(mDatabase))
+    {
+        UpdatePlayersTable();
+    }
+}
+
+// ===========================================================================================
+// TEAMS MANAGEMENT
+// ===========================================================================================
 void MainWindow::slotExportTeams()
 {
      ExportTable(ui->teamTable, tr("Exporter la liste des équipes au format Excel (CSV)"));
-}
-
-void MainWindow::slotRankingOptionChanged(bool checked)
-{
-    Q_UNUSED(checked);
-    UpdateRanking();
-}
-
-void MainWindow::slotRankingLeft()
-{
-    if (mCurrentRankingRound > 1)
-    {
-        mCurrentRankingRound--;
-    }
-    UpdateRanking();
-}
-
-void MainWindow::slotRankingRight()
-{
-    int nbGames = mTeams.size() / 2;
-    if (mTeams.size()%2)
-    {
-        nbGames += 1;
-    }
-
-    int maxTurn = (nbGames == 0) ? 0 : (mGames.size() / nbGames);
-
-    if (mCurrentRankingRound < maxTurn)
-    {
-        mCurrentRankingRound++;
-    }
-    UpdateRanking();
 }
 
 void MainWindow::UpdateTeamList()
@@ -451,160 +317,12 @@ void MainWindow::UpdateTeamList()
     teamWindow->ListIds();
 }
 
-void MainWindow::slotEventItemActivated()
-{
-    mCurrentRankingRound = 1;
-    int row = ui->eventTable->currentRow();
-    if (row > -1)
-    {
-        int id;
-        TableHelper helper(ui->eventTable);
-
-        if (helper.GetFirstColumnValue(id))
-        {
-            mCurrentEvent = mDatabase.GetEvent(id);
-
-            if (mCurrentEvent.IsValid())
-            {
-                std::cout << "Current event id: " << mCurrentEvent.id << std::endl;
-                UpdateTeamList();
-                UpdateGameList();
-                UpdateRanking();
-            }
-            else
-            {
-                TLogError("Invalid event!");
-            }
-        }
-    }
-}
-
-void MainWindow::UpdateRewards()
-{
-    TableHelper helper(ui->tableRewards);
-    QList<Reward> rewards = mDatabase.GetRewardsForTeam(mSelectedTeam);
-
-    helper.Initialize(gRewardsTableHeader, rewards.size());
-
-    foreach (Reward reward, rewards)
-    {
-        QList<QVariant> rewardData;
-
-        rewardData << reward.id
-                 << QString("%1 €").arg(reward.total)
-                 << reward.comment;
-        helper.AppendLine(rewardData, false);
-    }
-
-    helper.Finish();
-}
-
-void MainWindow::slotTeamItemActivated()
-{
-    int row = ui->teamTable->currentRow();
-    if (row > -1)
-    {
-        int id;
-        TableHelper helper(ui->teamTable);
-
-        if (helper.GetFirstColumnValue(id))
-        {
-            mSelectedTeam = id;
-        }
-
-        mTournament.GenerateTeamRanking(mGames, mTeams, 99);
-
-        Rank rank;
-        if (mTournament.GetTeamRank(mSelectedTeam, rank))
-        {
-            ui->lblPlayedGames->setText(QString("%1").arg(rank.gamesLost + rank.gamesWon + rank.gamesDraw));
-            ui->lblWonGames->setText(QString("%1").arg(rank.gamesWon));
-        }
-
-        UpdateRewards();
-    }
-}
-
-void MainWindow::UpdateSeasons()
-{
-    QStringList seasons = mDatabase.GetSeasons();
-
-    ui->comboSeasons->clear();
-    ui->comboSeasons->addItems(seasons);
-    ui->comboSeasons->setCurrentIndex(seasons.size() - 1);
-
-    UpdateEventsTable();
-}
-
-void MainWindow::slotAddEvent()
-{
-    Event event;
-    eventWindow->SetEvent(event);
-    if (eventWindow->exec() == QDialog::Accepted)
-    {
-        eventWindow->GetEvent(event);
-        event.year = event.date.date().year();
-        if (mDatabase.AddEvent(event))
-        {
-            UpdateSeasons();
-        }
-    }
-}
-
-void MainWindow::slotEditEvent()
-{
-    TableHelper helper(ui->eventTable);
-
-    int id;
-    if (helper.GetFirstColumnValue(id))
-    {
-        eventWindow->SetEvent(mCurrentEvent);
-        if (eventWindow->exec() == QDialog::Accepted)
-        {
-            eventWindow->GetEvent(mCurrentEvent);
-            if (!mDatabase.EditEvent(mCurrentEvent))
-            {
-                TLogError("Cannot edit event!");
-            }
-            else
-            {
-                slotSeasonChanged(ui->comboSeasons->currentIndex());
-            }
-        }
-    }
-}
-
-void MainWindow::slotDeleteEvent()
-{
-    TableHelper helper(ui->eventTable);
-
-    int id;
-    if (helper.GetFirstColumnValue(id))
-    {
-        if (QMessageBox::warning(this, tr("Suppression d'un événement"),
-                                    tr("Attention ! Toutes les parties associées seront perdues. Continuer ?"),
-                                    QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok)
-        {
-            bool success = mDatabase.DeleteGameByEventId(id);
-            success = success && mDatabase.DeleteTeamByEventId(id);
-            success = success && mDatabase.DeleteEvent(id);
-
-            if (!success)
-            {
-                TLogError("Delete event failure");
-            }
-            UpdateSeasons();
-        }
-    }
-}
-
-
 void MainWindow::slotAddTeam()
 {
     int selection = ui->eventTable->currentRow();
     if (selection > -1)
     {
-        // Prepare widget contents        
+        // Prepare widget contents
         teamWindow->Initialize(mDatabase.GetPlayerList(), mPlayersInTeams, false);
 
         if (teamWindow->exec() == QDialog::Accepted)
@@ -685,6 +403,56 @@ void MainWindow::slotDeleteTeam()
     }
 }
 
+void MainWindow::slotTeamItemActivated()
+{
+    int row = ui->teamTable->currentRow();
+    if (row > -1)
+    {
+        int id;
+        TableHelper helper(ui->teamTable);
+
+        if (helper.GetFirstColumnValue(id))
+        {
+            mSelectedTeam = id;
+        }
+
+        mTournament.GenerateTeamRanking(mGames, mTeams, 99);
+
+        Rank rank;
+        if (mTournament.GetTeamRank(mSelectedTeam, rank))
+        {
+            ui->lblPlayedGames->setText(QString("%1").arg(rank.gamesLost + rank.gamesWon + rank.gamesDraw));
+            ui->lblWonGames->setText(QString("%1").arg(rank.gamesWon));
+        }
+
+        UpdateRewards();
+    }
+}
+
+
+// ===========================================================================================
+// REWARDS MANAGEMENT
+// ===========================================================================================
+void MainWindow::UpdateRewards()
+{
+    TableHelper helper(ui->tableRewards);
+    QList<Reward> rewards = mDatabase.GetRewardsForTeam(mSelectedTeam);
+
+    helper.Initialize(gRewardsTableHeader, rewards.size());
+
+    foreach (Reward reward, rewards)
+    {
+        QList<QVariant> rewardData;
+
+        rewardData << reward.id
+                 << QString("%1 €").arg(reward.total)
+                 << reward.comment;
+        helper.AppendLine(rewardData, false);
+    }
+
+    helper.Finish();
+}
+
 void MainWindow::slotAddReward()
 {
     QDialog dialog;
@@ -726,6 +494,71 @@ void MainWindow::slotDeleteReward()
     }
 }
 
+// ===========================================================================================
+// RANKING MANAGEMENT
+// ===========================================================================================
+void MainWindow::UpdateRanking()
+{
+    bool isSeason = ui->radioSeason->isChecked(); // Display option
+    TableHelper helper(ui->tableContest);
+
+    if (isSeason)
+    {
+        ui->lblRankingRound->setEnabled(false);
+        mTournament.GeneratePlayerRanking(mDatabase, mEvents);
+    }
+    else
+    {
+        ui->lblRankingRound->setEnabled(true);
+        ui->lblRankingRound->setText(QString().number(mCurrentRankingRound));
+        mTournament.GenerateTeamRanking(mGames, mTeams, mCurrentRankingRound);
+    }
+    helper.Show(mDatabase.GetPlayerList(), mTeams, isSeason, mTournament.GetRanking());
+
+    UpdateBrackets();
+}
+
+
+void MainWindow::slotRankingOptionChanged(bool checked)
+{
+    Q_UNUSED(checked);
+    UpdateRanking();
+}
+
+void MainWindow::slotRankingLeft()
+{
+    if (mCurrentRankingRound > 1)
+    {
+        mCurrentRankingRound--;
+    }
+    UpdateRanking();
+}
+
+void MainWindow::slotRankingRight()
+{
+    int nbGames = mTeams.size() / 2;
+    if (mTeams.size()%2)
+    {
+        nbGames += 1;
+    }
+
+    int maxTurn = (nbGames == 0) ? 0 : (mGames.size() / nbGames);
+
+    if (mCurrentRankingRound < maxTurn)
+    {
+        mCurrentRankingRound++;
+    }
+    UpdateRanking();
+}
+
+void MainWindow::slotExportRanking()
+{
+    ExportTable(ui->tableContest, tr("Exporter le classement au format Excel (CSV)"));
+}
+
+// ===========================================================================================
+// EVENT MANAGEMENT
+// ===========================================================================================
 void MainWindow::UpdateEventsTable()
 {
     TableHelper helper(ui->eventTable);
@@ -753,6 +586,109 @@ void MainWindow::UpdateEventsTable()
     }
 }
 
+void MainWindow::slotEventItemActivated()
+{
+    mCurrentRankingRound = 1;
+    int row = ui->eventTable->currentRow();
+    if (row > -1)
+    {
+        int id;
+        TableHelper helper(ui->eventTable);
+
+        if (helper.GetFirstColumnValue(id))
+        {
+            mCurrentEvent = mDatabase.GetEvent(id);
+
+            if (mCurrentEvent.IsValid())
+            {
+                std::cout << "Current event id: " << mCurrentEvent.id << std::endl;
+                UpdateTeamList();
+                UpdateGameList();
+                UpdateRanking();
+            }
+            else
+            {
+                TLogError("Invalid event!");
+            }
+        }
+    }
+}
+
+void MainWindow::slotAddEvent()
+{
+    Event event;
+    eventWindow->SetEvent(event);
+    if (eventWindow->exec() == QDialog::Accepted)
+    {
+        eventWindow->GetEvent(event);
+        event.year = event.date.date().year();
+        if (mDatabase.AddEvent(event))
+        {
+            UpdateSeasons();
+        }
+    }
+}
+
+void MainWindow::slotEditEvent()
+{
+    TableHelper helper(ui->eventTable);
+
+    int id;
+    if (helper.GetFirstColumnValue(id))
+    {
+        eventWindow->SetEvent(mCurrentEvent);
+        if (eventWindow->exec() == QDialog::Accepted)
+        {
+            eventWindow->GetEvent(mCurrentEvent);
+            if (!mDatabase.EditEvent(mCurrentEvent))
+            {
+                TLogError("Cannot edit event!");
+            }
+            else
+            {
+                slotSeasonChanged(ui->comboSeasons->currentIndex());
+            }
+        }
+    }
+}
+
+void MainWindow::slotDeleteEvent()
+{
+    TableHelper helper(ui->eventTable);
+
+    int id;
+    if (helper.GetFirstColumnValue(id))
+    {
+        if (QMessageBox::warning(this, tr("Suppression d'un événement"),
+                                    tr("Attention ! Toutes les parties associées seront perdues. Continuer ?"),
+                                    QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Ok)
+        {
+            bool success = mDatabase.DeleteGameByEventId(id);
+            success = success && mDatabase.DeleteTeamByEventId(id);
+            success = success && mDatabase.DeleteEvent(id);
+
+            if (!success)
+            {
+                TLogError("Delete event failure");
+            }
+            UpdateSeasons();
+        }
+    }
+}
+
+// ===========================================================================================
+// SEASONS MANAGEMENT
+// ===========================================================================================
+void MainWindow::UpdateSeasons()
+{
+    QStringList seasons = mDatabase.GetSeasons();
+
+    ui->comboSeasons->clear();
+    ui->comboSeasons->addItems(seasons);
+    ui->comboSeasons->setCurrentIndex(seasons.size() - 1);
+
+    UpdateEventsTable();
+}
 
 void MainWindow::slotSeasonChanged(int index)
 {
@@ -760,6 +696,9 @@ void MainWindow::slotSeasonChanged(int index)
     UpdateEventsTable();
 }
 
+// ===========================================================================================
+// GAMES MANAGEMENT
+// ===========================================================================================
 void MainWindow::slotGenerateGames()
 {
     if (mTeams.size()%2)
@@ -806,12 +745,6 @@ void MainWindow::slotGenerateGames()
     }
 }
 
-void MainWindow::slotAboutBox()
-{
-    QDialog about;
-    uiAboutBox.setupUi(&about);
-    about.exec();
-}
 
 bool MainWindow::FindGame(const int id, Game &game)
 {
@@ -983,47 +916,7 @@ void MainWindow::slotDeleteAllGames()
     }
 }
 
-
-void MainWindow::slotTabChanged(int index)
-{
-    Q_UNUSED(index);
-    // Refresh ranking
-    UpdateRanking();
-    // Refresh team buttons
-
-    // Cannot edit teams if some games exist
-    if (mGames.size() == 0)
-    {
-        ui->buttonEditTeam->setEnabled(true);
-        ui->buttonDeleteTeam->setEnabled(true);
-    }
-    else
-    {
-        ui->buttonEditTeam->setEnabled(false);
-        ui->buttonDeleteTeam->setEnabled(false);
-    }
-}
-
-void MainWindow::slotExportRanking()
-{
-    ExportTable(ui->tableContest, tr("Exporter le classement au format Excel (CSV)"));
-}
-
 void MainWindow::slotExportGames()
 {
     ExportTable(ui->gameTable, tr("Exporter la liste des parties au format Excel (CSV)"));
 }
-
-void MainWindow::UpdateRanking()
-{
-    bool isSeason = ui->radioSeason->isChecked(); // Display option
-    TableHelper helper(ui->tableContest);
-
-    ui->lblRankingRound->setText(QString().number(mCurrentRankingRound));
-
-    mTournament.GenerateTeamRanking(mGames, mTeams, mCurrentRankingRound);
-    helper.Show(mDatabase.GetPlayerList(), mTeams, isSeason, mTournament.GetRanking());
-
-    UpdateBrackets();
-}
-

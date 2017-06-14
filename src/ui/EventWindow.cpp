@@ -41,6 +41,7 @@ void EventWindow::GetEvent(Event &event)
     event.state = ui.comboState->currentIndex();
     event.title = ui.lineTitle->text();
     event.type = ui.comboType->currentIndex();
+    event.option = ui.checkBoxSeasonRanking->isChecked() ? Event::cOptionSeasonRanking : Event::cNoOption;
 }
 
 void EventWindow::SetEvent(const Event &event)
@@ -49,6 +50,15 @@ void EventWindow::SetEvent(const Event &event)
     ui.comboState->setCurrentIndex(event.state);
     ui.lineTitle->setText(event.title);
     ui.comboType->setCurrentIndex(event.type);
+
+    if (event.HasOption(Event::cOptionSeasonRanking))
+    {
+        ui.checkBoxSeasonRanking->setChecked(true);
+    }
+    else
+    {
+        ui.checkBoxSeasonRanking->setChecked(false);
+    }
 }
 
 //=============================================================================

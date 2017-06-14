@@ -1,5 +1,8 @@
 #include "PlayerWindow.h"
 #include <QMessageBox>
+#include <QFileDialog>
+#include "Log.h"
+#include "TableHelper.h"
 
 PlayerWindow::PlayerWindow(QWidget *parent)
     : QDialog(parent)
@@ -143,4 +146,182 @@ void PlayerWindow::GetPlayer(Player &player)
     player.homePhone = ui.lineHomePhone->text();
     player.email = ui.lineMail->text();
 }
+
+bool PlayerWindow::AddPlayer(DbManager &db)
+{
+    bool success = false;
+    Player newPlayer;
+
+    SetPlayer(newPlayer);
+    if (exec() == QDialog::Accepted)
+    {
+        GetPlayer(newPlayer);
+        if (db.AddPlayer(newPlayer))
+        {
+            success = true;
+        }
+        else
+        {
+            TLogError("Cannot add player!");
+        }
+    }
+    return success;
+}
+
+bool PlayerWindow::EditPlayer(DbManager &db, QTableWidget *widget)
+{
+    bool success = false;
+    TableHelper helper(widget);
+
+    int id;
+    if (helper.GetFirstColumnValue(id))
+    {
+        Player p;
+        if (db.FindPlayer(id, p))
+        {
+            SetPlayer(p);
+            if (exec() == QDialog::Accepted)
+            {
+                GetPlayer(p);
+                if (db.EditPlayer(p))
+                {
+                    success = true;
+                }
+                else
+                {
+                    TLogError("Cannot edit player!");
+                }
+            }
+        }
+    }
+    return success;
+}
+
+bool PlayerWindow::DeletePlayer(DbManager &db, QTableWidget *widget)
+{
+    bool success = false;
+
+    TableHelper helper(widget);
+
+    int id;
+    if (helper.GetFirstColumnValue(id))
+    {
+        Player p;
+        if (db.FindPlayer(id, p))
+        {
+            bool canDelete = true;
+            // We allow deleting a player if there is no any game finished for him
+            QList<Team> teams = db.GetTeamsByPlayerId(id);
+
+            if (teams.size() > 0)
+            {
+                // Check if the player has played some games
+                foreach (Team team, teams)
+                {
+                    Event event = db.GetEvent(team.eventId);
+
+                    if (event.IsValid())
+                    {
+                        canDelete = false;
+                    }
+                }
+            }
+
+            if (canDelete)
+            {
+                // Granted to delete, actually do it!
+                if (db.DeletePlayer(id))
+                {
+                    success = true;
+                    (void)QMessageBox::information(this, tr("Suppression d'un joueur"),
+                                        tr("Suppression du joueur réussie."),
+                                        QMessageBox::Ok);
+                }
+                else
+                {
+                    (void)QMessageBox::critical(this, tr("Suppression d'un joueur"),
+                                        tr("La tentative de suppression a échoué."),
+                                        QMessageBox::Ok);
+                }
+            }
+            else
+            {
+                (void)QMessageBox::critical(this, tr("Suppression d'un joueur"),
+                                        tr("Impossible de supprimer un joueur ayant participé à un événement.\n"
+                                           "Supprimez l'événement d'abord."),
+                                        QMessageBox::Ok);
+            }
+        }
+    }
+
+    return success;
+}
+
+bool PlayerWindow::ImportPlayerFile(DbManager &db)
+{
+    bool importNoError = true;
+    QString fileName = QFileDialog::getOpenFileName(this,
+         tr("Ouvrir un fichier CSV"), QStandardPaths::displayName(QStandardPaths::DocumentsLocation), tr("Fichier CSV (*.csv)"));
+
+    QFile file(fileName);
+
+    if (file.exists())
+    {
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            TLogError("Cannot open CSV file: " + fileName.toStdString());
+            importNoError = false;
+        }
+        else
+        {
+            while (!file.atEnd())
+            {
+                QString line = file.readLine();
+                QStringList exploded = line.split(";");
+
+                // We need at least 5 information for a player
+                if (exploded.size() >= 5)
+                {
+                    // Add this new player, if not already exist in the database
+                    Player p;
+
+                    p.lastName = exploded.at(0);
+                    p.name = exploded.at(1);
+                    p.road = exploded.at(2);
+                    p.email = exploded.at(3);
+                    p.mobilePhone = exploded.at(4);
+
+                    QString fullname = p.name + " " + p.lastName;
+
+                    if (!db.PlayerExists(p) && db.IsValid(p))
+                    {
+                        if (!db.AddPlayer(p))
+                        {
+                            TLogError("Import failed for player: " + fullname.toStdString());
+                            importNoError = false;
+                        }
+                    }
+                    else
+                    {
+                        TLogError("Player " + fullname.toStdString() + " is invalid or already exists in the database, cannot import it");
+                        importNoError = false;
+                    }
+                }
+                else
+                {
+                    TLogError("Bad CSV file format");
+                    importNoError = false;
+                }
+            }
+        }
+    }
+    else
+    {
+        TLogError("Cannot find CSV file: " + fileName.toStdString());
+        importNoError = false;
+    }
+
+    return importNoError;
+}
+
 

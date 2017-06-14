@@ -113,6 +113,7 @@ struct Event
     QString title;
     int state;
     int type;
+    int option;
     QString document;  // JSON document, reserved to store anything in the future
 
     // State
@@ -121,17 +122,27 @@ struct Event
     static const int cCanceled = 2;
 
     // Type
-    static const int cClubContest   = 0;
-    static const int cRoundRobin    = 1;
+    static const int cRoundRobin   = 0;
+    // type 1 was used in the past
     static const int cSwissRounds   = 2;
+
+    // Option, maybe manage it with a bitmask so that is can be used in many ways
+    static const int cNoOption   = 0;
+    static const int cOptionSeasonRanking = 1; // if set, count this event for the season ranking
 
     Event()
         : id(-1)
         , year(-1)
         , state(cNotStarted)
-        , type(cClubContest)
+        , type(cRoundRobin)
+        , option(cOptionSeasonRanking) // add default options with OR operator
     {
         date = QDateTime::currentDateTime();
+    }
+
+    bool HasOption(int opt) const
+    {
+        return (option & opt) != 0;
     }
 
     bool IsValid()
@@ -161,11 +172,7 @@ struct Event
 
     QString TypeToString()
     {
-        if (type == cClubContest)
-        {
-            return QObject::tr("Championnat du club");
-        }
-        else if (type == cRoundRobin)
+        if (type == cRoundRobin)
         {
             return QObject::tr("Tournoi type toutes rondes");
         }
@@ -180,7 +187,7 @@ struct Event
     }
 
     static QString Table() {
-        return "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, year INTEGER, title TEXT, state INTEGER, type INTEGER, document TEXT);";
+        return "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, year INTEGER, title TEXT, state INTEGER, type INTEGER, option INTEGER, document TEXT);";
     }
 };
 

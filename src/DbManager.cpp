@@ -9,6 +9,11 @@
 
 /**
  * History of changes
+ *
+ * 1.2
+ *      - Converted type "Club championship" into Round Robin
+ *      - Added "Season Ranking" option in Event
+ *
  * 1.0
  *      - Added Infos table
  *      - Added the 'number' column into 'teams' table
@@ -19,6 +24,7 @@
 static const QString gBaseVersion = "0.0";
 static const QString gVersion1_0 = "1.0";
 static const QString gVersion1_1 = "1.1";
+static const QString gVersion1_2 = "1.2";
 
 static QStringList MakeTables()
 {
@@ -114,13 +120,9 @@ void DbManager::Upgrade()
         if(query.exec())
         {
             qDebug() << "Upgrade table 'teams' to 1.0 success";
-            mInfos.version = gVersion1_0;
-            EditInfos();
         }
-        else
-        {
-            TLogError("Upgrade table 'teams' to 1.0 failed");
-        }
+        mInfos.version = gVersion1_0;
+        EditInfos();
     }
 
     if (mInfos.version == gVersion1_0)
@@ -134,15 +136,29 @@ void DbManager::Upgrade()
         if(AddPlayer(p, Player::cDummyPlayer))
         {
             qDebug() << "Upgrade table 'teams' to 1.1 success";
-            mInfos.version = gVersion1_1;
-            EditInfos();
         }
-        else
-        {
-            TLogError("Upgrade table 'teams' to 1.1 failed");
-        }
+        mInfos.version = gVersion1_1;
+        EditInfos();
     }
 
+    if (mInfos.version == gVersion1_1)
+    {
+        // Upgrade to the 1.2
+        query.prepare("ALTER TABLE events ADD COLUMN option INTEGER DEFAULT 0");
+        if(query.exec())
+        {
+            qDebug() << "Upgrade table 'events' to 1.2 success";
+            // Then update the type (RoundRobin = 1 is now 0)
+            query.prepare("UPDATE TABLE events SET type = 0 WHERE type = 1");
+            if(query.exec())
+            {
+                qDebug() << "Upgrade table 'events' to 1.2 success";
+            }
+        }
+
+        mInfos.version = gVersion1_2;
+        EditInfos();
+    }
 }
 
 void DbManager::Initialize()
@@ -466,13 +482,14 @@ bool DbManager::AddEvent(const Event& event)
     bool success = false;
 
     QSqlQuery queryAdd(mDb);
-    queryAdd.prepare("INSERT INTO events (year, date, title, state, type, document) VALUES (:year, :date, :title, :state, :type, :document)");
+    queryAdd.prepare("INSERT INTO events (year, date, title, state, type, option, document) VALUES (:year, :date, :title, :state, :type, :option, :document)");
 
     queryAdd.bindValue(":year", event.year);
     queryAdd.bindValue(":date", event.date.toString(Qt::ISODate));
     queryAdd.bindValue(":title", event.title);
     queryAdd.bindValue(":state", event.state);
     queryAdd.bindValue(":type", event.type);
+    queryAdd.bindValue(":option", event.option);
     queryAdd.bindValue(":document", event.document);
 
     if(queryAdd.exec())
@@ -494,7 +511,7 @@ bool DbManager::EditEvent(const Event& event)
 
     QSqlQuery queryEdit(mDb);
 
-    queryEdit.prepare("UPDATE events SET year = :year, date = :date, title = :title, state = :state, type = :type, document = :document WHERE id = :id");
+    queryEdit.prepare("UPDATE events SET year = :year, date = :date, title = :title, state = :state, type = :type, option = :option, document = :document WHERE id = :id");
 
     queryEdit.bindValue(":id", event.id);
     queryEdit.bindValue(":year", event.year);
@@ -502,16 +519,17 @@ bool DbManager::EditEvent(const Event& event)
     queryEdit.bindValue(":title", event.title);
     queryEdit.bindValue(":state", event.state);
     queryEdit.bindValue(":type", event.type);
+    queryEdit.bindValue(":option", event.option);
     queryEdit.bindValue(":document", event.document);
 
     if(queryEdit.exec())
     {
-        qDebug() << "Edit game success";
+        qDebug() << "Edit event success";
         success = true;
     }
     else
     {
-        TLogError("Edit game failed: " + queryEdit.lastError().text().toStdString());
+        TLogError("Edit event failed: " + queryEdit.lastError().text().toStdString());
     }
     return success;
 }
@@ -534,6 +552,7 @@ Event DbManager::GetEvent(int id)
             event.title = query.value("title").toString();
             event.state = query.value("state").toInt();
             event.type = query.value("type").toInt();
+            event.option = query.value("option").toInt();
             event.document = query.value("document").toString();
         }
         else
@@ -564,6 +583,7 @@ QList<Event> DbManager::GetEvents(int year)
             event.title = query.value("title").toString();
             event.state = query.value("state").toInt();
             event.type = query.value("type").toInt();
+            event.option = query.value("option").toInt();
             event.document = query.value("document").toString();
             result.append(event);
         }

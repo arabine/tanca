@@ -77,7 +77,7 @@ private slots:
     void slotGenerateGames();
     void slotAboutBox();
 
-    void slotImportFile();
+    void slotImportPlayerFile();
     void slotExportRanking();
     void slotExportGames();
     void slotTabChanged(int index);

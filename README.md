@@ -65,6 +65,7 @@ s'il n'est pas encore terminé.
  - TODO: Choix prise en compte d'un tournoi dans le calcul du championnat
  - TODO: classement du championnat à corriger
  - Brackets dans navigateur via websockets
+ - Mieux gérer l'état des événements
 
 ### V1.8
 

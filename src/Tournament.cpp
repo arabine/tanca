@@ -159,10 +159,6 @@ QString Tournament::ToJsonString(const QList<Game> &games, const QList<Team> &te
 
                 json.append(game);
             }
-            else
-            {
-                TLogError(std::string(__PRETTY_FUNCTION__) + std::string(": Internal problem: cannot find team"));
-            }
         }
 
         QJsonDocument toJson(json);
@@ -256,7 +252,7 @@ void Tournament::GeneratePlayerRanking(const DbManager &mDb, const QList<Event> 
 
     foreach (Event event, events)
     {
-        if (event.state != Event::cCanceled)
+        if ((event.state != Event::cCanceled) && event.HasOption(Event::cOptionSeasonRanking))
         {
             bool ok = true;
             if (ok)
