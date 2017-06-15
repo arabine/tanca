@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Tanca"
-#define MyAppVersion "1.8"
+#define MyAppVersion "1.9"
 #define MyAppPublisher "Erigo.io"
 #define MyAppURL "http://www.tanca.fr"
 #define MyAppExeName "Tanca.exe"
@@ -34,19 +34,16 @@ Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "U:\build-tanca\release\Tanca.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\5.7\mingw53_32\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\5.7\mingw53_32\bin\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\5.7\mingw53_32\bin\libwinpthread-1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\5.7\mingw53_32\bin\Qt5Core.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\5.7\mingw53_32\bin\Qt5Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\5.7\mingw53_32\bin\Qt5QuickWidgets.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\5.7\mingw53_32\bin\Qt5Quick.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\5.7\mingw53_32\bin\Qt5Network.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\5.7\mingw53_32\bin\Qt5Qml.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\5.7\mingw53_32\bin\Qt5Sql.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\5.7\mingw53_32\bin\Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Qt\5.7\mingw53_32\plugins\platforms\qwindows.dll"; DestDir: "{app}/platforms"; Flags: ignoreversion
+Source: "..\..\build-tanca\release\Tanca.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.8\mingw53_32\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.8\mingw53_32\bin\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.8\mingw53_32\bin\libwinpthread-1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.8\mingw53_32\bin\Qt5Core.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.8\mingw53_32\bin\Qt5Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.8\mingw53_32\bin\Qt5Network.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.8\mingw53_32\bin\Qt5Sql.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.8\mingw53_32\bin\Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Qt\5.8\mingw53_32\plugins\platforms\qwindows.dll"; DestDir: "{app}/platforms"; Flags: ignoreversion
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

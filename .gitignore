@@ -3,12 +3,5 @@
 *.exe
 *.user
 
-build-tanca/debug/obj/
+build-tanca/*
 
-build-tanca/debug/ui/
-
-build-tanca/debug/moc/
-
-build-tanca/debug/rcc/
-
-build-tanca/debug/
