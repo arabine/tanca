@@ -150,11 +150,14 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    mServer.Stop();
     delete ui;
 }
 
 void MainWindow::Initialize()
 {
+    mServer.Initialize();
+
     // Initialize views
     UpdatePlayersTable();
     UpdateSeasons();
@@ -766,7 +769,7 @@ void MainWindow::UpdateBrackets()
 {
     QString json = mTournament.ToJsonString(mGames, mTeams);
 
-    // FIXME: Send json document to all connected clients
+    mServer.SetGames(json.toStdString());
 }
 
 

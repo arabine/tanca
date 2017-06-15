@@ -36,6 +36,7 @@
 #include "EventWindow.h"
 #include "ui_AboutWindow.h"
 #include "Tournament.h"
+#include "Server.h"
 
 namespace Ui {
 class MainWindow;
@@ -111,6 +112,7 @@ private:
     Tournament mTournament;
     int mCurrentRankingRound;
     int mSelectedTeam;
+    Server mServer;
 
     void UpdateTeamList();
     bool FindPlayer(int id, Player &player);
