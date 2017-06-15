@@ -58,14 +58,14 @@ s'il n'est pas encore terminé.
  - Tournoi avec poules qualiticatives
 
 
-### V1.9 (Next)
+### V1.9
 
  - Importante correction de l'algorithme d'appairement en mode "tournoi suisse"
  - L'écran de pointage permet d'éditer le tour et affiche le numéro des équipes
- - TODO: Choix prise en compte d'un tournoi dans le calcul du championnat
- - TODO: classement du championnat à corriger
+ - Prise en compte d'un tournoi dans le calcul du championnat sous forme d'option
+ - Correction du classement de la saison
  - Brackets dans navigateur via websockets
- - Mieux gérer l'état des événements
+ - Nouvelle icône
 
 ### V1.8
 
@@ -196,4 +196,22 @@ This continues through week n-1, in this case,
 2 8 7 6
 
 If n is odd, do the same thing but add a dummy team. Whoever is matched against the dummy team gets a bye that week.
+
+
+# Network protocol
+
+Since version 1.9, Tanca has a built-in TCP/IP server that supports JSON requests and can be used
+for external applications.
+
+An example is provided in standard that shows a brackets graphical view of current event.
+
+## Command line test
+
+On windows: netstat -aon to list TCP ports, 9620 and 9621 (WebSocket) should be in listen state.
+
+ncat.exe 127.0.0.1 9620 to get the current games list, if any
+
+
+
+
 
