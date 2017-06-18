@@ -23,6 +23,13 @@ OBJECTS_DIR     = $$DESTDIR/obj
 RCC_DIR         = $$DESTDIR/rcc
 MOC_DIR         = $$DESTDIR/moc
 
+
+# ------------------------------------------------------------------------------
+# ICL Configuration
+# ------------------------------------------------------------------------------
+
+#CONFIG += ICL_DB
+
 ICL_DIR = $$BASE_DIR/src/icl
 include($$ICL_DIR/icl.pri)
 
