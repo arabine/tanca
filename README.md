@@ -51,12 +51,15 @@ s'il n'est pas encore terminé.
   - Calendrier club (événements)
   - Calendrier Bureau (absences, réunions)
 
-
 ### V2.0 (Backlog)
 
  - Tournois simple et double élémination
  - Tournoi avec poules qualiticatives
 
+### V1.10
+
+ - FIX: ranger les événements dans l'ordre chronologique
+ - Classements : ajouter une colonne numéro de ligne
 
 ### V1.9
 
