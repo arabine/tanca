@@ -59,6 +59,7 @@ s'il n'est pas encore terminé.
 ### V1.10
 
  - FIX: ranger les événements dans l'ordre chronologique
+ - FIX: affichage du score 0 dans le WebView brackets
  - Classements : ajouter une colonne numéro de ligne
 
 ### V1.9
