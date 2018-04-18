@@ -185,12 +185,12 @@ void MainWindow::slotTabChanged(int index)
     // Cannot edit teams if some games exist
     if (mGames.size() == 0)
     {
-        ui->buttonEditTeam->setEnabled(true);
         ui->buttonDeleteTeam->setEnabled(true);
+        ui->buttonAddTeam->setEnabled(true);
     }
     else
     {
-        ui->buttonEditTeam->setEnabled(false);
+        ui->buttonAddTeam->setEnabled(false);
         ui->buttonDeleteTeam->setEnabled(false);
     }
 }
@@ -308,12 +308,12 @@ void MainWindow::UpdateTeamList()
     // Cannot edit teams if some games exist
     if (mGames.size() == 0)
     {
-        ui->buttonEditTeam->setEnabled(true);
+        ui->buttonAddTeam->setEnabled(true);
         ui->buttonDeleteTeam->setEnabled(true);
     }
     else
     {
-        ui->buttonEditTeam->setEnabled(false);
+        ui->buttonAddTeam->setEnabled(false);
         ui->buttonDeleteTeam->setEnabled(false);
     }
 
@@ -344,42 +344,34 @@ void MainWindow::slotAddTeam()
 
 void MainWindow::slotEditTeam()
 {
-    if (mGames.size() == 0)
+    TableHelper helper(ui->teamTable);
+
+    int id;
+    if (helper.GetFirstColumnValue(id))
     {
-        TableHelper helper(ui->teamTable);
-
-        int id;
-        if (helper.GetFirstColumnValue(id))
+        Team team;
+        if (Team::Find(mTeams, id, team))
         {
-            Team team;
-            if (Team::Find(mTeams, id, team))
+            // Prepare widget contents
+            teamWindow->Initialize(mDatabase.GetPlayerList(), mPlayersInTeams, true);
+
+            Player p1, p2;
+            (void) mDatabase.FindPlayer(team.player1Id, p1);
+            (void) mDatabase.FindPlayer(team.player2Id, p2);
+
+            teamWindow->SetTeam(p1, p2, team);
+
+            if (teamWindow->exec() == QDialog::Accepted)
             {
-                // Prepare widget contents
-                teamWindow->Initialize(mDatabase.GetPlayerList(), mPlayersInTeams, true);
-
-                Player p1, p2;
-                (void) mDatabase.FindPlayer(team.player1Id, p1);
-                (void) mDatabase.FindPlayer(team.player2Id, p2);
-
-                teamWindow->SetTeam(p1, p2, team);
-
-                if (teamWindow->exec() == QDialog::Accepted)
+                teamWindow->GetTeam(team);
+                team.number = teamWindow->GetNumber();
+                if (mDatabase.EditTeam(team))
                 {
-                    teamWindow->GetTeam(team);
-                    team.number = teamWindow->GetNumber();
-                    if (mDatabase.EditTeam(team))
-                    {
-                        UpdateTeamList();
-                    }
+                    UpdateTeamList();
+                    UpdateGameList();
                 }
             }
         }
-    }
-    else
-    {
-        (void) QMessageBox::warning(this, tr("Tanca"),
-                                    tr("Impossible d'éditer une équipe s'il existe des rencontres."),
-                                    QMessageBox::Ok);
     }
 }
 

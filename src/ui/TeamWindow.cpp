@@ -217,5 +217,15 @@ void TeamWindow::Update()
         AddRightEntry(p.name + " " + p.lastName);
     }
 
+    if (mSelection.size())
+    {
+         // Reset name when changes are performed
+        SetName("");
+    }
+    else
+    {
+        SetName(tr("EXEMPTE"));
+    }
+
     FinishUpdate();
 }
