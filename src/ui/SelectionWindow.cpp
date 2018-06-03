@@ -44,6 +44,26 @@ SelectionWindow::SelectionWindow(QWidget *parent, const QString &title, int minS
 
     connect(ui.playersTable, SIGNAL(itemSelectionChanged()), this, SLOT(slotPlayerItemActivated()));
     connect(ui.selectionList, &QListWidget::itemClicked, this, &SelectionWindow::slotSelectionItemActivated);
+    connect(ui.lineEditFilter, &QLineEdit::textChanged, this, &SelectionWindow::slotFilter);
+}
+
+void SelectionWindow::slotFilter()
+{
+    QString filter = ui.lineEditFilter->text();
+    for( int i = 0; i < ui.playersTable->rowCount(); ++i )
+    {
+        bool match = false;
+        for( int j = 0; j < ui.playersTable->columnCount(); ++j )
+        {
+            QTableWidgetItem *item = ui.playersTable->item( i, j );
+            if( item->text().contains(filter, Qt::CaseInsensitive) )
+            {
+                match = true;
+                break;
+            }
+        }
+        ui.playersTable->setRowHidden( i, !match );
+    }
 }
 
 void SelectionWindow::SetLabelNumber(const QString &name)

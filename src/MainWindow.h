@@ -89,6 +89,7 @@ private slots:
     void slotRankingRight();
     void slotDeleteAllGames();
     void slotTeamItemActivated();
+    void slotFilterPlayer();
 private:
     void UpdatePlayersTable();
 

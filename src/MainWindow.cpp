@@ -34,7 +34,7 @@
 #include "ui_MainWindow.h"
 #include "ui_RewardWindow.h"
 
-static const QString gVersion = "1.9";
+static const QString gVersion = "1.11";
 
 // Table headers
 QStringList gGamesTableHeader;
@@ -106,6 +106,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->buttonEditPlayer, &QPushButton::clicked, this, &MainWindow::slotEditPlayer);
     connect(ui->buttonDeletePlayer, &QPushButton::clicked, this, &MainWindow::slotDeletePlayer);
     connect(ui->buttonExportPlayers, &QPushButton::clicked, this, &MainWindow::slotExportPlayers);
+    connect(ui->lineEditPlayerFilter, &QLineEdit::textChanged, this, &MainWindow::slotFilterPlayer);
 
     // Setup signals for TAB 3: club championship management
     connect(ui->buttonAddEvent, &QPushButton::clicked, this, &MainWindow::slotAddEvent);
@@ -205,6 +206,26 @@ void MainWindow::slotAboutBox()
 // ===========================================================================================
 // PLAYERS MANAGEMENT
 // ===========================================================================================
+void MainWindow::slotFilterPlayer()
+{
+    QString filter = ui->lineEditPlayerFilter->text();
+    for( int i = 0; i < ui->playersWidget->rowCount(); ++i )
+    {
+        bool match = false;
+        for( int j = 0; j < ui->playersWidget->columnCount(); ++j )
+        {
+            QTableWidgetItem *item = ui->playersWidget->item( i, j );
+            if( item->text().contains(filter, Qt::CaseInsensitive) )
+            {
+                match = true;
+                break;
+            }
+        }
+        ui->playersWidget->setRowHidden( i, !match );
+    }
+}
+
+
 void MainWindow::UpdatePlayersTable()
 {
     TableHelper helper(ui->playersWidget);

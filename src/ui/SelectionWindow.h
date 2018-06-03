@@ -61,6 +61,7 @@ private slots:
     void slotPlayerItemActivated();
     void slotSelectionItemActivated(QListWidgetItem *item);
 
+    void slotFilter();
 protected:
     Ui::SelectionWindow ui;
 
