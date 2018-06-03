@@ -35,7 +35,7 @@
 QStringList InitEventRanking()
 {
     QStringList list;
-    list << QObject::tr("Id") << QObject::tr("Numéro") << QObject::tr("Équipe")
+    list << QObject::tr("Id") << QObject::tr("Rang") << QObject::tr("Numéro d'équipe") << QObject::tr("Équipe")
          << QObject::tr("Parties gagnées") << QObject::tr("Parties perdues") << QObject::tr("Points marqués")
          << QObject::tr("Points concédés") << QObject::tr("Différence") << QObject::tr("Buchholz");
     return list;
@@ -45,9 +45,9 @@ QStringList InitEventRanking()
 QStringList InitSeasonRanking()
 {
     QStringList list;
-    list << QObject::tr("Id") << QObject::tr("Joueur") << QObject::tr("Parties gagnées")
+    list << QObject::tr("Id") << QObject::tr("Rang")  << QObject::tr("Joueur") << QObject::tr("Parties gagnées")
          << QObject::tr("Parties perdues") << QObject::tr("Points marqués")
-         << QObject::tr("Points concédés") << QObject::tr("Différence");
+         << QObject::tr("Points concédés") << QObject::tr("Différence") << QObject::tr("Parties jouées") ;
     return list;
 }
 
@@ -115,6 +115,24 @@ void TableHelper::Finish()
     mWidget->resizeColumnsToContents();
 }
 
+static bool IsInteger(QVariant::Type type)
+{
+    bool isInteger = false;
+
+    switch (type) {
+    case QVariant::Int:
+    case QVariant::UInt:
+    case QVariant::LongLong:
+    case QVariant::ULongLong:
+        isInteger = true;
+        break;
+    default:
+        break;
+    }
+
+    return isInteger;
+}
+
 void TableHelper::AppendLine(const QList<QVariant> &list, bool selected)
 {
     int column = 0;
@@ -122,7 +140,7 @@ void TableHelper::AppendLine(const QList<QVariant> &list, bool selected)
     foreach (QVariant data, list)
     {
         QTableWidgetItem *cell;
-        if (data.type() == QVariant::Int)
+        if (IsInteger(data.type()))
         {
             cell = new IntegerTableItem(data.toInt());
         }
@@ -187,6 +205,7 @@ void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, b
         Initialize(gEventRankingTableHeader, list.size());
     }
 
+    uint32_t line = 1;
     for (auto &rank : list)
     {
         if (isSeason)
@@ -196,7 +215,9 @@ void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, b
             if (Player::Find(players, rank.id, player))
             {
                 QList<QVariant> rowData;
-                rowData << player.id << player.FullName() << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference();
+
+                uint32_t nbGames = rank.gamesWon + rank.gamesLost + rank.gamesDraw;
+                rowData << player.id << line << player.FullName() << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference() << nbGames;
                 AppendLine(rowData, false);
             }
             else
@@ -211,7 +232,7 @@ void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, b
             if (Team::Find(teams, rank.id, team))
             {
                 QList<QVariant> rowData;
-                rowData << team.id << team.number << team.teamName << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference() << rank.pointsOpponents;
+                rowData << team.id << line << team.number << team.teamName << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference() << rank.pointsOpponents;
                 AppendLine(rowData, false);
             }
             else
@@ -219,6 +240,7 @@ void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, b
                 TLogError("Cannot find team to create ranking!");
             }
         }
+        line++;
     }
 
     Finish();
