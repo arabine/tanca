@@ -26,16 +26,43 @@ static const QString gVersion1_0 = "1.0";
 static const QString gVersion1_1 = "1.1";
 static const QString gVersion1_2 = "1.2";
 
+
+static std::string PlayersTable() {
+    return "CREATE TABLE IF NOT EXISTS players (id INTEGER PRIMARY KEY AUTOINCREMENT, uuid TEXT, name TEXT, last_name TEXT, nick_name TEXT, "
+            "email TEXT, mobile_phone TEXT, home_phone TEXT, birth_date TEXT, road TEXT, post_code INTEGER, city TEXT, "
+            "membership TEXT, comments TEXT, state INTEGER, document TEXT);";
+}
+
+static std::string EventsTable() {
+    return "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, year INTEGER, title TEXT, state INTEGER, type INTEGER, option INTEGER, document TEXT);";
+}
+
+static std::string TeamsTable() {
+    return "CREATE TABLE IF NOT EXISTS teams (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER, team_name TEXT, player1_id INTEGER, "
+            "player2_id INTEGER, player3_id INTEGER, state INTEGER, document TEXT);";
+}
+
+static std::string RewardsTable() {
+    return "CREATE TABLE IF NOT EXISTS rewards (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER, team_id INTEGER, "
+           "total INTEGER, comment TEXT, state INTEGER, document TEXT);";
+}
+
+static std::string GamesTable() {
+    return "CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER, turn INTEGER, team1_id INTEGER, "
+            "team2_id INTEGER, team1_score INTEGER, team2_score INTEGER, state INTEGER, document TEXT);";
+}
+
+
 static QStringList MakeTables()
 {
     QStringList tables;
 
-    tables << Player::Table();
-    tables << Event::Table();
-    tables << Team::Table();
-    tables << Game::Table();
+    tables << PlayersTable();
+    tables << EventsTable();
+    tables << TeamsTable();
+    tables << GamesTable();
     tables << Infos::Table();
-    tables << Reward::Table();
+    tables << RewardsTable();
 
     return tables;
 }

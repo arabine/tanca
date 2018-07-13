@@ -24,17 +24,12 @@
  */
 
 #include "Tournament.h"
-#include "DbManager.h"
 #include "Log.h"
 
 #include <iostream>
 #include <algorithm>
 #include <sstream>
 #include <random>
-
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QJsonDocument>
 
 static const int cHighCost = 10000;
 
@@ -86,7 +81,7 @@ void Rank::AddPoints(int gameId, int score, int oppScore)
         gamesDraw++;
     }
 
-    mGames.append(gameId);
+    mGames.push_back(gameId);
 }
 
 
@@ -112,9 +107,10 @@ int Tournament::Generate(int min, int max)
     return distribution(gen);
 }
 
-QString Tournament::ToJsonString(const QList<Game> &games, const QList<Team> &teams)
+#if 0
+std::string Tournament::ToJsonString(const std::deque<Game> &games, const std::deque<Team> &teams)
 {
-    QString rounds;
+    std::string rounds;
     if (games.size() > 0)
     {
         QJsonArray json;
@@ -172,6 +168,8 @@ QString Tournament::ToJsonString(const QList<Game> &games, const QList<Team> &te
     return rounds;
 }
 
+#endif
+
 void Tournament::Add(int id, int gameId, int score, int opponent)
 {
     if (!Contains(id))
@@ -210,7 +208,7 @@ bool Tournament::Contains(int id)
 
 // Find all the matches played by each opponent
 // Sum the points won, this is the Buchholz points
-void Tournament::ComputeBuchholz(const QList<Game> &games)
+void Tournament::ComputeBuchholz(const std::deque<Game> &games)
 {
     // Loop on each team
     for (auto &rank : mRanking)
@@ -244,13 +242,13 @@ void Tournament::ComputeBuchholz(const QList<Game> &games)
 }
 
 
-void Tournament::GeneratePlayerRanking(const DbManager &mDb, const QList<Event> &events)
+void Tournament::GeneratePlayerRanking(const std::deque<Game> &gameList, const std::deque<Team> &teamList, const std::deque<Event> &events)
 {
     mRanking.clear();
 
     mIsTeam = false;
 
-    foreach (Event event, events)
+    for (auto const &event : events)
     {
         if ((event.state != Event::cCanceled) && event.HasOption(Event::cOptionSeasonRanking))
         {
@@ -258,10 +256,10 @@ void Tournament::GeneratePlayerRanking(const DbManager &mDb, const QList<Event> 
             if (ok)
             {
                 // Search for every game played for this event
-                QList<Game> games = mDb.GetGamesByEventId(event.id);
-                QList<Team> teams = mDb.GetTeams(event.id);
+                std::deque<Game> games = Game::FindByEventId(gameList, event.id);
+                std::deque<Team> teams = Team::FindByEventId(teamList, event.id);
 
-                foreach (Game game, games)
+                for (auto const &game : games)
                 {
                     if (game.IsPlayed())
                     {
@@ -302,13 +300,13 @@ bool Tournament::GetTeamRank(int id, Rank &outRank)
     return ret;
 }
 
-void Tournament::GenerateTeamRanking(const QList<Game> &games, const QList<Team> &teams, int maxTurn)
+void Tournament::GenerateTeamRanking(const std::deque<Game> &games, const std::deque<Team> &teams, int maxTurn)
 {
     mRanking.clear();
     mByeTeamIds.clear();
     mIsTeam = true;
 
-    foreach (auto &game, games)
+    for (auto const &game : games)
     {
         if (game.IsPlayed() && (game.turn < maxTurn))
         {
@@ -350,22 +348,22 @@ void Tournament::GenerateTeamRanking(const QList<Game> &games, const QList<Team>
     std::sort(mRanking.begin(), mRanking.end(), RankHighFirst);
 }
 
-std::vector<Rank> Tournament::GetRanking()
+std::deque<Rank> Tournament::GetRanking()
 {
     return mRanking;
 }
 
 /*****************************************************************************/
-QString Tournament::BuildRoundRobinRounds(const QList<Team> &tlist, int nbRounds, QList<Game> &games)
+std::string Tournament::BuildRoundRobinRounds(const std::deque<Team> &tlist, std::uint32_t nbRounds, std::deque<Game> &games)
 {
-    QString error;
-    QList<Team> teams = tlist; // Local copy to manipulate the list
+    std::string error;
+    std::deque<Team> teams = tlist; // Local copy to manipulate the list
 
     if (teams.size()%2)
     {
         // odd numeber of team, add dummy one
         Team dummy;
-        teams.append(dummy);
+        teams.push_back(dummy);
     }
 
     int max_games = teams.size() / 2;
@@ -377,7 +375,7 @@ QString Tournament::BuildRoundRobinRounds(const QList<Team> &tlist, int nbRounds
     // Round-robin tournament algorithm
     if (teams.size() > nbRounds)
     {
-        for (int i = 0; i < nbRounds; i++)
+        for (uint32_t i = 0; i < nbRounds; i++)
         {
             // Create matches for this turn
             for (int j = 0; j < max_games; j++)
@@ -392,19 +390,23 @@ QString Tournament::BuildRoundRobinRounds(const QList<Team> &tlist, int nbRounds
                 game.team1Id = team.id;
                 game.team2Id = opp.id;
 
-                games.append(game);
+                games.push_back(game);
             }
 
             // Then rotate, keep first player always at the first place
-            Team first = teams.takeFirst();
-            Team last = teams.takeLast();
-            teams.prepend(last);
-            teams.prepend(first);
+            Team first = teams.front();
+            Team last = teams.back();
+
+            teams.pop_front();
+            teams.pop_back();
+
+            teams.push_front(last);
+            teams.push_front(first);
         }
     }
     else
     {
-        error = tr("pas assez de joueurs pour jouer %1 tours").arg(nbRounds);
+        error = "pas assez de joueurs pour joueur les tours demandés";
     }
     return error;
 }
@@ -418,7 +420,7 @@ inline bool IsMultipleOf(const T i_value, const T i_multiple)
            : false;
 }
 
-bool Tournament::HasPlayed(const QList<Game> &games, const Rank &rank, int oppId)
+bool Tournament::HasPlayed(const std::deque<Game> &games, const Rank &rank, int oppId)
 {
     bool hasPlayed = false;
     // 1. Loop through all the games played
@@ -443,7 +445,7 @@ bool Tournament::HasPlayed(const QList<Game> &games, const Rank &rank, int oppId
 
 // Take the first player in the list
 // Find the opponent, never played with it, with the nearest level
-int Tournament::FindtUnplayedIndex(const QList<Game> &games, const std::vector<int> &ranking)
+int Tournament::FindtUnplayedIndex(const std::deque<Game> &games, const std::deque<int> &ranking)
 {
     int index = -1;
     if (ranking.size() >= 2)
@@ -477,7 +479,7 @@ int Tournament::FindtUnplayedIndex(const QList<Game> &games, const std::vector<i
     return index;
 }
 
-bool Tournament::AlreadyPlayed(const QList<Game> &games, int p1Id, int p2Id)
+bool Tournament::AlreadyPlayed(const std::deque<Game> &games, int p1Id, int p2Id)
 {
     // Get the rank for the first team
     int rankIndex = FindRankIndex(p1Id);
@@ -485,7 +487,7 @@ bool Tournament::AlreadyPlayed(const QList<Game> &games, int p1Id, int p2Id)
 }
 
 
-void PrintMatrix(const std::vector<int> &row, const std::vector<std::vector<int>> &matrix)
+void PrintMatrix(const std::deque<int> &row, const std::deque<std::deque<int>> &matrix)
 {
     // Print header
     for (unsigned int i = 0; i < row.size(); i++)
@@ -513,9 +515,9 @@ struct Point
 };
 
 struct Solution {
-    QList<Point> tree;
+    std::deque<Point> tree;
     int totalCost;
-    std::vector<int> taken;  // 1 if column is taken
+    std::deque<int> taken;  // 1 if column is taken
     int depth;
 
     Solution(int size)
@@ -538,7 +540,7 @@ private:
 };
 
 
-void FindSolution(QList<Solution> &list, Solution &s, const std::vector<int> &teamIds, const std::vector<std::vector<int>> &cost, std::uint32_t col, std::uint32_t row)
+void FindSolution(std::deque<Solution> &list, Solution &s, const std::deque<int> &teamIds, const std::deque<std::deque<int>> &cost, std::uint32_t col, std::uint32_t row)
 {
     s.depth++;
     do
@@ -567,7 +569,7 @@ void FindSolution(QList<Solution> &list, Solution &s, const std::vector<int> &te
                     int pair_cost = cost[row][col];
                 //    std::cout << "Cost is: " << pair_cost << std::endl;
                     s2.totalCost += pair_cost;
-                    s2.tree.append(p);
+                    s2.tree.push_back(p);
 
                     // continues this path for the other rows
                     std::uint32_t r = row + 1;
@@ -584,7 +586,7 @@ void FindSolution(QList<Solution> &list, Solution &s, const std::vector<int> &te
                     {
                         if (s2.totalCost < cHighCost)
                         {
-                            list.append(s2);
+                            list.push_back(s2);
                         }
                         else
                         {
@@ -603,13 +605,13 @@ void FindSolution(QList<Solution> &list, Solution &s, const std::vector<int> &te
 
 
 
-bool Tournament::BuildPairing(const std::vector<int> &ranking,
-                              const std::vector<std::vector<int>> &cost,
-                              QList<Game> &newRounds)
+bool Tournament::BuildPairing(const std::deque<int> &ranking,
+                              const std::deque<std::deque<int>> &cost,
+                              std::deque<Game> &newRounds)
 {
     std::uint32_t size = cost[0].size();
-    QList<Solution> solutions;
-    std::vector<std::vector<int>> pairing(size);
+    std::deque<Solution> solutions;
+    std::deque<std::deque<int>> pairing(size);
 
     for (std::uint32_t i = 0; i < size; i++)
     {
@@ -663,7 +665,7 @@ bool Tournament::BuildPairing(const std::vector<int> &ranking,
         game.team1Id = ranking[p.col];
         game.team2Id = ranking[p.row];
 
-        newRounds.append(game);
+        newRounds.push_back(game);
     }
 
     std::cout << "======>  COST MATRIX " << std::endl;
@@ -674,9 +676,9 @@ bool Tournament::BuildPairing(const std::vector<int> &ranking,
     return (solutions.size() > 0);
 }
 
-void Tournament::BuildCost(const QList<Game> &games,
-                           std::vector<int> &ranking,
-                           std::vector<std::vector<int>> &cost_matrix)
+void Tournament::BuildCost(const std::deque<Game> &games,
+                           std::deque<int> &ranking,
+                           std::deque<std::deque<int>> &cost_matrix)
 {
     int size = ranking.size();
 
@@ -713,9 +715,9 @@ bool IsOdd(int size)
     return size%2;
 }
 
-QString Tournament::BuildSwissRounds(const QList<Game> &games, const QList<Team> &teams, QList<Game> &newRounds)
+std::string Tournament::BuildSwissRounds(const std::deque<Game> &games, const std::deque<Team> &teams, std::deque<Game> &newRounds)
 {
-    QString error;
+    std::string error;
     int eventId;
 
     if (teams.size() >= 2)
@@ -723,7 +725,7 @@ QString Tournament::BuildSwissRounds(const QList<Game> &games, const QList<Team>
         bool hasDummy = false;
         eventId = teams.at(0).eventId; // memorize the current event id
 
-        int nbGames = teams.size() / 2;
+        size_t nbGames = teams.size() / 2;
         if (teams.size()%2)
         {
             hasDummy = true;
@@ -762,7 +764,7 @@ QString Tournament::BuildSwissRounds(const QList<Game> &games, const QList<Team>
                 dummy.eventId = eventId;
 
                 // Create a local list of the ranking, keep only ids
-                std::vector<int> ranking;
+                std::deque<int> ranking;
                 for (auto &rank : mRanking)
                 {
                     ranking.push_back(rank.id);
@@ -795,18 +797,18 @@ QString Tournament::BuildSwissRounds(const QList<Game> &games, const QList<Team>
                     rank_size++;
                 }
 
-                std::vector<int> winners(ranking.begin(), ranking.begin() + rank_size);
-                std::vector<int> loosers(ranking.begin() + rank_size, ranking.end());
+                std::deque<int> winners(ranking.begin(), ranking.begin() + rank_size);
+                std::deque<int> loosers(ranking.begin() + rank_size, ranking.end());
 
                 std::cout << "---------------  WINNERS -------------------" << std::endl;
                 // Create a matrix and fill it
-                std::vector<std::vector<int>> cost_matrix(rank_size);
+                std::deque<std::deque<int>> cost_matrix(rank_size);
                 BuildCost(games, winners, cost_matrix);
                 bool success = BuildPairing(winners, cost_matrix, newRounds);
 
                 std::cout << "---------------  LOOSERS -------------------" << std::endl;
                 // Create a matrix and fill it
-                std::vector<std::vector<int>> cost_matrix2(loosers.size());
+                std::deque<std::deque<int>> cost_matrix2(loosers.size());
                 BuildCost(games, loosers, cost_matrix2);
                 success = success && BuildPairing(loosers, cost_matrix2, newRounds);
 

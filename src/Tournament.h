@@ -26,8 +26,7 @@
 #ifndef TOURNAMENT_H
 #define TOURNAMENT_H
 
-#include "DbManager.h"
-#include <QObject>
+#include "IDataBase.h"
 #include <list>
 
 struct Rank
@@ -41,7 +40,7 @@ public:
     int pointsOpponents;
     int id;
 
-    QList<int> mGames;
+    std::deque<int> mGames;
 
     Rank()
         : pointsWon(0)
@@ -63,46 +62,45 @@ public:
 };
 
 
-class Tournament : public QObject
+class Tournament
 {
-    Q_OBJECT
 
 public:
     Tournament();
     ~Tournament();
 
-    void GeneratePlayerRanking(const DbManager &mDb, const QList<Event> &events);
-    void GenerateTeamRanking(const QList<Game> &games, const QList<Team> &teams, int maxTurn);
+    void GeneratePlayerRanking(const std::deque<Game> &gameList, const std::deque<Team> &teamList, const std::deque<Event> &events);
+    void GenerateTeamRanking(const std::deque<Game> &games, const std::deque<Team> &teams, int maxTurn);
 
-    std::vector<Rank> GetRanking();
+    std::deque<Rank> GetRanking();
     bool GetTeamRank(int id, Rank &outRank);
 
-    QString ToJsonString(const QList<Game> &games, const QList<Team> &teams);
+   // std::string ToJsonString(const std::deque<Game> &games, const std::deque<Team> &teams);
     std::string RankingToString();
 
-    QString BuildRoundRobinRounds(const QList<Team> &tlist, int nbRounds, QList<Game> &games);
-    QString BuildSwissRounds(const QList<Game> &games, const QList<Team> &teams, QList<Game> &newRounds);
+    std::string BuildRoundRobinRounds(const std::deque<Team> &tlist, uint32_t nbRounds, std::deque<Game> &games);
+    std::string BuildSwissRounds(const std::deque<Game> &games, const std::deque<Team> &teams, std::deque<Game> &newRounds);
 
     static int Generate(int min, int max);
 private:
     bool mIsTeam;
 
-    std::vector<Rank> mRanking;
-    std::vector<int> mByeTeamIds; // list of teams that has a bye for that event
+    std::deque<Rank> mRanking;
+    std::deque<int> mByeTeamIds; // list of teams that has a bye for that event
 
-    void ComputeBuchholz(const QList<Game> &games);
+    void ComputeBuchholz(const std::deque<Game> &games);
     bool Contains(int id);
     int FindRankIndex(int id);
     void Add(int id, int gameId, int score, int opponent);
-    bool HasPlayed(const QList<Game> &games, const Rank &rank, int oppId);
-    int FindtUnplayedIndex(const QList<Game> &games, const std::vector<int> &ranking);
-    bool AlreadyPlayed(const QList<Game> &games, int p1Id, int p2Id);
-    bool BuildPairing(const std::vector<int> &ranking,
-                      const std::vector<std::vector<int> > &cost,
-                      QList<Game> &newRounds);
-    void BuildCost(const QList<Game> &games,
-                   std::vector<int> &ranking,
-                   std::vector<std::vector<int> > &cost_matrix);
+    bool HasPlayed(const std::deque<Game> &games, const Rank &rank, int oppId);
+    int FindtUnplayedIndex(const std::deque<Game> &games, const std::deque<int> &ranking);
+    bool AlreadyPlayed(const std::deque<Game> &games, int p1Id, int p2Id);
+    bool BuildPairing(const std::deque<int> &ranking,
+                      const std::deque<std::deque<int> > &cost,
+                      std::deque<Game> &newRounds);
+    void BuildCost(const std::deque<Game> &games,
+                   std::deque<int> &ranking,
+                   std::deque<std::deque<int> > &cost_matrix);
 };
 
 #endif // TOURNAMENT_H

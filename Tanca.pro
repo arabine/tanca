@@ -72,7 +72,7 @@ SOURCES += main.cpp MainWindow.cpp \
     SelectionWindow.cpp \
     ScoreWindow.cpp \
     Tournament.cpp \
-    src/Server.cpp
+    Server.cpp
     tests/test_tournament.cpp
 
 HEADERS  += MainWindow.h \
@@ -87,7 +87,8 @@ HEADERS  += MainWindow.h \
     SelectionWindow.h \
     ScoreWindow.h \
     Tournament.h \
-    src/Server.h
+    Server.h \
+    IDataBase.h
 
 FORMS    += MainWindow.ui \
     PlayerWindow.ui \
