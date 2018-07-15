@@ -760,7 +760,7 @@ std::string Tournament::BuildSwissRounds(const std::deque<Game> &games, const st
 
                 // Create a local list of the ranking, keep only ids
                 std::deque<int> ranking;
-                int i = 1;
+
                 for (auto &rank : mRanking)
                 {
                     Team team;
@@ -769,28 +769,35 @@ std::string Tournament::BuildSwissRounds(const std::deque<Game> &games, const st
                     ranking.push_back(rank.id);
                 }
 
+                // Create a matrix and fill it
+                std::deque<std::deque<int>> cost_matrix(ranking.size());
+                BuildCost(games, ranking, cost_matrix);
+                bool success = BuildPairing(ranking, cost_matrix, newRounds);
+
+
+
                 // Split in two vectors
-                unsigned int rank_size = ranking.size() / 2;
+//                unsigned int rank_size = ranking.size() / 2;
 
-                if (IsOdd(rank_size))
-                {
-                    rank_size++;
-                }
+//                if (IsOdd(rank_size))
+//                {
+//                    rank_size++;
+//                }
 
-                std::deque<int> winners(ranking.begin(), ranking.begin() + rank_size);
-                std::deque<int> loosers(ranking.begin() + rank_size, ranking.end());
+//                std::deque<int> winners(ranking.begin(), ranking.begin() + rank_size);
+//                std::deque<int> loosers(ranking.begin() + rank_size, ranking.end());
 
-                std::cout << "---------------  WINNERS -------------------" << std::endl;
-                // Create a matrix and fill it
-                std::deque<std::deque<int>> cost_matrix(rank_size);
-                BuildCost(games, winners, cost_matrix);
-                bool success = BuildPairing(winners, cost_matrix, newRounds);
+//                std::cout << "---------------  WINNERS -------------------" << std::endl;
+//                // Create a matrix and fill it
+//                std::deque<std::deque<int>> cost_matrix(rank_size);
+//                BuildCost(games, winners, cost_matrix);
+//                bool success = BuildPairing(winners, cost_matrix, newRounds);
 
-                std::cout << "---------------  LOOSERS -------------------" << std::endl;
-                // Create a matrix and fill it
-                std::deque<std::deque<int>> cost_matrix2(loosers.size());
-                BuildCost(games, loosers, cost_matrix2);
-                success = success && BuildPairing(loosers, cost_matrix2, newRounds);
+//                std::cout << "---------------  LOOSERS -------------------" << std::endl;
+//                // Create a matrix and fill it
+//                std::deque<std::deque<int>> cost_matrix2(loosers.size());
+//                BuildCost(games, loosers, cost_matrix2);
+//                success = success && BuildPairing(loosers, cost_matrix2, newRounds);
 
                 for (auto &game : newRounds)
                 {

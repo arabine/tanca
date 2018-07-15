@@ -46,8 +46,7 @@ QStringList InitSeasonRanking()
 {
     QStringList list;
     list << QObject::tr("Id") << QObject::tr("Rang")  << QObject::tr("Joueur") << QObject::tr("Gagnés")<< QObject::tr("Nuls")  << QObject::tr("Perdus")
-         << QObject::tr("Parties perdues") << QObject::tr("Points marqués")
-         << QObject::tr("Points concédés") << QObject::tr("Différence") << QObject::tr("Parties jouées") ;
+         << QObject::tr("Points marqués") << QObject::tr("Points concédés") << QObject::tr("Différence") << QObject::tr("Parties jouées") ;
     return list;
 }
 
