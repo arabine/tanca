@@ -28,6 +28,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
+#include "Value.h"
 #include "Log.h"
 #include "MainWindow.h"
 #include "TableHelper.h"
@@ -229,16 +230,14 @@ void MainWindow::slotFilterPlayer()
 void MainWindow::UpdatePlayersTable()
 {
     TableHelper helper(ui->playersWidget);
-    QList<Player> &list = mDatabase.GetPlayerList();
+    std::deque<Player> &list = mDatabase.GetPlayerList();
     helper.Initialize(gPlayersTableHeader, list.size());
 
     foreach (Player p, list)
     {
-        QList<QVariant> rowData;
-
-        rowData << p.id << p.uuid << p.name << p.lastName << p.nickName << p.email
-                << p.mobilePhone << p.homePhone << p.birthDate.toString(Qt::TextDate) << p.road << p.postCode
-                << p.city << p.membership << p.comments << p.state << p.document;
+        std::list<Value> rowData = {p.id, p.uuid, p.name, p.lastName, p.nickName, p.email
+               , p.mobilePhone, p.homePhone, Util::ToISODateTime(p.birthDate), p.road, p.postCode
+               , p.city, p.membership, p.comments, p.state, p.document};
 
         helper.AppendLine(rowData, false);
     }
@@ -309,18 +308,17 @@ void MainWindow::UpdateTeamList()
         Player p1, p2, p3;
         if (mDatabase.FindPlayer(team.player1Id, p1))
         {
-            mPlayersInTeams.append(team.player1Id);
+            mPlayersInTeams.push_back(team.player1Id);
         }
 
         if (mDatabase.FindPlayer(team.player2Id, p2))
         {
-            mPlayersInTeams.append(team.player2Id);
+            mPlayersInTeams.push_back(team.player2Id);
         }
 
         teamWindow->AddId(team.number);
 
-        QList<QVariant> rowData;
-        rowData << team.id << team.number << p1.FullName() << p2.FullName() << team.teamName;
+        std::list<Value> rowData = {team.id, team.number, p1.FullName(), p2.FullName(), team.teamName};
         helper.AppendLine(rowData, false);
     }
 
@@ -458,11 +456,7 @@ void MainWindow::UpdateRewards()
 
     foreach (Reward reward, rewards)
     {
-        QList<QVariant> rewardData;
-
-        rewardData << reward.id
-                 << QString("%1 €").arg(reward.total)
-                 << reward.comment;
+        std::list<Value> rewardData = {reward.id, std::to_string(reward.total), reward.comment};
         helper.AppendLine(rewardData, false);
     }
 
@@ -483,7 +477,7 @@ void MainWindow::slotAddReward()
         reward.teamId = mSelectedTeam;
         reward.total = ui.spinReward->value();
         reward.state = Reward::cStateRewardOk;
-        reward.comment = ui.lineRewardComment->text();
+        reward.comment = ui.lineRewardComment->text().toStdString();
 
         if (mDatabase.AddReward(reward))
         {
@@ -521,7 +515,19 @@ void MainWindow::UpdateRanking()
     if (isSeason)
     {
         ui->lblRankingRound->setEnabled(false);
-        mTournament.GeneratePlayerRanking(mDatabase, mEvents);
+        std::deque<Game> games;
+        std::deque<Team> teams;
+
+        for (auto const &i : mEvents)
+        {
+            std::deque<Game> g = mDatabase.GetGamesByEventId(i.id);
+            games.insert(games.end(), g.begin(), g.end());
+
+            std::deque<Team> t = mDatabase.GetTeams(i.id);
+            teams.insert(teams.end(), t.begin(), t.end());
+        }
+
+        mTournament.GeneratePlayerRanking(games, teams, mEvents);
     }
     else
     {
@@ -582,8 +588,7 @@ void MainWindow::UpdateEventsTable()
 
     foreach (Event event, mEvents)
     {
-        QList<QVariant> rowData;
-        rowData << event.id << event.date.toString("d MMMM yyyy") << event.TypeToString() << event.title << event.StateToString();
+        std::list<Value> rowData = {event.id, Util::DateTimeFormat(event.date, "%e %B"), TypeToString(event), event.title, StateToString(event)};
         helper.AppendLine(rowData, false);
     }
 
@@ -637,7 +642,7 @@ void MainWindow::slotAddEvent()
     if (eventWindow->exec() == QDialog::Accepted)
     {
         eventWindow->GetEvent(event);
-        event.year = event.date.date().year();
+        event.year = Util::GetYear(event.date);
         if (mDatabase.AddEvent(event))
         {
             UpdateSeasons();
@@ -725,8 +730,8 @@ void MainWindow::slotGenerateGames()
     }
     else
     {
-        QList<Game> games;
-        QString error;
+        std::deque<Game> games;
+        std::string error;
 
         if (mCurrentEvent.type == Event::cRoundRobin)
         {
@@ -755,7 +760,7 @@ void MainWindow::slotGenerateGames()
         {
             TLogError("Cannot build rounds!");
             (void) QMessageBox::warning(this, tr("Tanca"),
-                                        tr("Impossible de générer les parties : ") + error,
+                                        tr("Impossible de générer les parties : ") + QString(error.c_str()),
                                         QMessageBox::Ok);
         }
     }
@@ -765,7 +770,7 @@ void MainWindow::slotGenerateGames()
 bool MainWindow::FindGame(const int id, Game &game)
 {
     bool found = false;
-    for (int i = 0; i < mGames.size(); i++)
+    for (size_t i = 0; i < mGames.size(); i++)
     {
         if (mGames[i].id == id)
         {
@@ -780,7 +785,7 @@ bool MainWindow::FindGame(const int id, Game &game)
 
 void MainWindow::UpdateBrackets()
 {
-    QString json = mTournament.ToJsonString(mGames, mTeams);
+    QString json; // FIXME = mTournament.ToJsonString(mGames, mTeams);
 
     mServer.SetGames(json.toStdString());
 }
@@ -798,16 +803,15 @@ void MainWindow::UpdateGameList()
     foreach (Game game, mGames)
     {
         Team t1, t2;
-        QList<QVariant> gameData;
 
         // Be tolerant: only print found teams (forget return code)
         (void) Team::Find(mTeams, game.team1Id, t1);
         (void) Team::Find(mTeams, game.team2Id, t2);
 
-        gameData << game.id << (int)(game.turn + 1)
-                 << QString("(%1) ").arg(t1.number) + t1.teamName
-                 << QString("(%1) ").arg(t2.number) + t2.teamName
-                 << game.team1Score << game.team2Score;
+        std::list<Value> gameData = {game.id, (int)(game.turn + 1)
+                , "(" + std::to_string(t1.number) + ") " + t1.teamName
+                , "(" + std::to_string(t2.number) + ") " + t2.teamName
+                , game.team1Score, game.team2Score};
         helper.AppendLine(gameData, game.IsPlayed());
 
     }
@@ -829,8 +833,8 @@ void MainWindow::slotAddGame()
         game.eventId = mCurrentEvent.id;
         game.turn = gameWindow->GetNumber() - 1; // turns begin internally @ zero
 
-        QList<Game> list;
-        list.append(game);
+        std::deque<Game> list;
+        list.push_back(game);
         if (mDatabase.AddGames(list))
         {
             if (mCurrentEvent.state != Event::cStarted)
@@ -935,4 +939,40 @@ void MainWindow::slotDeleteAllGames()
 void MainWindow::slotExportGames()
 {
     ExportTable(ui->gameTable, tr("Exporter la liste des parties au format Excel (CSV)"));
+}
+
+std::string StateToString(const Event &event)
+{
+    if (event.state == Event::cNotStarted)
+    {
+        return "Non démarré";
+    }
+    else if (event.state == Event::cStarted)
+    {
+        return "En cours";
+    }
+    else if (event.state == Event::cCanceled)
+    {
+        return "Annulé";
+    }
+    else
+    {
+        return "";
+    }
+}
+
+std::string TypeToString(const Event &event)
+{
+    if (event.type == Event::cRoundRobin)
+    {
+        return "Tournoi type toutes rondes";
+    }
+    else if (event.type == Event::cSwissRounds)
+    {
+        return "Tournoi type Suisse";
+    }
+    else
+    {
+        return "";
+    }
 }

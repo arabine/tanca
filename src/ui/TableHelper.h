@@ -28,6 +28,7 @@
 
 #include <QtCore>
 #include <QTableWidget>
+#include "Value.h"
 #include "DbManager.h"
 #include "Tournament.h"
 
@@ -62,12 +63,12 @@ public:
 
     bool GetFirstColumnValue(int &value);
     void Initialize(const QStringList &header, int rows);
-    void AppendLine(const QList<QVariant> &list, bool selected);
+    void AppendLine(const std::list<Value> &list, bool selected);
     void Finish();
     void SetSelectedColor(const QColor &color);
     void SetAlternateColors(bool enable);
     void Export(const QString &fileName);
-    void Show(const QList<Player> &players, const QList<Team> &teams, bool isSeason, const std::vector<Rank> &list);
+    void Show(const std::deque<Player> &players, const std::deque<Team> &teams, bool isSeason, const std::deque<Rank> &list);
 
 private:
     QTableWidget *mWidget;

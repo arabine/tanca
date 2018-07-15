@@ -37,18 +37,18 @@ EventWindow::EventWindow(QWidget *parent)
 
 void EventWindow::GetEvent(Event &event)
 {
-    event.date = ui.dateTimeEdit->dateTime();
+    event.date = Util::FromISODateTime(ui.dateTimeEdit->dateTime().toString(Qt::ISODate).toStdString());
     event.state = ui.comboState->currentIndex();
-    event.title = ui.lineTitle->text();
+    event.title = ui.lineTitle->text().toStdString();
     event.type = ui.comboType->currentIndex();
     event.option = ui.checkBoxSeasonRanking->isChecked() ? Event::cOptionSeasonRanking : Event::cNoOption;
 }
 
 void EventWindow::SetEvent(const Event &event)
 {
-    ui.dateTimeEdit->setDateTime(event.date);
+    ui.dateTimeEdit->setDateTime(QDateTime::fromString(Util::ToISODateTime(event.date).c_str(), Qt::ISODate));
     ui.comboState->setCurrentIndex(event.state);
-    ui.lineTitle->setText(event.title);
+    ui.lineTitle->setText(event.title.c_str());
     ui.comboType->setCurrentIndex(event.type);
 
     if (event.HasOption(Event::cOptionSeasonRanking))

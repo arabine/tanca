@@ -40,7 +40,7 @@ public:
     void SetTeam(const Player &p1, const Player &p2, const Team &team);
     void GetTeam(Team &team);
 
-    void Initialize(const QList<Player> &players, const QList<int> &inTeams, bool isEdit);
+    void Initialize(const std::deque<Player> &players, const std::deque<int> &inTeams, bool isEdit);
 
     void ClickedRight(int index);
     void ClickedLeft(int id);
@@ -53,8 +53,8 @@ private slots:
     void slotAccept();
 
 private:
-    QList<Player> mList;
-    QList<Player> mSelection;
+    std::deque<Player> mList;
+    std::deque<Player> mSelection;
     UniqueId mTeamsId;
     bool mIsEdit;
 

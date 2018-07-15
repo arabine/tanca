@@ -115,38 +115,20 @@ void TableHelper::Finish()
     mWidget->resizeColumnsToContents();
 }
 
-static bool IsInteger(QVariant::Type type)
-{
-    bool isInteger = false;
-
-    switch (type) {
-    case QVariant::Int:
-    case QVariant::UInt:
-    case QVariant::LongLong:
-    case QVariant::ULongLong:
-        isInteger = true;
-        break;
-    default:
-        break;
-    }
-
-    return isInteger;
-}
-
-void TableHelper::AppendLine(const QList<QVariant> &list, bool selected)
+void TableHelper::AppendLine(const std::list<Value> &list, bool selected)
 {
     int column = 0;
 
-    foreach (QVariant data, list)
+    for (auto const &data : list)
     {
         QTableWidgetItem *cell;
-        if (IsInteger(data.type()))
+        if (data.GetType() == Value::INTEGER)
         {
-            cell = new IntegerTableItem(data.toInt());
+            cell = new IntegerTableItem(data.GetInteger());
         }
         else
         {
-            cell = new QTableWidgetItem(data.toString());
+            cell = new QTableWidgetItem(data.GetString().c_str());
         }
 
         if (selected)
@@ -191,7 +173,7 @@ void TableHelper::Export(const QString &fileName)
     }
 }
 
-void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, bool isSeason, const std::vector<Rank> &list)
+void TableHelper::Show(const std::deque<Player> &players, const std::deque<Team> &teams, bool isSeason, const std::deque<Rank> &list)
 {
     SetSelectedColor(QColor(245,245,220));
     SetAlternateColors(true);
@@ -205,7 +187,7 @@ void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, b
         Initialize(gEventRankingTableHeader, list.size());
     }
 
-    uint32_t line = 1;
+    int line = 1;
     for (auto &rank : list)
     {
         if (isSeason)
@@ -214,10 +196,8 @@ void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, b
             Player player;
             if (Player::Find(players, rank.id, player))
             {
-                QList<QVariant> rowData;
-
-                uint32_t nbGames = rank.gamesWon + rank.gamesLost + rank.gamesDraw;
-                rowData << player.id << line << player.FullName() << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference() << nbGames;
+                int nbGames = rank.gamesWon + rank.gamesLost + rank.gamesDraw;
+                std::list<Value> rowData = {player.id, line, player.FullName(), rank.gamesWon, rank.gamesLost, rank.pointsWon, rank.pointsLost, rank.Difference(), nbGames};
                 AppendLine(rowData, false);
             }
             else
@@ -231,8 +211,7 @@ void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, b
             Team team;
             if (Team::Find(teams, rank.id, team))
             {
-                QList<QVariant> rowData;
-                rowData << team.id << line << team.number << team.teamName << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference() << rank.pointsOpponents;
+                std::list<Value> rowData = {team.id, line, team.number, team.teamName, rank.gamesWon, rank.gamesLost, rank.pointsWon, rank.pointsLost, rank.Difference(), rank.pointsOpponents};
                 AppendLine(rowData, false);
             }
             else

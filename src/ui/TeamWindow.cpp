@@ -50,7 +50,7 @@ void TeamWindow::slotAccept()
 {
     bool ok = false;
 
-    if ((ui.selectionList->count() >= mMinSize) && (ui.selectionList->count() <= mMaxSize))
+    if ((ui.selectionList->count() >= (int)mMinSize) && (ui.selectionList->count() <= (int)mMaxSize))
     {
         ok = true;
     }
@@ -96,10 +96,10 @@ void TeamWindow::slotAccept()
 void TeamWindow::SetTeam(const Player &p1, const Player &p2, const Team &team)
 {
     mSelection.clear();
-    mSelection.append(p1);
-    mSelection.append(p2);
+    mSelection.push_back(p1);
+    mSelection.push_back(p2);
 
-    SetName(team.teamName);
+    SetName(team.teamName.c_str());
     SetNumber(team.number);
     Update();
 }
@@ -137,20 +137,21 @@ void TeamWindow::GetTeam(Team &team)
     }
     else
     {
-        team.teamName = name;
+        team.teamName = name.toStdString();
     }
 }
 
-void TeamWindow::Initialize(const QList<Player> &players, const QList<int> &inTeams, bool isEdit)
+void TeamWindow::Initialize(const std::deque<Player> &players, const std::deque<int> &inTeams, bool isEdit)
 {
     // Create a list of players that are still alone
     mList.clear();
-    foreach (Player p, players)
+    for (auto const & p : players)
     {
         // This player has no team, add it to the list of available players
-        if (!inTeams.contains(p.id))
+        //if (!inTeams.contains(p.id))
+        if (std::find(inTeams.begin(), inTeams.end(), p.id) == inTeams.end())
         {
-            mList.append(p);
+            mList.push_back(p);
         }
     }
 
@@ -173,8 +174,8 @@ void TeamWindow::ClickedRight(int index)
 {
     const Player &p = mSelection.at(index);
     // transfer to the left
-    mList.append(p);
-    mSelection.removeAt(index);
+    mList.push_back(p);
+    mSelection.erase(mSelection.begin() + index);
 
     Update();
 }
@@ -185,11 +186,11 @@ void TeamWindow::ClickedLeft(int id)
     if (Player::Find(mList, id, p) && (mSelection.size() < GetMaxSize()))
     {
         // transfer to the right and remove the player from the list
-        mSelection.append(p);
+        mSelection.push_back(p);
         int index;
         if (Player::Index(mList, id, index))
         {
-            mList.removeAt(index);
+            mList.erase(mList.begin() + index);
         }
     }
 
@@ -207,14 +208,13 @@ void TeamWindow::Update()
 
     foreach (Player p, mList)
     {
-        QList<QVariant> rowData;
-        rowData << p.id << p.name << p.lastName << p.nickName;
+        std::list<Value> rowData = {p.id, p.name, p.lastName, p.nickName};
         AddLeftEntry(rowData);
     }
 
     foreach (Player p, mSelection)
     {
-        AddRightEntry(p.name + " " + p.lastName);
+        AddRightEntry(p.FullName().c_str());
     }
 
     if (mSelection.size())

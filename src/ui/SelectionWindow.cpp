@@ -89,7 +89,7 @@ void SelectionWindow::FinishUpdate()
     mHelper.Finish();
 }
 
-void SelectionWindow::AddLeftEntry(const QList<QVariant> &rowData)
+void SelectionWindow::AddLeftEntry(const std::list<Value> &rowData)
 {
     mHelper.AppendLine(rowData, false);
 }
@@ -164,7 +164,7 @@ void SelectionWindow::slotClicked()
 
 void SelectionWindow::slotAccept()
 {
-    if ((ui.selectionList->count() >= mMinSize) && (ui.selectionList->count() <= mMaxSize))
+    if ((ui.selectionList->count() >= (int)mMinSize) && (ui.selectionList->count() <= (int)mMaxSize))
     {
         accept();
     }

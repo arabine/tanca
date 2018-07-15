@@ -10,43 +10,12 @@
 
 
 
-void FillFrom(const QSqlQuery &query)
-{
-    id = query.value("id").toInt();
-    eventId = query.value("event_id").toInt();
-    teamName = query.value("team_name").toString();
-    player1Id = query.value("player1_id").toInt();
-    player2Id = query.value("player2_id").toInt();
-    player3Id = query.value("player3_id").toInt();
-    state = query.value("state").toInt();
-    document = query.value("document").toString();
-    number = query.value("number").toInt();
-}
+void FillFrom(const QSqlQuery &query, Team &team);
 
-void FillFrom(const QSqlQuery &query)
-{
-    id = query.value("id").toInt();
-    eventId = query.value("event_id").toInt();
-    teamId = query.value("team_id").toInt();
-    total = query.value("total").toInt();
-    comment = query.value("comment").toString();
-    state = query.value("state").toInt();
-    document = query.value("document").toString();
-}
+void FillFrom(const QSqlQuery &query, Reward &reward);
 
 
-void FillFrom(const QSqlQuery &query)
-{
-    id = query.value("id").toInt();
-    eventId = query.value("event_id").toInt();
-    turn = query.value("turn").toInt();
-    team1Id = query.value("team1_id").toInt();
-    team2Id = query.value("team2_id").toInt();
-    team1Score = query.value("team1_score").toInt();
-    team2Score = query.value("team2_score").toInt();
-    state = query.value("state").toInt();
-    document = query.value("document").toString();
-}
+void FillFrom(const QSqlQuery &query, Game &game);
 
 
 struct Infos
@@ -86,7 +55,7 @@ public:
     bool AddPlayer(const Player &player, int id = -1); // you may specify an ID if you want
     bool EditPlayer(const Player &player);
     bool FindPlayer(int id, Player &player) const;
-    QList<Player> &GetPlayerList();
+    std::deque<Player> &GetPlayerList();
     bool PlayerExists(const Player &player) const;
     bool DeletePlayer(int id);
 
@@ -95,23 +64,23 @@ public:
     Event GetEvent(int id);
     QStringList GetSeasons();
     bool UpdateEventState(const Event &event);
-    QList<Event> GetEvents(int year);
+    std::deque<Event> GetEvents(int year);
     bool EditEvent(const Event &event);
     bool DeleteEvent(int id);
 
     // Team management
     bool AddTeam(const Team &team);
-    QList<Team> GetTeams(int eventId) const;
-    QList<Team> GetTeamsByPlayerId(int playerId);
+    std::deque<Team> GetTeams(int eventId) const;
+    std::deque<Team> GetTeamsByPlayerId(int playerId);
     bool EditTeam(const Team &team);
     bool DeleteTeam(int id);
     bool DeleteTeamByEventId(int eventId);
 
     // Game management
-    QList<Game> GetGamesByEventId(int event_id) const;
+    std::deque<Game> GetGamesByEventId(int event_id) const;
     Game GetGameById(int game_id) const;
-    QList<Game> GetGamesByTeamId(int teamId);
-    bool AddGames(const QList<Game> &games);
+    std::deque<Game> GetGamesByTeamId(int teamId);
+    bool AddGames(const std::deque<Game> &games);
     bool EditGame(const Game &game);
     bool DeleteGame(int id);
     bool DeleteGameByEventId(int eventId);
@@ -129,7 +98,7 @@ public:
 private:
     QSqlDatabase mDb;
     QSqlDatabase mCities;
-    QList<Player> mPlayers; // Cached player list
+    std::deque<Player> mPlayers; // Cached player list
     Infos mInfos;
 
     void UpdatePlayerList();

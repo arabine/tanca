@@ -42,41 +42,9 @@ namespace Ui {
 class MainWindow;
 }
 
-std::string StateToString()
-{
-    if (state == cNotStarted)
-    {
-        return QObject::tr("Non démarré");
-    }
-    else if (state == cStarted)
-    {
-        return QObject::tr("En cours");
-    }
-    else if (state == cCanceled)
-    {
-        return QObject::tr("Annulé");
-    }
-    else
-    {
-        return QObject::tr("");
-    }
-}
+std::string StateToString(const Event &event);
 
-std::string TypeToString()
-{
-    if (type == cRoundRobin)
-    {
-        return QObject::tr("Tournoi type toutes rondes");
-    }
-    else if (type == cSwissRounds)
-    {
-        return QObject::tr("Tournoi type Suisse");
-    }
-    else
-    {
-        return QObject::tr("");
-    }
-}
+std::string TypeToString(const Event &event);
 
 
 class MainWindow : public QMainWindow
@@ -142,10 +110,10 @@ private:
 
     // other stuff
     DbManager mDatabase;
-    QList<int>  mPlayersInTeams; // Players already in teams
-    QList<Event> mEvents;
-    QList<Team> mTeams;
-    QList<Game> mGames;
+    std::deque<int>  mPlayersInTeams; // Players already in teams
+    std::deque<Event> mEvents;
+    std::deque<Team> mTeams;
+    std::deque<Game> mGames;
     Event mCurrentEvent;
     Tournament mTournament;
     int mCurrentRankingRound;

@@ -39,7 +39,7 @@ public:
 
     void GetGame(Game &game);
 
-    void Initialize(const QList<Team> &teams);
+    void Initialize(const std::deque<Team> &teams);
 
     void ClickedRight(int index);
     void ClickedLeft(int id);
@@ -48,8 +48,8 @@ private slots:
     void slotAccept();
 
 private:
-    QList<Team> mList;
-    QList<Team> mSelection;
+    std::deque<Team> mList;
+    std::deque<Team> mSelection;
 
     void Update();
 };
