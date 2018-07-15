@@ -36,7 +36,7 @@ QStringList InitEventRanking()
 {
     QStringList list;
     list << QObject::tr("Id") << QObject::tr("Rang") << QObject::tr("Numéro d'équipe") << QObject::tr("Équipe")
-         << QObject::tr("Parties gagnées") << QObject::tr("Parties perdues") << QObject::tr("Points marqués")
+         << QObject::tr("Gagnés")<< QObject::tr("Nuls")  << QObject::tr("Perdus") << QObject::tr("Points marqués")
          << QObject::tr("Points concédés") << QObject::tr("Différence") << QObject::tr("Buchholz");
     return list;
 }
@@ -45,7 +45,7 @@ QStringList InitEventRanking()
 QStringList InitSeasonRanking()
 {
     QStringList list;
-    list << QObject::tr("Id") << QObject::tr("Rang")  << QObject::tr("Joueur") << QObject::tr("Parties gagnées")
+    list << QObject::tr("Id") << QObject::tr("Rang")  << QObject::tr("Joueur") << QObject::tr("Gagnés")<< QObject::tr("Nuls")  << QObject::tr("Perdus")
          << QObject::tr("Parties perdues") << QObject::tr("Points marqués")
          << QObject::tr("Points concédés") << QObject::tr("Différence") << QObject::tr("Parties jouées") ;
     return list;
@@ -197,7 +197,7 @@ void TableHelper::Show(const std::deque<Player> &players, const std::deque<Team>
             if (Player::Find(players, rank.id, player))
             {
                 int nbGames = rank.gamesWon + rank.gamesLost + rank.gamesDraw;
-                std::list<Value> rowData = {player.id, line, player.FullName(), rank.gamesWon, rank.gamesLost, rank.pointsWon, rank.pointsLost, rank.Difference(), nbGames};
+                std::list<Value> rowData = {player.id, line, player.FullName(), rank.gamesWon, rank.gamesDraw, rank.gamesLost, rank.pointsWon, rank.pointsLost, rank.Difference(), nbGames};
                 AppendLine(rowData, false);
             }
             else
@@ -211,7 +211,7 @@ void TableHelper::Show(const std::deque<Player> &players, const std::deque<Team>
             Team team;
             if (Team::Find(teams, rank.id, team))
             {
-                std::list<Value> rowData = {team.id, line, team.number, team.teamName, rank.gamesWon, rank.gamesLost, rank.pointsWon, rank.pointsLost, rank.Difference(), rank.pointsOpponents};
+                std::list<Value> rowData = {team.id, line, team.number, team.teamName, rank.gamesWon, rank.gamesDraw, rank.gamesLost, rank.pointsWon, rank.pointsLost, rank.Difference(), rank.pointsOpponents};
                 AppendLine(rowData, false);
             }
             else

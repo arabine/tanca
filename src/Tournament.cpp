@@ -31,8 +31,6 @@
 #include <sstream>
 #include <random>
 
-static const int cHighCost = 10000;
-
 bool RankHighFirst (Rank &i, Rank &j)
 {
     bool ret = false;
@@ -42,15 +40,22 @@ bool RankHighFirst (Rank &i, Rank &j)
     }
     else if (i.gamesWon == j.gamesWon)
     {
-        if (i.Difference() > j.Difference())
+        if (i.gamesDraw > j.gamesDraw)
         {
             ret = true;
         }
-        else if (i.Difference() == j.Difference())
+        else if (i.gamesDraw == j.gamesDraw)
         {
-            if (i.pointsOpponents > j.pointsOpponents)
+            if (i.Difference() > j.Difference())
             {
                 ret = true;
+            }
+            else if (i.Difference() == j.Difference())
+            {
+                if (i.pointsOpponents > j.pointsOpponents)
+                {
+                    ret = true;
+                }
             }
         }
     }
@@ -584,7 +589,7 @@ void FindSolution(std::deque<Solution> &list, Solution &s, const std::deque<int>
                     //if (r >= (s.Size()-1))
                     if (static_cast<std::uint32_t>(s2.tree.size()) == (s.Size() / 2U))
                     {
-                        if (s2.totalCost < cHighCost)
+                        if (s2.totalCost < Rank::cHighCost)
                         {
                             list.push_back(s2);
                         }
@@ -631,7 +636,7 @@ bool Tournament::BuildPairing(const std::deque<int> &ranking,
 
     int i = 1;
 
-    int minCost = cHighCost;
+    int minCost = Rank::cHighCost;
     Solution choice(size);
 
     for (auto &s : solutions)
@@ -692,16 +697,16 @@ void Tournament::BuildCost(const std::deque<Game> &games,
             if (ranking[j] == ranking[i])
             {
                 // Same player
-                cost = cHighCost;
+                cost = Rank::cHighCost;
             }
             else if (AlreadyPlayed(games, ranking[j], ranking[i]))
             {
-                cost = cHighCost;
+                cost = Rank::cHighCost;
             }
             else
             {
                 // compute cost
-                cost = std::abs(mRanking[j].Difference() - mRanking[i].Difference());
+                cost = std::abs(mRanking[j].ComputeForce() - mRanking[i].ComputeForce());
             }
 
             cost_matrix[i].push_back(cost);
@@ -722,15 +727,9 @@ std::string Tournament::BuildSwissRounds(const std::deque<Game> &games, const st
 
     if (teams.size() >= 2)
     {
-        bool hasDummy = false;
         eventId = teams.at(0).eventId; // memorize the current event id
 
         size_t nbGames = teams.size() / 2;
-        if (teams.size()%2)
-        {
-            hasDummy = true;
-            nbGames += 1;
-        }
 
         // 1. Check where we are
         if (games.size() == 0)
@@ -759,34 +758,15 @@ std::string Tournament::BuildSwissRounds(const std::deque<Game> &games, const st
                 // Create ranking
                 GenerateTeamRanking(games, teams, turn);
 
-                // Prepare dummy team if needed
-                Team dummy;
-                dummy.eventId = eventId;
-
                 // Create a local list of the ranking, keep only ids
                 std::deque<int> ranking;
+                int i = 1;
                 for (auto &rank : mRanking)
                 {
+                    Team team;
+                    Team::Find(teams, rank.id, team);
+                    std::cout << rank.id << ". " << team.teamName << std::endl;
                     ranking.push_back(rank.id);
-                }
-
-                int byeTeamId = 0;
-                if (hasDummy)
-                {
-                    // Choose the bye team
-                    bool found = false;
-                    int max = ranking.size() - 1;
-                    while (!found)
-                    {
-                        byeTeamId = ranking[Generate(0, max)];
-
-                        // Make sure to give the bye to a different team each turn
-                        if (std::find(mByeTeamIds.begin(), mByeTeamIds.end(), byeTeamId) == mByeTeamIds.end())
-                        {
-                            // Not found in previous match, this team has a bye for this round
-                            found = true;
-                        }
-                    }
                 }
 
                 // Split in two vectors

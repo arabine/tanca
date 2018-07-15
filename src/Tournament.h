@@ -32,6 +32,11 @@
 struct Rank
 {
 public:
+    static const int cHighCost = 1000000;
+    static const int cWinCost = 10000;
+    static const int cDrawCost = 5;
+
+
     int pointsWon;
     int pointsLost;
     int gamesWon;
@@ -55,6 +60,11 @@ public:
 
     bool operator==(const Rank &other) const {
         return (id == other.id);
+    }
+
+    int ComputeForce()
+    {
+        return cWinCost*gamesWon + gamesDraw*cDrawCost + pointsWon;
     }
 
     int Difference() const;
