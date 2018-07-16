@@ -9,6 +9,19 @@ import android.webkit.WebView;
 import android.webkit.WebChromeClient;
 import android.webkit.WebViewClient;
 
+
+public static boolean isTcpPortAvailable(int port) {
+    try (ServerSocket serverSocket = new ServerSocket()) {
+        // setReuseAddress(false) is required only on OSX, 
+        // otherwise the code will not work correctly on that platform          
+        serverSocket.setReuseAddress(false);
+        serverSocket.bind(new InetSocketAddress(InetAddress.getByName("localhost"), port), 1);
+        return true;
+    } catch (Exception ex) {
+        return false;
+    }
+}  
+
 public class MainActivity extends AppCompatActivity {
 
 
@@ -17,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        // FIXME: check few open ports, then pass it to the server initialization
         initialize();
 
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
@@ -24,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         mWebView.setWebChromeClient(new WebChromeClient());
         mWebView.setWebViewClient(new WebViewClient());
         mWebView.getSettings().setJavaScriptEnabled(true);
-        mWebView.loadUrl("http://127.0.0.1:8000");
+        mWebView.loadUrl("http://127.0.0.1:8000"); // FIXME: use the TCP port discovered just before
     }
 
 /*
