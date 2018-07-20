@@ -140,35 +140,63 @@ void TableHelper::AppendLine(const std::list<Value> &list, bool selected)
     mRow++;
 }
 
+#include <JsonWriter.h>
+
 void TableHelper::Export(const QString &fileName)
 {
     // FIXME: detect the output format thanks to the file extension
+    QString ext = QFileInfo(fileName).completeSuffix().toLower();
+    //bool saveInCSV = (ext == "csv");
+    bool saveInJson = (ext == "json");
 
     QFile f( fileName );
+
     if (f.open(QFile::WriteOnly))
     {
         QTextStream data( &f );
         QStringList strList;
+        QStringList titles;
+
+        JsonArray players;
 
         // Export header title
         for( int c = 0; c < mWidget->columnCount(); ++c )
         {
-            strList << mWidget->horizontalHeaderItem(c)->data(Qt::DisplayRole).toString();
+            QString title = mWidget->horizontalHeaderItem(c)->data(Qt::DisplayRole).toString();
+            title.replace(" ", "_");
+            title.replace("(", "");
+            title.replace(")", "");
+            title.replace("é", "e");
+            title = title.toLower();
+            titles << title;
         }
 
-        data << strList.join(";") << "\n";
+        data << titles.join(";") << "\n";
 
         // Export table contents
         for( int r = 0; r < mWidget->rowCount(); ++r )
         {
             strList.clear();
+            JsonObject player;
             for( int c = 0; c < mWidget->columnCount(); ++c )
             {
-                strList << mWidget->item( r, c )->text();
+                QString element = mWidget->item( r, c )->text();
+                player.AddValue( titles[c].toStdString(), element.toStdString());
+                strList << element;
             }
+            players.AddValue(player);
             data << strList.join( ";" ) + "\n";
         }
+
+        JsonObject root;
+        root.AddValue("players", players);
+
         f.close();
+
+        if (saveInJson)
+        {
+            JsonWriter::SaveToFile(root, fileName.toStdString());
+        }
     }
 }
 

@@ -1,8 +1,11 @@
 // Dom7
 var $$ = Dom7;
 
-var db = new PouchDB('tanca');
-var remoteCouch = 'https://79510970-e8d3-4dda-b815-4d0a5b345f40-bluemix:6d75e14de91f75696ce707b5bbede1daca070e9ed0869964b85793d221687155@79510970-e8d3-4dda-b815-4d0a5b345f40-bluemix.cloudant.com/tanca';
+var localDb = new PouchDB('tanca');
+
+var remoteDb = new PouchDB('http://dbreader:pass@localhost:5984/tanca', {skip_setup: true});
+
+localDb.sync(remoteDb);
 
 // Framework7 App main instance
 var app  = new Framework7({
@@ -88,12 +91,17 @@ function addPlayer(text) {
 //addPlayer("Juliette");
 
 function showPlayers() {
-  db.allDocs({include_docs: true, descending: true}, function(err, doc) {
-    console.log(doc.rows);
+  localDb.allDocs({include_docs: true, descending: true}, function(err, doc) {
+    if (!err) {
+      console.log(doc.rows);
+    } else {
+      console.log("DB error" + localDb.info());
+    }
+
   });
 }
 
-db.changes({
+localDb.changes({
   since: 'now',
   live: true
 }).on('change', showPlayers);

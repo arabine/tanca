@@ -169,7 +169,7 @@ void MainWindow::ExportTable(QTableWidget *table, const QString &title)
 {
     QString fileName = QFileDialog::getSaveFileName(this, title,
                                  QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation),
-                                 tr("Excel CSV (*.csv)"));
+                                 tr("Excel CSV (*.csv);;JSON (*.json)"));
     if (!fileName.isEmpty())
     {
         TableHelper helper(table);
