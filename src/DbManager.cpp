@@ -26,16 +26,43 @@ static const QString gVersion1_0 = "1.0";
 static const QString gVersion1_1 = "1.1";
 static const QString gVersion1_2 = "1.2";
 
+
+static QString PlayersTable() {
+    return "CREATE TABLE IF NOT EXISTS players (id INTEGER PRIMARY KEY AUTOINCREMENT, uuid TEXT, name TEXT, last_name TEXT, nick_name TEXT, "
+            "email TEXT, mobile_phone TEXT, home_phone TEXT, birth_date TEXT, road TEXT, post_code INTEGER, city TEXT, "
+            "membership TEXT, comments TEXT, state INTEGER, document TEXT);";
+}
+
+static QString EventsTable() {
+    return "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, year INTEGER, title TEXT, state INTEGER, type INTEGER, option INTEGER, document TEXT);";
+}
+
+static QString TeamsTable() {
+    return "CREATE TABLE IF NOT EXISTS teams (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER, team_name TEXT, player1_id INTEGER, "
+            "player2_id INTEGER, player3_id INTEGER, state INTEGER, document TEXT);";
+}
+
+static QString RewardsTable() {
+    return "CREATE TABLE IF NOT EXISTS rewards (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER, team_id INTEGER, "
+           "total INTEGER, comment TEXT, state INTEGER, document TEXT);";
+}
+
+static QString GamesTable() {
+    return "CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER, turn INTEGER, team1_id INTEGER, "
+            "team2_id INTEGER, team1_score INTEGER, team2_score INTEGER, state INTEGER, document TEXT);";
+}
+
+
 static QStringList MakeTables()
 {
     QStringList tables;
 
-    tables << Player::Table();
-    tables << Event::Table();
-    tables << Team::Table();
-    tables << Game::Table();
+    tables << PlayersTable();
+    tables << EventsTable();
+    tables << TeamsTable();
+    tables << GamesTable();
     tables << Infos::Table();
-    tables << Reward::Table();
+    tables << RewardsTable();
 
     return tables;
 }
@@ -220,7 +247,7 @@ void DbManager::Initialize()
     mCities.setDatabaseName("~/Tanca/villes.db"); // FIXME: use the executable path
 }
 
-QList<Player> &DbManager::GetPlayerList()
+std::deque<Player> &DbManager::GetPlayerList()
 {
     return mPlayers;
 }
@@ -231,8 +258,8 @@ bool DbManager::PlayerExists(const Player &player) const
 
     foreach (Player p, mPlayers)
     {
-        if ((p.lastName.toLower() == player.lastName.toLower()) &&
-            (p.name.toLower() == player.name.toLower()))
+        if ((Util::ToLower(p.lastName) == Util::ToLower(player.lastName) &&
+            (Util::ToLower(p.name) == Util::ToLower(player.name))))
         {
             found = true;
             break;
@@ -273,25 +300,25 @@ void DbManager::UpdatePlayerList()
         Player player;
 
         player.id = query.value("id").toInt();
-        player.uuid = query.value("uuid").toString();
-        player.name = query.value("name").toString();
-        player.lastName = query.value("last_name").toString();
-        player.nickName = query.value("nick_name").toString();
-        player.email = query.value("email").toString();
-        player.mobilePhone = query.value("mobile_phone").toString();
-        player.homePhone = query.value("home_phone").toString();
-        player.birthDate = query.value("birth_date").toDate();
-        player.road = query.value("road").toString();
+        player.uuid = query.value("uuid").toString().toStdString();
+        player.name = query.value("name").toString().toStdString();
+        player.lastName = query.value("last_name").toString().toStdString();
+        player.nickName = query.value("nick_name").toString().toStdString();
+        player.email = query.value("email").toString().toStdString();
+        player.mobilePhone = query.value("mobile_phone").toString().toStdString();
+        player.homePhone = query.value("home_phone").toString().toStdString();
+        player.birthDate = Util::FromISODateTime(query.value("birth_date").toString().toStdString());
+        player.road = query.value("road").toString().toStdString();
         player.postCode = query.value("post_code").toInt();
-        player.city = query.value("city").toString();
-        player.membership = query.value("membership").toString();
-        player.comments = query.value("comments").toString();
+        player.city = query.value("city").toString().toStdString();
+        player.membership = query.value("membership").toString().toStdString();
+        player.comments = query.value("comments").toString().toStdString();
         player.state = query.value("state").toInt();
-        player.document = query.value("document").toString();
+        player.document = query.value("document").toString().toStdString();
 
         if (player.id != Player::cDummyPlayer)
         {
-            mPlayers.append(player);
+            mPlayers.push_back(player);
         }
     }
 }
@@ -328,18 +355,18 @@ bool DbManager::AddPlayer(const Player& player, int id)
         queryAdd.prepare(cmd);
 
         queryAdd.bindValue(":uuid", QUuid::createUuid().toString());
-        queryAdd.bindValue(":name", player.name);
-        queryAdd.bindValue(":last_name", player.lastName);
-        queryAdd.bindValue(":nick_name", player.nickName);
-        queryAdd.bindValue(":email", player.email);
-        queryAdd.bindValue(":mobile_phone", player.mobilePhone);
-        queryAdd.bindValue(":home_phone", player.homePhone);
-        queryAdd.bindValue(":birth_date", player.birthDate);
-        queryAdd.bindValue(":road", player.road);
+        queryAdd.bindValue(":name", player.name.c_str());
+        queryAdd.bindValue(":last_name", player.lastName.c_str());
+        queryAdd.bindValue(":nick_name", player.nickName.c_str());
+        queryAdd.bindValue(":email", player.email.c_str());
+        queryAdd.bindValue(":mobile_phone", player.mobilePhone.c_str());
+        queryAdd.bindValue(":home_phone", player.homePhone.c_str());
+        queryAdd.bindValue(":birth_date", Util::ToISODateTime(player.birthDate).c_str());
+        queryAdd.bindValue(":road", player.road.c_str());
         queryAdd.bindValue(":post_code", player.postCode);
-        queryAdd.bindValue(":city", player.city);
-        queryAdd.bindValue(":membership", player.membership);
-        queryAdd.bindValue(":comments", player.comments);
+        queryAdd.bindValue(":city", player.city.c_str());
+        queryAdd.bindValue(":membership", player.membership.c_str());
+        queryAdd.bindValue(":comments", player.comments.c_str());
         queryAdd.bindValue(":state", player.state);
 
         if (id >= 0)
@@ -347,7 +374,7 @@ bool DbManager::AddPlayer(const Player& player, int id)
             queryAdd.bindValue(":id", id);
         }
 
-        queryAdd.bindValue(":document", player.document);
+        queryAdd.bindValue(":document", player.document.c_str());
 
         if(queryAdd.exec())
         {
@@ -381,20 +408,20 @@ bool DbManager::EditPlayer(const Player& player)
                          "WHERE id = :id");
 
         queryEdit.bindValue(":id", player.id);
-        queryEdit.bindValue(":name", player.name);
-        queryEdit.bindValue(":last_name", player.lastName);
-        queryEdit.bindValue(":nick_name", player.nickName);
-        queryEdit.bindValue(":email", player.email);
-        queryEdit.bindValue(":mobile_phone", player.mobilePhone);
-        queryEdit.bindValue(":home_phone", player.homePhone);
-        queryEdit.bindValue(":birth_date", player.birthDate.toString());
-        queryEdit.bindValue(":road", player.road);
+        queryEdit.bindValue(":name", player.name.c_str());
+        queryEdit.bindValue(":last_name", player.lastName.c_str());
+        queryEdit.bindValue(":nick_name", player.nickName.c_str());
+        queryEdit.bindValue(":email", player.email.c_str());
+        queryEdit.bindValue(":mobile_phone", player.mobilePhone.c_str());
+        queryEdit.bindValue(":home_phone", player.homePhone.c_str());
+        queryEdit.bindValue(":birth_date", Util::ToISODateTime(player.birthDate).c_str());
+        queryEdit.bindValue(":road", player.road.c_str());
         queryEdit.bindValue(":post_code", player.postCode);
-        queryEdit.bindValue(":city", player.city);
-        queryEdit.bindValue(":membership", player.membership);
-        queryEdit.bindValue(":comments", player.comments);
+        queryEdit.bindValue(":city", player.city.c_str());
+        queryEdit.bindValue(":membership", player.membership.c_str());
+        queryEdit.bindValue(":comments", player.comments.c_str());
         queryEdit.bindValue(":state", player.state);
-        queryEdit.bindValue(":document", player.document);
+        queryEdit.bindValue(":document", player.document.c_str());
 
         if(queryEdit.exec())
         {
@@ -485,12 +512,12 @@ bool DbManager::AddEvent(const Event& event)
     queryAdd.prepare("INSERT INTO events (year, date, title, state, type, option, document) VALUES (:year, :date, :title, :state, :type, :option, :document)");
 
     queryAdd.bindValue(":year", event.year);
-    queryAdd.bindValue(":date", event.date.toString(Qt::ISODate));
-    queryAdd.bindValue(":title", event.title);
+    queryAdd.bindValue(":date", Util::ToISODateTime(event.date).c_str());
+    queryAdd.bindValue(":title", event.title.c_str());
     queryAdd.bindValue(":state", event.state);
     queryAdd.bindValue(":type", event.type);
     queryAdd.bindValue(":option", event.option);
-    queryAdd.bindValue(":document", event.document);
+    queryAdd.bindValue(":document", event.document.c_str());
 
     if(queryAdd.exec())
     {
@@ -515,12 +542,12 @@ bool DbManager::EditEvent(const Event& event)
 
     queryEdit.bindValue(":id", event.id);
     queryEdit.bindValue(":year", event.year);
-    queryEdit.bindValue(":date", event.date.toString(Qt::ISODate));
-    queryEdit.bindValue(":title", event.title);
+    queryEdit.bindValue(":date", Util::ToISODateTime(event.date).c_str());
+    queryEdit.bindValue(":title", event.title.c_str());
     queryEdit.bindValue(":state", event.state);
     queryEdit.bindValue(":type", event.type);
     queryEdit.bindValue(":option", event.option);
-    queryEdit.bindValue(":document", event.document);
+    queryEdit.bindValue(":document", event.document.c_str());
 
     if(queryEdit.exec())
     {
@@ -548,12 +575,12 @@ Event DbManager::GetEvent(int id)
         {
             event.id = query.value("id").toInt();
             event.year = query.value("year").toInt();
-            event.date = query.value("date").toDateTime();
-            event.title = query.value("title").toString();
+            event.date = Util::FromISODateTime(query.value("date").toString().toStdString());
+            event.title = query.value("title").toString().toStdString();
             event.state = query.value("state").toInt();
             event.type = query.value("type").toInt();
             event.option = query.value("option").toInt();
-            event.document = query.value("document").toString();
+            event.document = query.value("document").toString().toStdString();
         }
         else
         {
@@ -564,13 +591,13 @@ Event DbManager::GetEvent(int id)
     return event;
 }
 
-QList<Event> DbManager::GetEvents(int year)
+std::deque<Event> DbManager::GetEvents(int year)
 {
     QSqlQuery query(mDb);
     query.prepare("SELECT * FROM events WHERE year = :year");
     query.bindValue(":year", year);
 
-    QList<Event> result;
+    std::deque<Event> result;
 
     if(query.exec())
     {
@@ -579,13 +606,13 @@ QList<Event> DbManager::GetEvents(int year)
             Event event;
             event.id = query.value("id").toInt();
             event.year = query.value("year").toInt();
-            event.date = query.value("date").toDateTime();
-            event.title = query.value("title").toString();
+            event.date = Util::FromISODateTime(query.value("date").toString().toStdString());
+            event.title = query.value("title").toString().toStdString();
             event.state = query.value("state").toInt();
             event.type = query.value("type").toInt();
             event.option = query.value("option").toInt();
-            event.document = query.value("document").toString();
-            result.append(event);
+            event.document = query.value("document").toString().toStdString();
+            result.push_back(event);
         }
     }
     return result;
@@ -613,11 +640,11 @@ bool DbManager::DeleteEvent(int id)
 }
 
 
-bool DbManager::AddGames(const QList<Game>& games)
+bool DbManager::AddGames(const std::deque<Game>& games)
 {
     bool success = false;
 
-    foreach (Game game, games)
+    for (auto const &game : games)
     {
         QSqlQuery queryAdd(mDb);
         queryAdd.prepare("INSERT INTO games (event_id, turn, team1_id, team2_id, team1_score, team2_score, state, document) "
@@ -629,7 +656,7 @@ bool DbManager::AddGames(const QList<Game>& games)
         queryAdd.bindValue(":team1_score", game.team1Score);
         queryAdd.bindValue(":team2_score", game.team2Score);
         queryAdd.bindValue(":state", game.state);
-        queryAdd.bindValue(":document", game.document);
+        queryAdd.bindValue(":document", game.document.c_str());
 
         if(queryAdd.exec())
         {
@@ -647,21 +674,21 @@ bool DbManager::AddGames(const QList<Game>& games)
     return success;
 }
 
-QList<Game> DbManager::GetGamesByEventId(int event_id) const
+std::deque<Game> DbManager::GetGamesByEventId(int event_id) const
 {
     QSqlQuery query(mDb);
     query.prepare("SELECT * FROM games WHERE event_id = :event_id");
     query.bindValue(":event_id", event_id);
 
-    QList<Game> result;
+    std::deque<Game> result;
 
     if(query.exec())
     {
         while (query.next())
         {
             Game game;
-            game.FillFrom(query);
-            result.append(game);
+            FillFrom(query, game);
+            result.push_back(game);
         }
     }
     return result;
@@ -679,27 +706,27 @@ Game DbManager::GetGameById(int game_id) const
     {
         if (query.next())
         {
-            result.FillFrom(query);
+            FillFrom(query, result);
         }
     }
     return result;
 }
 
-QList<Game> DbManager::GetGamesByTeamId(int teamId)
+std::deque<Game> DbManager::GetGamesByTeamId(int teamId)
 {
     QSqlQuery query(mDb);
     query.prepare("SELECT * FROM games WHERE team1_id = :teamId OR team2_id = :teamId");
     query.bindValue(":teamId", teamId);
 
-    QList<Game> result;
+    std::deque<Game> result;
 
     if(query.exec())
     {
         while (query.next())
         {
             Game game;
-            game.FillFrom(query);
-            result.append(game);
+            FillFrom(query, game);
+            result.push_back(game);
         }
     }
     return result;
@@ -725,7 +752,7 @@ bool DbManager::EditGame(const Game& game)
     queryEdit.bindValue(":team1_score", game.team1Score);
     queryEdit.bindValue(":team2_score", game.team2Score);
     queryEdit.bindValue(":state", game.state);
-    queryEdit.bindValue(":document", game.document);
+    queryEdit.bindValue(":document", game.document.c_str());
 
     if(queryEdit.exec())
     {
@@ -794,7 +821,7 @@ QList<Reward> DbManager::GetRewardsForTeam(int team_id)
         while (query.next())
         {
             Reward reward;
-            reward.FillFrom(query);
+            FillFrom(query, reward);
             result.append(reward);
         }
     }
@@ -811,9 +838,9 @@ bool DbManager::AddReward(const Reward &reward)
     queryAdd.bindValue(":event_id", reward.eventId);
     queryAdd.bindValue(":team_id", reward.teamId);
     queryAdd.bindValue(":total", reward.total);
-    queryAdd.bindValue(":comment", reward.comment);
+    queryAdd.bindValue(":comment", reward.comment.c_str());
     queryAdd.bindValue(":state", reward.state);
-    queryAdd.bindValue(":document", reward.document);
+    queryAdd.bindValue(":document", reward.document.c_str());
 
     if(queryAdd.exec())
     {
@@ -859,12 +886,12 @@ bool DbManager::AddTeam(const Team &team)
     queryAdd.prepare("INSERT INTO teams (event_id, team_name, player1_id, player2_id, player3_id, state, document, number) "
                      "VALUES (:event_id, :team_name, :player1_id, :player2_id, :player3_id, :state, :document, :number)");
     queryAdd.bindValue(":event_id", team.eventId);
-    queryAdd.bindValue(":team_name", team.teamName);
+    queryAdd.bindValue(":team_name", team.teamName.c_str());
     queryAdd.bindValue(":player1_id", team.player1Id);
     queryAdd.bindValue(":player2_id", team.player2Id);
     queryAdd.bindValue(":player3_id", team.player3Id);
     queryAdd.bindValue(":state", team.state);
-    queryAdd.bindValue(":document", team.document);
+    queryAdd.bindValue(":document", team.document.c_str());
     queryAdd.bindValue(":number", team.number);
 
     if(queryAdd.exec())
@@ -880,20 +907,20 @@ bool DbManager::AddTeam(const Team &team)
     return success;
 }
 
-QList<Team> DbManager::GetTeams(int eventId) const
+std::deque<Team> DbManager::GetTeams(int eventId) const
 {
     QSqlQuery query(mDb);
     query.prepare("SELECT * FROM teams WHERE event_id = :event_id");
     query.bindValue(":event_id", eventId);
 
-    QList<Team> result;
+    std::deque<Team> result;
 
     if(query.exec())
     {
         while (query.next())
         {
             Team team;
-            team.FillFrom(query);
+            FillFrom(query, team);
 
             if (team.teamName == "")
             {
@@ -913,27 +940,27 @@ QList<Team> DbManager::GetTeams(int eventId) const
                 }
             }
 
-            result.append(team);
+            result.push_back(team);
         }
     }
     return result;
 }
 
-QList<Team> DbManager::GetTeamsByPlayerId(int playerId)
+std::deque<Team> DbManager::GetTeamsByPlayerId(int playerId)
 {
     QSqlQuery query(mDb);
     query.prepare("SELECT * FROM teams WHERE player1_id = :playerId OR player2_id = :playerId");
     query.bindValue(":playerId", playerId);
 
-    QList<Team> result;
+    std::deque<Team> result;
 
     if(query.exec())
     {
         while (query.next())
         {
             Team team;
-            team.FillFrom(query);
-            result.append(team);
+            FillFrom(query, team);
+            result.push_back(team);
         }
     }
     return result;
@@ -942,7 +969,7 @@ QList<Team> DbManager::GetTeamsByPlayerId(int playerId)
 
 void DbManager::CreateName(Team &team, const Player &p1, const Player &p2)
 {
-    team.teamName = p1.name + " " + p1.lastName.left(3) + QString(". / ") + p2.name + " " + p2.lastName.left(3) + QString(".");
+    team.teamName = p1.name + " " + p1.lastName.substr(0, 3) + ". / " + p2.name + " " + p2.lastName.substr(0, 3) + ".";
 }
 
 bool DbManager::EditTeam(const Team &team)
@@ -956,12 +983,12 @@ bool DbManager::EditTeam(const Team &team)
 
     queryEdit.bindValue(":id", team.id);
     queryEdit.bindValue(":event_id", team.eventId);
-    queryEdit.bindValue(":team_name", team.teamName);
+    queryEdit.bindValue(":team_name", team.teamName.c_str());
     queryEdit.bindValue(":player1_id", team.player1Id);
     queryEdit.bindValue(":player2_id", team.player2Id);
     queryEdit.bindValue(":player3_id", team.player3Id);
     queryEdit.bindValue(":state", team.state);
-    queryEdit.bindValue(":document", team.document);
+    queryEdit.bindValue(":document", team.document.c_str());
     queryEdit.bindValue(":number", team.number);
 
     if(queryEdit.exec())
@@ -1018,3 +1045,40 @@ bool DbManager::DeleteTeamByEventId(int eventId)
     return success;
 }
 
+
+void FillFrom(const QSqlQuery &query, Team &team)
+{
+    team.id = query.value("id").toInt();
+    team.eventId = query.value("event_id").toInt();
+    team.teamName = query.value("team_name").toString().toStdString();
+    team.player1Id = query.value("player1_id").toInt();
+    team.player2Id = query.value("player2_id").toInt();
+    team.player3Id = query.value("player3_id").toInt();
+    team.state = query.value("state").toInt();
+    team.document = query.value("document").toString().toStdString();
+    team.number = query.value("number").toInt();
+}
+
+void FillFrom(const QSqlQuery &query, Reward &reward)
+{
+    reward.id = query.value("id").toInt();
+    reward.eventId = query.value("event_id").toInt();
+    reward.teamId = query.value("team_id").toInt();
+    reward.total = query.value("total").toInt();
+    reward.comment = query.value("comment").toString().toStdString();
+    reward.state = query.value("state").toInt();
+    reward.document = query.value("document").toString().toStdString();
+}
+
+void FillFrom(const QSqlQuery &query, Game &game)
+{
+    game.id = query.value("id").toInt();
+    game.eventId = query.value("event_id").toInt();
+    game.turn = query.value("turn").toInt();
+    game.team1Id = query.value("team1_id").toInt();
+    game.team2Id = query.value("team2_id").toInt();
+    game.team1Score = query.value("team1_score").toInt();
+    game.team2Score = query.value("team2_score").toInt();
+    game.state = query.value("state").toInt();
+    game.document = query.value("document").toString().toStdString();
+}

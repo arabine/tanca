@@ -40,8 +40,8 @@ void ScoreWindow::SetGame(const Game &game, const Team &team1, const Team &team2
     ui.roundSpinBox->setValue(game.turn + 1);
     ui.team1GroupBox->setTitle(tr("Équipe n° %1").arg(team1.number));
     ui.team2GroupBox->setTitle(tr("Équipe n° %1").arg(team2.number));
-    ui.labelTeam1Name->setText(team1.teamName);
-    ui.labelTeam2Name->setText(team2.teamName);
+    ui.labelTeam1Name->setText(team1.teamName.c_str());
+    ui.labelTeam2Name->setText(team2.teamName.c_str());
     int value = (game.team1Score == -1) ? 0 : game.team1Score;
     ui.spinScore1->setValue(value);
     value = (game.team2Score == -1) ? 0 : game.team2Score;

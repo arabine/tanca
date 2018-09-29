@@ -53,7 +53,7 @@ void GameWindow::GetGame(Game &game)
     }
 }
 
-void GameWindow::Initialize(const QList<Team> &teams)
+void GameWindow::Initialize(const std::deque<Team> &teams)
 {
     mList = teams;
     mSelection.clear();
@@ -65,8 +65,8 @@ void GameWindow::ClickedRight(int index)
 {
     const Team &t = mSelection.at(index);
     // transfer to the left
-    mList.append(t);
-    mSelection.removeAt(index);
+    mList.push_back(t);
+    mSelection.erase(mSelection.begin() + index);
 
     Update();
 }
@@ -77,11 +77,11 @@ void GameWindow::ClickedLeft(int id)
     if (Team::Find(mList, id, t) && (mSelection.size() < GetMaxSize()))
     {
         // transfer to the right and remove the player from the list
-        mSelection.append(t);
+        mSelection.push_back(t);
         int index;
         if (Team::Index(mList, id, index))
         {
-            mList.removeAt(index);
+            mList.erase(mList.begin() + index);
         }
     }
 
@@ -94,14 +94,13 @@ void GameWindow::Update()
 
     foreach (Team t, mList)
     {
-        QList<QVariant> rowData;
-        rowData << t.id << t.number << t.teamName;
+        std::list<Value> rowData = {t.id, t.number, t.teamName};
         AddLeftEntry(rowData);
     }
 
     foreach (Team t, mSelection)
     {
-        AddRightEntry(t.teamName);
+        AddRightEntry(t.teamName.c_str());
     }
 
     FinishUpdate();
@@ -109,7 +108,7 @@ void GameWindow::Update()
 
 void GameWindow::slotAccept()
 {
-    if ((ui.selectionList->count() >= mMinSize) && (ui.selectionList->count() <= mMaxSize))
+    if ((ui.selectionList->count() >= (int)mMinSize) && (ui.selectionList->count() <= (int)mMaxSize))
     {
         accept();
     }

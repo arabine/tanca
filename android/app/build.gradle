@@ -1,0 +1,53 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion '27.0.3'
+    defaultConfig {
+        applicationId 'eu.d8s.Tanca'
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        ndk {
+            abiFilters 'x86', 'x86_64', 'armeabi-v7a'
+        }
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_PLATFORM=android-28',
+                          '-DANDROID_TOOLCHAIN=clang',
+                          '-DANDROID_STL=c++_shared'
+                // Enables RTTI support.
+                cppFlags "-frtti"
+                // Enables exception-handling support.
+                cppFlags "-fexceptions"
+                // For TarotClub and ICL, specify the target platform
+                cppFlags "-DUSE_UNIX_OS"
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                          'proguard-rules.pro'
+        }
+
+        debug {
+            debuggable true
+        }
+
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:25.2.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+}

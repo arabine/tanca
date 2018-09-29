@@ -44,6 +44,26 @@ SelectionWindow::SelectionWindow(QWidget *parent, const QString &title, int minS
 
     connect(ui.playersTable, SIGNAL(itemSelectionChanged()), this, SLOT(slotPlayerItemActivated()));
     connect(ui.selectionList, &QListWidget::itemClicked, this, &SelectionWindow::slotSelectionItemActivated);
+    connect(ui.lineEditFilter, &QLineEdit::textChanged, this, &SelectionWindow::slotFilter);
+}
+
+void SelectionWindow::slotFilter()
+{
+    QString filter = ui.lineEditFilter->text();
+    for( int i = 0; i < ui.playersTable->rowCount(); ++i )
+    {
+        bool match = false;
+        for( int j = 0; j < ui.playersTable->columnCount(); ++j )
+        {
+            QTableWidgetItem *item = ui.playersTable->item( i, j );
+            if( item->text().contains(filter, Qt::CaseInsensitive) )
+            {
+                match = true;
+                break;
+            }
+        }
+        ui.playersTable->setRowHidden( i, !match );
+    }
 }
 
 void SelectionWindow::SetLabelNumber(const QString &name)
@@ -69,7 +89,7 @@ void SelectionWindow::FinishUpdate()
     mHelper.Finish();
 }
 
-void SelectionWindow::AddLeftEntry(const QList<QVariant> &rowData)
+void SelectionWindow::AddLeftEntry(const std::list<Value> &rowData)
 {
     mHelper.AppendLine(rowData, false);
 }
@@ -144,7 +164,7 @@ void SelectionWindow::slotClicked()
 
 void SelectionWindow::slotAccept()
 {
-    if ((ui.selectionList->count() >= mMinSize) && (ui.selectionList->count() <= mMaxSize))
+    if ((ui.selectionList->count() >= (int)mMinSize) && (ui.selectionList->count() <= (int)mMaxSize))
     {
         accept();
     }

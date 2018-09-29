@@ -56,6 +56,13 @@ s'il n'est pas encore terminé.
  - Tournois simple et double élémination
  - Tournoi avec poules qualiticatives
 
+### V1.11
+
+ - Add line edit filter for players tab and selection windows
+ - Add table rank for ranking
+ - Add number of played games in ranking
+ - More flexible team management
+
 ### V1.10
 
  - FIX: ranger les événements dans l'ordre chronologique
@@ -145,11 +152,6 @@ s'il n'est pas encore terminé.
 
 ### V2.0
 
-HOT:
-
- - Editer le nom d'équipe même quand les matchs ont commencé
- - Ajouter le numéro d'équipe dans la fenêtre de pointage
-
 Backlog:
  
  - Créer un Export Box dédié avec choix du script
@@ -166,8 +168,6 @@ Backlog:
  - Support des catégories (Vétéran, Sénior, Junior, Cadet, Minime, Benjamin)
  - Implémenter des statistiques pour un événement
  - Progression d'un joueur en graphique
-
- - 
 
 ## Swisss (round-robin) tournament algorithm
 

@@ -42,6 +42,11 @@ namespace Ui {
 class MainWindow;
 }
 
+std::string StateToString(const Event &event);
+
+std::string TypeToString(const Event &event);
+
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -89,6 +94,7 @@ private slots:
     void slotRankingRight();
     void slotDeleteAllGames();
     void slotTeamItemActivated();
+    void slotFilterPlayer();
 private:
     void UpdatePlayersTable();
 
@@ -104,10 +110,10 @@ private:
 
     // other stuff
     DbManager mDatabase;
-    QList<int>  mPlayersInTeams; // Players already in teams
-    QList<Event> mEvents;
-    QList<Team> mTeams;
-    QList<Game> mGames;
+    std::deque<int>  mPlayersInTeams; // Players already in teams
+    std::deque<Event> mEvents;
+    std::deque<Team> mTeams;
+    std::deque<Game> mGames;
     Event mCurrentEvent;
     Tournament mTournament;
     int mCurrentRankingRound;

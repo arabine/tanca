@@ -40,9 +40,9 @@ public:
     void SetHeader(const QStringList &tableHeader);
     void StartUpdate(int size);
     void FinishUpdate();
-    void AddLeftEntry(const QList<QVariant> &rowData);
+    void AddLeftEntry(const std::list<Value> &rowData);
     void AddRightEntry(const QString &text);
-    int GetMaxSize() { return mMaxSize; }
+    size_t GetMaxSize() { return mMaxSize; }
     void SetName(const QString &name);
     void SetNumber(uint32_t number);
     uint32_t GetNumber();
@@ -61,12 +61,13 @@ private slots:
     void slotPlayerItemActivated();
     void slotSelectionItemActivated(QListWidgetItem *item);
 
+    void slotFilter();
 protected:
     Ui::SelectionWindow ui;
 
     TableHelper mHelper;
-    int mMinSize;
-    int mMaxSize;
+    size_t mMinSize;
+    size_t mMaxSize;
     QStringList mTableHeader;
 };
 

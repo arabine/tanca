@@ -31,6 +31,7 @@
 
 //#define UNIT_TESTS
 
+extern "C" void StartFileServer(void);
 
 /*****************************************************************************/
 class Logger : public Observer<std::string>
@@ -63,6 +64,8 @@ int main(int argc, char *argv[])
 #else
     Logger logger;
     Log::RegisterListener(logger);
+
+    StartFileServer();
 
     QApplication a(argc, argv);
 

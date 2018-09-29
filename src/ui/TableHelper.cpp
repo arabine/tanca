@@ -35,8 +35,8 @@
 QStringList InitEventRanking()
 {
     QStringList list;
-    list << QObject::tr("Id") << QObject::tr("Numéro") << QObject::tr("Équipe")
-         << QObject::tr("Parties gagnées") << QObject::tr("Parties perdues") << QObject::tr("Points marqués")
+    list << QObject::tr("Id") << QObject::tr("Rang") << QObject::tr("Numéro d'équipe") << QObject::tr("Équipe")
+         << QObject::tr("Gagnés")<< QObject::tr("Nuls")  << QObject::tr("Perdus") << QObject::tr("Points marqués")
          << QObject::tr("Points concédés") << QObject::tr("Différence") << QObject::tr("Buchholz");
     return list;
 }
@@ -45,9 +45,8 @@ QStringList InitEventRanking()
 QStringList InitSeasonRanking()
 {
     QStringList list;
-    list << QObject::tr("Id") << QObject::tr("Joueur") << QObject::tr("Parties gagnées")
-         << QObject::tr("Parties perdues") << QObject::tr("Points marqués")
-         << QObject::tr("Points concédés") << QObject::tr("Différence");
+    list << QObject::tr("Id") << QObject::tr("Rang")  << QObject::tr("Joueur") << QObject::tr("Gagnés")<< QObject::tr("Nuls")  << QObject::tr("Perdus")
+         << QObject::tr("Points marqués") << QObject::tr("Points concédés") << QObject::tr("Différence") << QObject::tr("Parties jouées") ;
     return list;
 }
 
@@ -115,20 +114,20 @@ void TableHelper::Finish()
     mWidget->resizeColumnsToContents();
 }
 
-void TableHelper::AppendLine(const QList<QVariant> &list, bool selected)
+void TableHelper::AppendLine(const std::list<Value> &list, bool selected)
 {
     int column = 0;
 
-    foreach (QVariant data, list)
+    for (auto const &data : list)
     {
         QTableWidgetItem *cell;
-        if (data.type() == QVariant::Int)
+        if (data.GetType() == Value::INTEGER)
         {
-            cell = new IntegerTableItem(data.toInt());
+            cell = new IntegerTableItem(data.GetInteger());
         }
         else
         {
-            cell = new QTableWidgetItem(data.toString());
+            cell = new QTableWidgetItem(data.GetString().c_str());
         }
 
         if (selected)
@@ -141,39 +140,67 @@ void TableHelper::AppendLine(const QList<QVariant> &list, bool selected)
     mRow++;
 }
 
+#include <JsonWriter.h>
+
 void TableHelper::Export(const QString &fileName)
 {
     // FIXME: detect the output format thanks to the file extension
+    QString ext = QFileInfo(fileName).completeSuffix().toLower();
+    //bool saveInCSV = (ext == "csv");
+    bool saveInJson = (ext == "json");
 
     QFile f( fileName );
+
     if (f.open(QFile::WriteOnly))
     {
         QTextStream data( &f );
         QStringList strList;
+        QStringList titles;
+
+        JsonArray players;
 
         // Export header title
         for( int c = 0; c < mWidget->columnCount(); ++c )
         {
-            strList << mWidget->horizontalHeaderItem(c)->data(Qt::DisplayRole).toString();
+            QString title = mWidget->horizontalHeaderItem(c)->data(Qt::DisplayRole).toString();
+            title.replace(" ", "_");
+            title.replace("(", "");
+            title.replace(")", "");
+            title.replace("é", "e");
+            title = title.toLower();
+            titles << title;
         }
 
-        data << strList.join(";") << "\n";
+        data << titles.join(";") << "\n";
 
         // Export table contents
         for( int r = 0; r < mWidget->rowCount(); ++r )
         {
             strList.clear();
+            JsonObject player;
             for( int c = 0; c < mWidget->columnCount(); ++c )
             {
-                strList << mWidget->item( r, c )->text();
+                QString element = mWidget->item( r, c )->text();
+                player.AddValue( titles[c].toStdString(), element.toStdString());
+                strList << element;
             }
+            players.AddValue(player);
             data << strList.join( ";" ) + "\n";
         }
+
+        JsonObject root;
+        root.AddValue("players", players);
+
         f.close();
+
+        if (saveInJson)
+        {
+            JsonWriter::SaveToFile(root, fileName.toStdString());
+        }
     }
 }
 
-void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, bool isSeason, const std::vector<Rank> &list)
+void TableHelper::Show(const std::deque<Player> &players, const std::deque<Team> &teams, bool isSeason, const std::deque<Rank> &list)
 {
     SetSelectedColor(QColor(245,245,220));
     SetAlternateColors(true);
@@ -187,6 +214,7 @@ void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, b
         Initialize(gEventRankingTableHeader, list.size());
     }
 
+    int line = 1;
     for (auto &rank : list)
     {
         if (isSeason)
@@ -195,8 +223,8 @@ void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, b
             Player player;
             if (Player::Find(players, rank.id, player))
             {
-                QList<QVariant> rowData;
-                rowData << player.id << player.FullName() << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference();
+                int nbGames = rank.gamesWon + rank.gamesLost + rank.gamesDraw;
+                std::list<Value> rowData = {player.id, line, player.FullName(), rank.gamesWon, rank.gamesDraw, rank.gamesLost, rank.pointsWon, rank.pointsLost, rank.Difference(), nbGames};
                 AppendLine(rowData, false);
             }
             else
@@ -210,8 +238,7 @@ void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, b
             Team team;
             if (Team::Find(teams, rank.id, team))
             {
-                QList<QVariant> rowData;
-                rowData << team.id << team.number << team.teamName << rank.gamesWon << rank.gamesLost << rank.pointsWon << rank.pointsLost << rank.Difference() << rank.pointsOpponents;
+                std::list<Value> rowData = {team.id, line, team.number, team.teamName, rank.gamesWon, rank.gamesDraw, rank.gamesLost, rank.pointsWon, rank.pointsLost, rank.Difference(), rank.pointsOpponents};
                 AppendLine(rowData, false);
             }
             else
@@ -219,6 +246,7 @@ void TableHelper::Show(const QList<Player> &players, const QList<Team> &teams, b
                 TLogError("Cannot find team to create ranking!");
             }
         }
+        line++;
     }
 
     Finish();
