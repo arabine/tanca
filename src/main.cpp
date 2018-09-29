@@ -43,6 +43,8 @@ public:
 
     }
 
+    virtual ~Logger();
+
     void Update(const std::string &info)
     {
         std::cout << info << std::endl;
@@ -77,3 +79,5 @@ int main(int argc, char *argv[])
 #endif
 
 }
+
+Logger::~Logger() {}

@@ -32,8 +32,8 @@
 struct Rank
 {
 public:
-    static const int cHighCost = 1000000;
-    static const int cWinCost = 10000;
+    static const int cHighCost = 10000;
+    static const int cWinCost = 1000;
     static const int cDrawCost = 5;
 
 

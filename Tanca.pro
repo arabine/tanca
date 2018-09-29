@@ -44,11 +44,21 @@ TEMPLATE = app
 VPATH += src src/ui
 INCLUDEPATH += src src/ui
 
-QMAKE_CXXFLAGS += -std=c++11
 
-win32 {
+windows {
     DEFINES += USE_WINDOWS_OS
-    LIBS += libws2_32 libpsapi
+
+
+    *-g++* {
+        # MinGW
+        QMAKE_CXXFLAGS += -std=c++11
+        LIBS +=  -lws2_32 -lpsapi
+    }
+
+    *-msvc* {
+        # MSVC
+        QMAKE_LIBS += ws2_32.lib #psapi.lib setupapi.lib cfgmgr32.lib advapi32.lib
+    }
 
 } else {
     DEFINES += USE_UNIX_OS

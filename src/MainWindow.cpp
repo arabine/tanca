@@ -35,32 +35,34 @@
 #include "ui_MainWindow.h"
 #include "ui_RewardWindow.h"
 
-static const QString gVersion = "1.11";
+static const QString gVersion = "1.12";
 
 // Table headers
-QStringList gGamesTableHeader;
-QStringList gEventsTableHeader;
-QStringList gPlayersTableHeader;
-QStringList gTeamsTableHeader;
-QStringList gRewardsTableHeader;
+static QStringList gGamesTableHeader;
+static QStringList gEventsTableHeader;
+static QStringList gPlayersTableHeader;
+static QStringList gTeamsTableHeader;
+static QStringList gRewardsTableHeader;
 
 #ifdef USE_WINDOWS_OS
-QString gAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tanca";
+static QString gAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tanca";
 #else
 QString gAppDataPath = QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/.tanca";
 #endif
-QString gDbFullPath = gAppDataPath + "/tanca.db";
+static QString gDbFullPath = gAppDataPath + "/tanca.db";
 
 class Outputter : public Observer<std::string>
 {
 public:
+    virtual ~Outputter();
+
     virtual void Update(const std::string &info)
     {
         std::cout << info << std::endl;
     }
 };
 
-Outputter consoleOutput;
+static Outputter consoleOutput;
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -182,19 +184,6 @@ void MainWindow::slotTabChanged(int index)
     Q_UNUSED(index);
     // Refresh ranking
     UpdateRanking();
-    // Refresh team buttons
-
-    // Cannot edit teams if some games exist
-    if (mGames.size() == 0)
-    {
-        ui->buttonDeleteTeam->setEnabled(true);
-        ui->buttonAddTeam->setEnabled(true);
-    }
-    else
-    {
-        ui->buttonAddTeam->setEnabled(false);
-        ui->buttonDeleteTeam->setEnabled(false);
-    }
 }
 
 void MainWindow::slotAboutBox()
@@ -323,18 +312,6 @@ void MainWindow::UpdateTeamList()
     }
 
     helper.Finish();
-
-    // Cannot edit teams if some games exist
-    if (mGames.size() == 0)
-    {
-        ui->buttonAddTeam->setEnabled(true);
-        ui->buttonDeleteTeam->setEnabled(true);
-    }
-    else
-    {
-        ui->buttonAddTeam->setEnabled(false);
-        ui->buttonDeleteTeam->setEnabled(false);
-    }
 
     teamWindow->ListIds();
 }
@@ -976,3 +953,5 @@ std::string TypeToString(const Event &event)
         return "";
     }
 }
+
+Outputter::~Outputter() {}

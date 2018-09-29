@@ -56,6 +56,12 @@ s'il n'est pas encore terminé.
  - Tournois simple et double élémination
  - Tournoi avec poules qualiticatives
 
+### V1.12
+
+ - Improved algorithm for ranking (no more split before pairing)
+ - Corrected rankin, now based on points won only (no more games won/lost)
+ - Team buttons are now always accessible
+
 ### V1.11
 
  - Add line edit filter for players tab and selection windows
