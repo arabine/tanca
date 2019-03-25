@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+
+	<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+  
 </head>
 <body>
   <div id="app">
@@ -15,33 +19,13 @@
 			<v-toolbar-side-icon></v-toolbar-side-icon>
 			<v-toolbar-title>Tanca</v-toolbar-title>
 			<v-spacer></v-spacer>
-			<v-toolbar-items class="hidden-sm-and-down">
-				<v-btn flat>Pull</v-btn>
-				<v-btn flat>Push</v-btn>
-			</v-toolbar-items>
 		</v-toolbar>
-
 
 		<v-content>
 			<v-container fluid fill-height>
-				<v-layout row>
-					<v-flex xs12 >
-
-							<v-card-text>
-									<v-form>
-										<v-text-field prepend-icon="search" name="search" label="Search" type="text"></v-text-field>
-									</v-form>
-							</v-card-text>
-					
-							<v-card-text>
-								Active: {{ bottomNav }}
-							</v-card-text>
-					
-					</v-flex>
-				</v-layout>
+					<router-view></router-view>					
 			</v-container>
 		</v-content>
-
 
 		<v-bottom-nav :active.sync="bottomNav" :value="true" absolute	color="transparent">
 			<v-btn color="teal" flat value="players">
@@ -70,16 +54,16 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
-  <script>
-    new Vue({ 
-		el: '#app',
-		data () {
-			return {
-			bottomNav: 'recent'
-			}
-		}
-	})
-  </script>
+	<script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+	<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/pouchdb@7.0.0/dist/pouchdb.min.js"></script>
+	<script src="https://unpkg.com/vuex@3.1.0/dist/vuex.js"></script>
+
+	<script src="backend.js"></script>
+	<script src="components/AddPlayerDialog.js"></script>
+	<script src="store/PlayersStore.js"></script>
+	<script src="views/PlayersView.js"></script>
+	<script src="app.js"></script>
+
 </body>
 </html>
