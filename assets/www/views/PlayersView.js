@@ -12,15 +12,23 @@ var players_view_template = /*template*/`
           <v-list two-line>
             <template v-for="(item, index) in filteredPlayers">
               
-              <v-list-tile @click="">
-                <v-list-tile-avatar>
-                  <img src="https://cdn.vuetifyjs.com/images/lists/1.jpg">
-                </v-list-tile-avatar>
-  
-                <v-list-tile-content>
-                  <v-list-tile-title v-html="item.firstname"></v-list-tile-title>
-                  <v-list-tile-sub-title v-html="item.lastname"></v-list-tile-sub-title>
-                </v-list-tile-content>
+         
+
+              <v-list-tile @click.capture.stop="togglePlayer(item._id)">
+
+                  <v-list-tile-action>
+                    <v-checkbox v-model="selected" multiple :value="item._id" />
+                  </v-list-tile-action>
+
+                    <v-list-tile-avatar>
+                      <v-icon>account_circle</v-icon>
+                    </v-list-tile-avatar>
+      
+                    <v-list-tile-content>
+                      <v-list-tile-title v-html="item.firstname"></v-list-tile-title>
+                      <v-list-tile-sub-title v-html="item.lastname"></v-list-tile-sub-title>
+                    </v-list-tile-content>
+
               </v-list-tile>
 
               <v-divider></v-divider>
@@ -28,6 +36,7 @@ var players_view_template = /*template*/`
             </template>
           </v-list>
 
+          <pre>{{ selected }}</pre>
 
       </v-card-text>
 
@@ -45,7 +54,8 @@ PlayersView = {
   data () {
     return {
       showAddPlayerDialog: false,
-      searchWord: ''
+      searchWord: '',
+      selected: []
     }
   },
   computed: {
@@ -89,7 +99,14 @@ PlayersView = {
   },
   //====================================================================================================================
   methods : {
-
+    togglePlayer (id) {
+      if (this.selected.includes(id)) {
+        // Removing the color
+        this.selected.splice(this.selected.indexOf(id), 1);
+      } else {
+        this.selected.push(id);
+      }
+    }
   },
   //====================================================================================================================
   mounted: function() {
