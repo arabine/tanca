@@ -6,15 +6,12 @@ var players_view_template = /*template*/`
       <v-btn absolute dark fab top right color="pink" @click="showAddPlayerDialog=true"><v-icon>add</v-icon></v-btn>
       <v-card-text>
           <v-form>
-            <v-text-field prepend-icon="search" name="search" label="Search" type="text"></v-text-field>
+            <v-text-field v-model="searchWord" prepend-icon="search" name="search" label="Search" type="text"></v-text-field>
           </v-form>
 
           <v-list two-line>
-            <template v-for="(item, index) in players">
+            <template v-for="(item, index) in filteredPlayers">
               
-  
-              
-  
               <v-list-tile @click="">
                 <v-list-tile-avatar>
                   <img src="https://cdn.vuetifyjs.com/images/lists/1.jpg">
@@ -48,6 +45,7 @@ PlayersView = {
   data () {
     return {
       showAddPlayerDialog: false,
+      searchWord: ''
     }
   },
   computed: {
@@ -60,7 +58,26 @@ PlayersView = {
           });
         }
         return pList;
-      }
+      },
+      filteredPlayers() {
+        var pList = [];
+        
+        if (this.$store.state.docs !== null) { 
+          pList = this.$store.state.docs.filter((doc) => {
+              var matchFilter = true;
+
+              if (this.searchWord !== '') {
+                var word = Api.removeDiacritics(this.searchWord.trim().toLowerCase());
+                matchFilter = doc.firstname.toLowerCase().includes(word) || 
+                              doc.lastname.toLowerCase().includes(word);
+              }
+
+              return doc._id.includes('player_') && matchFilter;
+          });
+        }
+        return pList;
+      },
+      
   },
   //====================================================================================================================
   created() {

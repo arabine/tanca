@@ -29,6 +29,10 @@ class Backend
       
     }
 
+    removeDiacritics(str) {
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+    }
+
     // Utility function
     binarySearch(arr, docId) {
         var low = 0, high = arr.length, mid;
