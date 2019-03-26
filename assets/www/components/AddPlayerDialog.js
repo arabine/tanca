@@ -15,8 +15,8 @@ var add_player_dialog_template = /*template*/`
   <!-- CENTRE DU DIALOG --> 
   <v-card-text>
       <v-flex xs12 sm6 md3>
-        <v-text-field v-model="first_name" :rules="[() => !!first_name || 'This field is required']" :error-messages="errorMessages" label="Firt name" required></v-text-field>
-        <v-text-field v-model="last_name" :rules="[() => !!last_name || 'This field is required']" :error-messages="errorMessages" label="Last name" required></v-text-field>
+        <v-text-field v-model="firstname" :rules="[() => !!firstname || 'This field is required']" :error-messages="errorMessages" label="Firt name" required></v-text-field>
+        <v-text-field v-model="lastname" :rules="[() => !!lastname || 'This field is required']" :error-messages="errorMessages" label="Last name" required></v-text-field>
     </v-flex>
   </v-card-text>
  
@@ -30,8 +30,8 @@ AddPlayerDialog = {
       return {
         errorMessages: '',
         formHasErrors: false,
-        first_name: null,
-        last_name: null,
+        firstname: null,
+        lastname: null,
       }
   },
   computed: {
@@ -47,8 +47,8 @@ AddPlayerDialog = {
     },
     form () {
       return {
-        first_name: this.first_name,
-        last_name: this.last_name,
+        firstname: this.firstname,
+        lastname: this.lastname,
       }
     }
   },
@@ -62,7 +62,7 @@ AddPlayerDialog = {
       });
 
       if (!this.formHasErrors) {
-        Api.addPlayer(this.first_name, this.last_name);
+        Api.addPlayer(this.firstname, this.lastname);
         this.show = close;
       }
     }
