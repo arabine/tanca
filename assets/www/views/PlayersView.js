@@ -1,9 +1,15 @@
 
 var players_view_template = /*template*/`
-<v-layout row>
+
+<v-layout column>
   <v-flex xs12 >
       <AddPlayerDialog  :visible="showAddPlayerDialog" @close="showAddPlayerDialog=false" ></AddPlayerDialog>
-      <v-btn absolute dark fab top right color="pink" @click="showAddPlayerDialog=true"><v-icon>add</v-icon></v-btn>
+      
+      <v-layout row justify-end>
+        <v-btn dark fab small color="indigo"><v-icon>group_add</v-icon></v-btn>
+        <v-btn dark fab small color="pink" @click="showAddPlayerDialog=true"><v-icon>add</v-icon></v-btn>
+      </v-layout>
+      
       <v-card-text>
           <v-form>
             <v-text-field v-model="searchWord" prepend-icon="search" name="search" label="Search" type="text"></v-text-field>
@@ -12,8 +18,6 @@ var players_view_template = /*template*/`
           <v-list two-line>
             <template v-for="(item, index) in filteredPlayers">
               
-         
-
               <v-list-tile @click.capture.stop="togglePlayer(item._id)">
 
                   <v-list-tile-action>
@@ -36,7 +40,7 @@ var players_view_template = /*template*/`
             </template>
           </v-list>
 
-          <pre>{{ selected }}</pre>
+     <!--     <pre>{{ selected }}</pre> -->
 
       </v-card-text>
 
