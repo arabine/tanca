@@ -18,11 +18,9 @@ const store = new Vuex.Store({
     // Global generic purpose states
     state: {
         finishedLoading: false,
-        docs: null
-    },
-    // Sub modules
-    modules: {
-      players: PlayersStore,
+        docs: null, // Tous les documents sont mis en mémoire !! Optimisation possible plus tard ... il faudrait juste garder les joueurs et la session en cours
+        currentSession: null
+
     },
     mutations: {
         SET_FINISHED_LOADING: (state) => {
@@ -59,20 +57,27 @@ const store = new Vuex.Store({
 // =================================================================================================
 async function loadEverything()
 {
-    Api.initialize(function onUpdatedOrInserted(newDoc) {
+    Api.initializeDb(function onUpdatedOrInserted(newDoc) {
         store.commit('DB_UPDATE', newDoc);
     }, function(id) {
         store.commit('DB_DELETE', id);
     }, function(docs) {
         console.log("[DB] Loaded");
         store.commit('SET_DOCS', docs);
+
+        // Add here all other inits
+        Api.loadCurrentSession();
+
+        store.commit('SET_FINISHED_LOADING');
     });
-    store.commit('SET_FINISHED_LOADING');
+    
 }
 
 // =================================================================================================
 // VUE APPLICATION TOP LEVEL COMPONENT
 // =================================================================================================
+Vue.prototype.$eventHub = new Vue(); // Global event bus
+
 const app = new Vue({
     router: router,
     el: '#app',
@@ -82,14 +87,33 @@ const app = new Vue({
     },
     data () {
         return {
-            bottomNav: 'players'
+            bottomNav: 'players',
+            alert: false,
+            alertType: 'success', // success, info, warning, error
+            alertText: '',
+            alertTimeout: 2000
+        }
+    },
+    methods: {
+        showAlert(text, type, timeout) {
+            this.alertText = text;
+            this.alertType = type;
+            this.alert = true;
+            if (timeout !== undefined) {
+                this.alertTimeout = timeout;
+            }
         }
     },
     created: function() {
+        this.$eventHub.$on('alert', this.showAlert);
         loadEverything();
+
     },
     beforeMount: function() {
 
+    },
+    beforeDestroy() {
+        this.$eventHub.$off('logged-in');
     },
     mounted: function() {
         console.log('Tanca initialized');

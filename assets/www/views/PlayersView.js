@@ -6,7 +6,7 @@ var players_view_template = /*template*/`
       <AddPlayerDialog  :visible="showAddPlayerDialog" @close="showAddPlayerDialog=false" ></AddPlayerDialog>
       
       <v-layout row justify-end>
-        <v-btn dark fab small color="indigo"><v-icon>group_add</v-icon></v-btn>
+        <v-btn dark fab small color="indigo" @click="addSelectedToTeam"><v-icon>group_add</v-icon></v-btn>
         <v-btn dark fab small color="pink" @click="showAddPlayerDialog=true"><v-icon>add</v-icon></v-btn>
       </v-layout>
       
@@ -40,7 +40,7 @@ var players_view_template = /*template*/`
             </template>
           </v-list>
 
-     <!--     <pre>{{ selected }}</pre> -->
+          <pre>{{ selected }}</pre> 
 
       </v-card-text>
 
@@ -68,7 +68,7 @@ PlayersView = {
         
         if (this.$store.state.docs !== null) { 
           pList = this.$store.state.docs.filter(function(doc) {
-              return doc._id.includes('player_');
+              return doc._id.includes('player:');
           });
         }
         return pList;
@@ -86,7 +86,7 @@ PlayersView = {
                               doc.lastname.toLowerCase().includes(word);
               }
 
-              return doc._id.includes('player_') && matchFilter;
+              return doc._id.includes('player:') && matchFilter;
           });
         }
         return pList;
@@ -109,6 +109,15 @@ PlayersView = {
         this.selected.splice(this.selected.indexOf(id), 1);
       } else {
         this.selected.push(id);
+      }
+    },
+    addSelectedToTeam() {
+      if (this.selected.length == 0) {
+        this.$eventHub.$emit('alert', 'Vous devez sélectionner au moins un joueur', 'info');
+      } else {
+        Api.addTeam(this.selected);
+        this.selected = [];
+        this.$eventHub.$emit('alert', "L'équipe a été créée", 'success');
       }
     }
   },

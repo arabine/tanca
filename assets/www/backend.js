@@ -2,9 +2,10 @@ class Backend
 {
     constructor() {
         this.db = null;
+        this.session = null;
     }
 
-    initialize(updatedCb, deletedCb, loadedCb) {
+    initializeDb(updatedCb, deletedCb, loadedCb) {
         this.db = new PouchDB('tanca');
 
         this.db.allDocs({include_docs: true}).then(function (res) {
@@ -26,7 +27,33 @@ class Backend
         .on('error', function (err) {
             // handle errors
         });
-      
+    }
+
+    loadCurrentSession() {
+        // Now we look if we have a current session in working state
+        if (localStorage.getItem('tancasession')) {
+            this.session = JSON.parse(localStorage.getItem('tancasession'));
+        } else {
+            // On on la crée alors
+            this.session = this.createNewSession();
+            localStorage.setItem('tancasession', JSON.stringify(this.session));
+        }
+
+        console.log('Current session is: ' + JSON.stringify(this.session));
+    }
+
+    createNewSession() {
+        var session = {
+            _id: 'session:' + new Date().toISOString(),
+            title: '',
+            teams: []
+        };
+        this.db.put(session, function callback(err, result) {
+            if (!err) {
+                console.log('[DB] Successfully saved a session!');
+            }
+        });
+        return session;
     }
 
     removeDiacritics(str) {
@@ -45,15 +72,19 @@ class Backend
 
     addPlayer(firstname, lastname) {
         var person = {
-            _id: 'player_' + new Date().toISOString(),
+            _id: 'player:' + new Date().toISOString(),
             firstname: firstname,
             lastname: lastname
         };
         this.db.put(person, function callback(err, result) {
             if (!err) {
-                console.log('Successfully saved a person!');
+                console.log('[DB] Successfully saved a person!');
             }
         });
+    }
+
+    addTeam(players) {
+        
     }
 
 

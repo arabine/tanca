@@ -12,9 +12,18 @@
 <body>
   <div id="app">
 	<v-app id="inspire" dark>
-	
+
+      <v-snackbar
+      v-model="alert"
+      top
+      :color="alertType"
+      :timeout="alertTimeout"
+    >
+    {{ alertText }}
+    </v-snackbar>
+    
 		<v-toolbar>
-			<v-toolbar-side-icon></v-toolbar-side-icon>
+
 			<v-toolbar-title>Tanca</v-toolbar-title>
 			<v-spacer></v-spacer>
 			<v-btn icon>
@@ -32,6 +41,12 @@
 		</v-content>
 
 		<v-bottom-nav :active.sync="bottomNav" :value="true" absolute	color="transparent">
+
+      <v-btn color="teal" flat value="home">
+          <span>Home</span>
+          <v-icon>home</v-icon>
+      </v-btn>
+
 			<v-btn color="teal" flat value="players">
 				<span>Players</span>
 				<v-icon>face</v-icon>
@@ -67,7 +82,6 @@
 
 	<script src="backend.js"></script>
 	<script src="components/AddPlayerDialog.js"></script>
-	<script src="store/PlayersStore.js"></script>
 	<script src="views/PlayersView.js"></script>
 	<script src="app.js"></script>
 
