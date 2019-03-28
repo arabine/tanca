@@ -6,8 +6,12 @@
 const router = new VueRouter({
     mode: 'hash',
     routes: [
+      { path: '/home', name: 'home', component: HomeView },
       { path: '/players', name: 'players', component: PlayersView },
-      { path: '*', redirect: '/players'}
+      { path: '/teams', name: 'teams', component: TeamsView },
+      { path: '/games', name: 'games', component: GamesView },
+      { path: '/results', name: 'results', component: ResultsView },
+      { path: '*', redirect: '/home'}
     ]
 });
 

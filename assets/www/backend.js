@@ -39,7 +39,7 @@ class Backend
             localStorage.setItem('tancasession', JSON.stringify(this.session));
         }
 
-        console.log('Current session is: ' + JSON.stringify(this.session));
+        console.log('[DB] Current session is: ' + JSON.stringify(this.session));
     }
 
     createNewSession() {
@@ -84,7 +84,23 @@ class Backend
     }
 
     addTeam(players) {
-        
+        var team = {
+            players: players,
+            opponents: [],
+            wons: [],
+            loses: []
+        };
+        //Reading the contents of a Document
+        this.db.get(this.session._id, (err, doc) => {
+        if (err) {
+            return console.log(err);
+        } else {
+            // Inserting Document
+            doc.teams.push(team);
+            this.db.put(doc);
+            console.log(doc);
+        }
+ });
     }
 
 

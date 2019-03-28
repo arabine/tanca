@@ -42,27 +42,27 @@
 
 		<v-bottom-nav :active.sync="bottomNav" :value="true" absolute	color="transparent">
 
-      <v-btn color="teal" flat value="home">
+      <v-btn color="teal" flat value="home" to="home">
           <span>Home</span>
           <v-icon>home</v-icon>
       </v-btn>
 
-			<v-btn color="teal" flat value="players">
+			<v-btn color="teal" flat value="players" to="players">
 				<span>Players</span>
 				<v-icon>face</v-icon>
 			</v-btn>
 
-			<v-btn color="teal" flat value="teams">
+			<v-btn color="teal" flat value="teams" to="teams">
 				<span>Teams</span>
 				<v-icon>group</v-icon>
 			</v-btn>
 		
-			<v-btn color="teal" flat value="games">
+			<v-btn color="teal" flat value="games" to="games">
 				<span>Games</span>
 				<v-icon>casino</v-icon>
 			</v-btn>
 		
-			<v-btn color="teal" flat value="results">
+			<v-btn color="teal" flat value="results" to="results">
 				<span>Results</span>
 				<v-icon>assignment</v-icon>
 			</v-btn>
@@ -72,17 +72,20 @@
 
   </div>
 
-  	<script src="lib/vue.js"></script>
+  <script src="lib/vue.js"></script>
 	<script src="lib/vuex.js"></script>
 	<script src="lib/vuetify.js"></script>
 	<script src="lib/vue-router.js"></script>
 	<script src="lib/pouchdb.min.js"></script>
 	<script src="lib/blossom.js"></script>
-	
 
 	<script src="backend.js"></script>
 	<script src="components/AddPlayerDialog.js"></script>
-	<script src="views/PlayersView.js"></script>
+  <script src="views/HomeView.js"></script>
+  <script src="views/PlayersView.js"></script>
+  <script src="views/TeamsView.js"></script>
+  <script src="views/GamesView.js"></script>
+  <script src="views/ResultsView.js"></script>
 	<script src="app.js"></script>
 
 <script>

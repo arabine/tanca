@@ -76,19 +76,18 @@ PlayersView = {
       filteredPlayers() {
         var pList = [];
         
-        if (this.$store.state.docs !== null) { 
-          pList = this.$store.state.docs.filter((doc) => {
-              var matchFilter = true;
+        pList = this.players.filter((doc) => {
+            var matchFilter = true;
 
-              if (this.searchWord !== '') {
-                var word = Api.removeDiacritics(this.searchWord.trim().toLowerCase());
-                matchFilter = doc.firstname.toLowerCase().includes(word) || 
-                              doc.lastname.toLowerCase().includes(word);
-              }
+            if (this.searchWord !== '') {
+              var word = Api.removeDiacritics(this.searchWord.trim().toLowerCase());
+              matchFilter = doc.firstname.toLowerCase().includes(word) || 
+                            doc.lastname.toLowerCase().includes(word);
+            }
 
-              return doc._id.includes('player:') && matchFilter;
-          });
-        }
+            return matchFilter;
+        });
+
         return pList;
       },
       
@@ -123,6 +122,6 @@ PlayersView = {
   },
   //====================================================================================================================
   mounted: function() {
-    console.log('Loaded component PlayersView');
+    console.log('[VUE] Mounted component PlayersView');
   },
 }
