@@ -35,8 +35,18 @@
 		</v-toolbar>
 
 		<v-content>
-			<v-container fluid fill-height>
-					<router-view></router-view>					
+			<v-container align-center justify-center fluid fill-height>
+        <template v-if="!isReady">
+            <v-progress-circular
+            indeterminate
+            color="primary"
+          ></v-progress-circular>
+
+        </template>
+
+        <template v-else>
+          <router-view></router-view>					
+        </template>
 			</v-container>
 		</v-content>
 
@@ -79,7 +89,8 @@
 	<script src="lib/pouchdb.min.js"></script>
 	<script src="lib/blossom.js"></script>
 
-	<script src="backend.js"></script>
+  <script src="backend.js"></script>
+	<script src="store.js"></script>
 	<script src="components/AddPlayerDialog.js"></script>
   <script src="views/HomeView.js"></script>
   <script src="views/PlayersView.js"></script>

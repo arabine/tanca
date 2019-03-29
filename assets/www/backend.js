@@ -2,7 +2,6 @@ class Backend
 {
     constructor() {
         this.db = null;
-        this.session = null;
     }
 
     initializeDb(updatedCb, deletedCb, loadedCb) {
@@ -14,7 +13,6 @@ class Backend
         }).catch(console.log.bind(console));
 
         this.db.changes({live: true, since: 'now', include_docs: true})
-       
         .on('change', function (change) {
             if (change.deleted) {
                 // change.id holds the deleted id
@@ -30,22 +28,23 @@ class Backend
     }
 
     loadCurrentSession() {
+        var session = {}
         // Now we look if we have a current session in working state
         if (localStorage.getItem('tancasession')) {
-            this.session = JSON.parse(localStorage.getItem('tancasession'));
+            session = JSON.parse(localStorage.getItem('tancasession'));
         } else {
             // On on la crée alors
-            this.session = this.createNewSession();
-            localStorage.setItem('tancasession', JSON.stringify(this.session));
+            session = this.createNewSession();
+            localStorage.setItem('tancasession', JSON.stringify(session));
         }
 
-        console.log('[DB] Current session is: ' + JSON.stringify(this.session));
+        console.log('[DB] Current session is: ' + JSON.stringify(session));
+        return session;
     }
 
     createNewSession() {
         var session = {
             _id: 'session:' + new Date().toISOString(),
-            title: '',
             teams: []
         };
         this.db.put(session, function callback(err, result) {
@@ -70,37 +69,31 @@ class Backend
         return low;
       }
 
-    addPlayer(firstname, lastname) {
-        var person = {
-            _id: 'player:' + new Date().toISOString(),
-            firstname: firstname,
-            lastname: lastname
-        };
-        this.db.put(person, function callback(err, result) {
+    addPlayer(player) {
+        player._id = 'player:' + new Date().toISOString();
+        this.db.put(player, function callback(err, result) {
             if (!err) {
                 console.log('[DB] Successfully saved a person!');
             }
         });
     }
 
-    addTeam(players) {
+    addTeam(players, sessionId) {
         var team = {
             players: players,
             opponents: [],
             wons: [],
             loses: []
         };
-        //Reading the contents of a Document
-        this.db.get(this.session._id, (err, doc) => {
-        if (err) {
-            return console.log(err);
-        } else {
-            // Inserting Document
+        
+        return this.db.get(sessionId).then((doc) => {
             doc.teams.push(team);
-            this.db.put(doc);
-            console.log(doc);
-        }
- });
+            return this.db.put(doc);
+        });
+    }
+
+    deleteTeams(teams) {
+        // FIXME
     }
 
 

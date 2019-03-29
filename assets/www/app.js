@@ -16,47 +16,6 @@ const router = new VueRouter({
 });
 
 // =================================================================================================
-// VUE STORE
-// =================================================================================================
-const store = new Vuex.Store({
-    // Global generic purpose states
-    state: {
-        finishedLoading: false,
-        docs: null, // Tous les documents sont mis en mémoire !! Optimisation possible plus tard ... il faudrait juste garder les joueurs et la session en cours
-        currentSession: null
-
-    },
-    mutations: {
-        SET_FINISHED_LOADING: (state) => {
-            state.finishedLoading = true;
-        },
-        SET_DOCS: (state, docs) => {
-            state.docs = docs;
-        },
-        DB_UPDATE: (state, newDoc) => {
-            var index = Api.binarySearch(state.docs, newDoc._id);
-            var doc = state.docs[index];
-            if (doc && doc._id === newDoc._id) { // update
-                state.docs[index] = newDoc;
-                console.log("[DB] Document updated");
-            } else { // insert
-                state.docs.splice(index, 0, newDoc);
-                console.log("[DB] Document inserted");
-            }
-        },
-        DB_DELETE: (state, id) => {
-            var index = Api.binarySearch(docs, id);
-            var doc = this.docs[index];
-            if (doc && doc._id === id) {
-                console.log("[DB] Document deleted");
-                this.docs.splice(index, 1);
-            }
-        }
-    }
-});
-
-
-// =================================================================================================
 // SYNCHRONOUS LOADING AT START-UP
 // =================================================================================================
 async function loadEverything()
@@ -70,7 +29,8 @@ async function loadEverything()
         store.commit('SET_DOCS', docs);
 
         // Add here all other inits
-        Api.loadCurrentSession();
+        var session = Api.loadCurrentSession();
+        store.commit('SET_SESSION', session);
 
         store.commit('SET_FINISHED_LOADING');
     });
@@ -87,11 +47,13 @@ const app = new Vue({
     el: '#app',
     store: store,
     computed: {
-
+        isReady() {
+            return this.$store.state.finishedLoading;
+        }
     },
     data () {
         return {
-            bottomNav: 'players',
+            bottomNav: '',
             alert: false,
             alertType: 'success', // success, info, warning, error
             alertText: '',
@@ -117,10 +79,10 @@ const app = new Vue({
 
     },
     beforeDestroy() {
-        this.$eventHub.$off('logged-in');
+        this.$eventHub.$off('alert');
     },
     mounted: function() {
-        console.log('Tanca initialized');
+        console.log('[APP] Tanca initialized');
     }
 });
 

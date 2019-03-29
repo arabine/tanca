@@ -62,8 +62,13 @@ AddPlayerDialog = {
       });
 
       if (!this.formHasErrors) {
-        Api.addPlayer(this.firstname, this.lastname);
-        this.show = close;
+        var player = {
+          firstname: this.firstname,
+          lastname: this.lastname
+        }
+
+        this.$store.dispatch('addPlayer', player);
+        this.$emit('close');
       }
     }
 

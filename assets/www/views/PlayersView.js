@@ -114,9 +114,16 @@ PlayersView = {
       if (this.selected.length == 0) {
         this.$eventHub.$emit('alert', 'Vous devez sélectionner au moins un joueur', 'info');
       } else {
-        Api.addTeam(this.selected);
-        this.selected = [];
-        this.$eventHub.$emit('alert', "L'équipe a été créée", 'success');
+        this.$store.dispatch('addTeam', this.selected).then((doc) => {
+          this.selected = [];
+          console.log('[PLAYERS] Add team: ' + JSON.stringify(doc));
+          this.$eventHub.$emit('alert', "L'équipe a été créée", 'success');
+        }).catch((err) => {
+          this.selected = [];
+          console.log('[PLAYERS] Add team failure: ' + err);
+          this.$eventHub.$emit('alert', "Erreur: impossible de créer l'équipe", 'error');
+        });
+        
       }
     }
   },
