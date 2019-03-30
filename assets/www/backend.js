@@ -68,7 +68,8 @@ class Backend
         var s = {
             _id: 'session:' + new Date().toISOString(),
             teams: [],
-            counter: 1 // unique counter used for team numbering
+            counter: 1, // unique counter used for team numbering
+            rounds: []
         };
         return this.db.put(s);
     }
@@ -133,6 +134,13 @@ class Backend
         });
     }
 
+    createRounds() {
+        return this.db.get(this.sessionId).then((doc) => {
+            Games.createRounds(doc);
+            return this.db.put(doc);
+        });
+        
+    }
 
 }
 

@@ -38,6 +38,9 @@ const store = new Vuex.Store({
         },
         deleteTeam: (context, indexList) => {
             return Api.deleteTeam(indexList)
+        },
+        createRounds: (context) => {
+            return Api.createRounds();
         }
     },
     mutations: {
