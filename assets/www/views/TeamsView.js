@@ -20,7 +20,7 @@ var teams_view_template = /*template*/`
                   </v-list-tile-action>
 
                   <v-list-tile-content>
-                      <v-list-tile-title v-html="index"></v-list-tile-title>
+                      <v-list-tile-title v-html="item.id"></v-list-tile-title>
                     </v-list-tile-content>
       
                     <v-list-tile-content>
@@ -78,9 +78,15 @@ TeamsView = {
       if (this.selected.length == 0) {
         this.$eventHub.$emit('alert', 'Vous devez sélectionner au moins une équipe', 'info');
       } else {
-        Api.deleteTeams(this.selected);
-        this.selected = [];
-        this.$eventHub.$emit('alert', "Équipe(s) supprimée(s)", 'success');
+        this.$store.dispatch('deleteTeam', this.selected).then((doc) => {
+          this.selected = [];
+          console.log('[TEAMS] Delete team: ' + JSON.stringify(doc));
+          this.$eventHub.$emit('alert', "Équipe(s) supprimée(s)", 'success');
+        }).catch((err) => {
+          this.selected = [];
+          console.log('[TEAMS] Delete team failure: ' + err);
+          this.$eventHub.$emit('alert', "Erreur: impossible de supprimer l'(es) équipe(s)", 'error');
+        });
       }
     },
     getTeamName(item) {

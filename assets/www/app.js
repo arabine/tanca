@@ -29,8 +29,7 @@ async function loadEverything()
         store.commit('SET_DOCS', docs);
 
         // Add here all other inits
-        var session = Api.loadCurrentSession();
-        store.commit('SET_SESSION', session);
+        Api.loadCurrentSession();
 
         store.commit('SET_FINISHED_LOADING');
     });

@@ -6,13 +6,12 @@ const store = new Vuex.Store({
     state: {
         finishedLoading: false,
         docs: null, // Tous les documents sont mis en mémoire !! Optimisation possible plus tard ... il faudrait juste garder les joueurs et la session en cours
-        sessionId: ''
     },
     getters: {
         getTeams: (state) => {
             var teams = [];
             if (state.docs !== undefined) {
-                var docs = state.docs.filter(doc => doc._id.includes(state.sessionId));
+                var docs = state.docs.filter(doc => doc._id.includes(Api.getSessionId()));
                 if (docs.length == 1) {
                     teams = docs[0].teams;
                 }
@@ -32,16 +31,16 @@ const store = new Vuex.Store({
     },
     actions: {
         addPlayer: (context, player) => {
-            Api.addPlayer(player, context.state.sessionId);
+            return Api.addPlayer(player);
         },
         addTeam: (context, players) => {
-            return Api.addTeam(players, context.state.sessionId);
+            return Api.addTeam(players);
+        },
+        deleteTeam: (context, indexList) => {
+            return Api.deleteTeam(indexList)
         }
     },
     mutations: {
-        SET_SESSION: (state, session) => {
-            state.sessionId = session._id;
-        },
         SET_FINISHED_LOADING: (state) => {
             state.finishedLoading = true;
         },

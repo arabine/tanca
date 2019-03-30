@@ -2,6 +2,7 @@ class Backend
 {
     constructor() {
         this.db = null;
+        this.sessionId = '';
     }
 
     initializeDb(updatedCb, deletedCb, loadedCb) {
@@ -27,32 +28,49 @@ class Backend
         });
     }
 
-    loadCurrentSession() {
-        var session = {}
-        // Now we look if we have a current session in working state
-        if (localStorage.getItem('tancasession')) {
-            session = JSON.parse(localStorage.getItem('tancasession'));
-        } else {
-            // On on la crée alors
-            session = this.createNewSession();
-            localStorage.setItem('tancasession', JSON.stringify(session));
-        }
-
-        console.log('[DB] Current session is: ' + JSON.stringify(session));
-        return session;
+    getSessionId() {
+        return this.sessionId;
     }
 
-    createNewSession() {
-        var session = {
-            _id: 'session:' + new Date().toISOString(),
-            teams: []
-        };
-        this.db.put(session, function callback(err, result) {
-            if (!err) {
-                console.log('[DB] Successfully saved a session!');
+    async getSavedSession() {
+        return new Promise( (resolve, reject) => {
+            if (localStorage.getItem('fr.tanca.session.id')) {
+                resolve(localStorage.getItem('fr.tanca.session.id'));
+            } else {
+                reject(new Error("[DB] No any Tanca session found in localStorage"));
             }
         });
-        return session;
+    }
+
+    loadCurrentSession() {
+
+        this.getSavedSession().then((sId) => {
+            console.log('[DB] Found localStorage session');
+            return this.db.get(sId);
+        }).then((doc) => {
+            console.log('[DB] Found valid session in DB');
+            this.sessionId = doc.id;
+        }).catch((error) => {
+            console.log('[DB] Create new session because: ' + error);
+            // Tout est faux, on crée une nouvelle session
+           this.createNewSession().then( (doc) => {
+                this.sessionId = doc.id;
+                localStorage.setItem('fr.tanca.session.id', this.sessionId);
+                console.log('[DB] Session created with id: ' + this.sessionId);
+           }).catch( (err) => {
+                console.log('[DB] Cannot create session in DB: ' + err);
+           });
+            
+        });
+    }
+
+    async createNewSession() {
+        var s = {
+            _id: 'session:' + new Date().toISOString(),
+            teams: [],
+            counter: 1 // unique counter used for team numbering
+        };
+        return this.db.put(s);
     }
 
     removeDiacritics(str) {
@@ -71,14 +89,10 @@ class Backend
 
     addPlayer(player) {
         player._id = 'player:' + new Date().toISOString();
-        this.db.put(player, function callback(err, result) {
-            if (!err) {
-                console.log('[DB] Successfully saved a person!');
-            }
-        });
+        return this.db.put(player);
     }
 
-    addTeam(players, sessionId) {
+    addTeam(players, teamId) {
         var team = {
             players: players,
             opponents: [],
@@ -86,14 +100,37 @@ class Backend
             loses: []
         };
         
-        return this.db.get(sessionId).then((doc) => {
+        return this.db.get(this.sessionId).then((doc) => {
+            var idIsUnique = true;
+            for (var i = 0; i < doc.teams.length; i++) {
+                if (doc.teams[i].id == teamId) {
+                    idIsUnique = false;
+                    break;
+                }
+            }
+
+            if ((teamId === undefined) || (!idIsUnique)) {
+                team.id = doc.counter++; // generate unique id for this team
+            } else {
+                team.id = teamId; // specified id is ok
+            }
             doc.teams.push(team);
             return this.db.put(doc);
         });
     }
 
-    deleteTeams(teams) {
-        // FIXME
+    deleteTeam(indexList) {
+        return this.db.get(this.sessionId).then((doc) => {
+            var newArray = [];
+            for (var i = 0; i < doc.teams.length; i++) {
+                if (indexList.indexOf(i) === -1) {
+                    // save this team
+                    newArray.push(doc.teams[i]);
+                } 
+            }
+            doc.teams = newArray;
+            return this.db.put(doc);
+        });
     }
 
 
