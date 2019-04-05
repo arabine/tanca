@@ -49,7 +49,7 @@ class Backend
             return this.db.get(sId);
         }).then((doc) => {
             console.log('[DB] Found valid session in DB');
-            this.sessionId = doc.id;
+            this.sessionId = doc._id;
         }).catch((error) => {
             console.log('[DB] Create new session because: ' + error);
             // Tout est faux, on crée une nouvelle session
@@ -136,8 +136,10 @@ class Backend
 
     createRounds() {
         return this.db.get(this.sessionId).then((doc) => {
-            Games.createRounds(doc);
-            return this.db.put(doc);
+        
+            return Games.createRounds(doc);
+        }).then( (updatedDoc) => {
+            return this.db.put(updatedDoc);
         });
         
     }

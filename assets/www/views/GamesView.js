@@ -41,7 +41,7 @@ GamesView = {
       this.$store.dispatch('createRounds').then( () => {
         this.$eventHub.$emit('alert', "Création des parties réussie", 'success');
       }).catch( (err) => {
-        this.$eventHub.$emit('alert', "Impossible de créer les parties: ", 'error');
+        this.$eventHub.$emit('alert', "Impossible de créer les parties: " + err, 'error');
       });
     }
   },
