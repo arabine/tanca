@@ -2,41 +2,38 @@
 var teams_view_template = /*template*/`
 
 <v-layout column>
-  <v-flex xs12 >
+
       
       <v-layout row justify-end>
         <v-btn dark fab small color="red" @click="deleteSelectedTeams"><v-icon>delete</v-icon></v-btn>
       </v-layout>
       
-      <v-card-text>
+      <v-list>
+        <template v-for="(item, index) in teams">
+          
+          <v-list-tile @click.capture.stop="toggleTeam(index)">
 
-          <v-list>
-            <template v-for="(item, index) in teams">
-              
-              <v-list-tile @click.capture.stop="toggleTeam(index)">
+              <v-list-tile-action>
+                <v-checkbox v-model="selected" multiple :value="index" />
+              </v-list-tile-action>
 
-                  <v-list-tile-action>
-                    <v-checkbox v-model="selected" multiple :value="index" />
-                  </v-list-tile-action>
+              <v-list-tile-content>
+                  <v-list-tile-title v-html="item.id"></v-list-tile-title>
+                </v-list-tile-content>
+  
+                <v-list-tile-content>
+                  <v-list-tile-title v-html="getTeamName(item)"></v-list-tile-title>
+                </v-list-tile-content>
 
-                  <v-list-tile-content>
-                      <v-list-tile-title v-html="item.id"></v-list-tile-title>
-                    </v-list-tile-content>
-      
-                    <v-list-tile-content>
-                      <v-list-tile-title v-html="getTeamName(item)"></v-list-tile-title>
-                    </v-list-tile-content>
+          </v-list-tile>
 
-              </v-list-tile>
+          <v-divider></v-divider>
 
-              <v-divider></v-divider>
+        </template>
+      </v-list>
 
-            </template>
-          </v-list>
+      <pre>{{ selected }}</pre> 
 
-          <pre>{{ selected }}</pre> 
-      </v-card-text>
-    </v-flex>
 </v-layout>
 `;
 
@@ -88,13 +85,6 @@ TeamsView = {
           this.$eventHub.$emit('alert', "Erreur: impossible de supprimer l'(es) équipe(s)", 'error');
         });
       }
-    },
-    getTeamName(item) {
-      var players = [];
-      for (var i = 0; i < item.players.length; i++) {
-        players.push(this.$store.getters.getPlayer(item.players[i]).firstname);
-      }
-      return players.join(' ');
     }
   },
   //====================================================================================================================

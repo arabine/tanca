@@ -45,6 +45,13 @@ const store = new Vuex.Store({
                 }
             }
             return player;
+        },
+        getTeamName(item) {
+            var players = [];
+            for (var i = 0; i < item.players.length; i++) {
+              players.push(this.$store.getters.getPlayer(item.players[i]).firstname);
+            }
+            return players.join('/');
         }
     },
     actions: {

@@ -17,9 +17,21 @@ var games_view_template = /*template*/`
         
         <v-list-tile>
               <v-list-tile-content>
-                <p>{{ index }}</p>
-              </v-list-tile-content>
+              
+              <v-list-tile-action>
+                <p>{{ index + 1 }}: {{item[0]}}  </p>
+                </v-list-tile-action>
 
+                <v-list-tile-action>
+                <v-icon>compare_arrows</v-icon>
+              </v-list-tile-action>
+
+
+                <v-list-tile-action>
+                <p> {{item[1]}}</p>
+                </v-list-tile-action>
+              </v-list-tile-content>
+  </div>
         </v-list-tile>
 
         <v-divider></v-divider>
