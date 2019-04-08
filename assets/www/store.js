@@ -9,19 +9,37 @@ const store = new Vuex.Store({
     },
     getters: {
         getTeams: (state) => {
-            var teams = [];
+            let teams = [];
             if (state.docs !== undefined) {
-                var docs = state.docs.filter(doc => doc._id.includes(Api.getSessionId()));
+                let docs = state.docs.filter(doc => doc._id.includes(Api.getSessionId()));
                 if (docs.length == 1) {
                     teams = docs[0].teams;
+                } else {
+                    console.log("[STORE] No session found!");
                 }
+            } else {
+                console.log("[STORE] Database not loaded!");
             }
             return teams;
         },
-        getPlayer: (state) => (playerId) => {
-            var player = null;
+        getRounds: (state) => {
+            let rounds = [];
             if (state.docs !== undefined) {
-                var docs = state.docs.filter(doc => doc._id.includes(playerId));
+                let docs = state.docs.filter(doc => doc._id.includes(Api.getSessionId()));
+                if (docs.length == 1) {
+                    rounds = docs[0].rounds;
+                } else {
+                    console.log("[STORE] No session found!");
+                }
+            } else {
+                console.log("[STORE] Database not loaded!");
+            }
+            return rounds;
+        },
+        getPlayer: (state) => (playerId) => {
+            let player = null;
+            if (state.docs !== undefined) {
+                let docs = state.docs.filter(doc => doc._id.includes(playerId));
                 if (docs.length == 1) {
                     player = docs[0];
                 }

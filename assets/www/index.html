@@ -6,92 +6,27 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 
 	<link href="css/tancafonts.css" rel="stylesheet">
-	<link href="css/vuetify.min.css" rel="stylesheet">
+  <link href="css/vuetify.min.css" rel="stylesheet">
+ 
   
 </head>
 <body>
+
   <div id="app">
-	<v-app id="inspire" dark>
-
-      <v-snackbar
-      v-model="alert"
-      top
-      :color="alertType"
-      :timeout="alertTimeout"
-    >
-    {{ alertText }}
-    </v-snackbar>
-    
-		<v-toolbar>
-
-			<v-toolbar-title>Tanca</v-toolbar-title>
-			<v-spacer></v-spacer>
-			<v-btn icon>
-				<v-icon>refresh</v-icon>
-			</v-btn>
-			<v-btn icon>
-				<v-icon>backup</v-icon>
-			</v-btn>
-		</v-toolbar>
-
-		<v-content>
-			<v-container align-center justify-center fluid fill-height>
-        <template v-if="!isReady">
-            <v-progress-circular
-            indeterminate
-            color="primary"
-          ></v-progress-circular>
-
-        </template>
-
-        <template v-else>
-          <router-view></router-view>					
-        </template>
-			</v-container>
-		</v-content>
-
-		<v-bottom-nav :active.sync="bottomNav" :value="true" absolute	color="transparent">
-
-      <v-btn color="teal" flat value="home" to="home">
-          <span>Home</span>
-          <v-icon>home</v-icon>
-      </v-btn>
-
-			<v-btn color="teal" flat value="players" to="players">
-				<span>Players</span>
-				<v-icon>face</v-icon>
-			</v-btn>
-
-			<v-btn color="teal" flat value="teams" to="teams">
-				<span>Teams</span>
-				<v-icon>group</v-icon>
-			</v-btn>
-		
-			<v-btn color="teal" flat value="games" to="games">
-				<span>Games</span>
-				<v-icon>casino</v-icon>
-			</v-btn>
-		
-			<v-btn color="teal" flat value="results" to="results">
-				<span>Results</span>
-				<v-icon>assignment</v-icon>
-			</v-btn>
-		</v-bottom-nav>
-
-	</v-app>
-
   </div>
 
   <script src="lib/vue.js"></script>
 	<script src="lib/vuex.js"></script>
 	<script src="lib/vuetify.js"></script>
-	<script src="lib/vue-router.js"></script>
+  <script src="lib/vue-router.js"></script>
 	<script src="lib/pouchdb.min.js"></script>
 	<script src="lib/blossom.js"></script>
 
   <script src="games.js"></script>
   <script src="backend.js"></script>
-	<script src="store.js"></script>
+  <script src="store.js"></script>
+  <script src="components/TopToolbar.js"></script>
+  <script src="components/BottomNav.js"></script>
 	<script src="components/AddPlayerDialog.js"></script>
   <script src="views/HomeView.js"></script>
   <script src="views/PlayersView.js"></script>

@@ -29,12 +29,50 @@ async function loadEverything()
         store.commit('SET_DOCS', docs);
 
         // Add here all other inits
-        Api.loadCurrentSession();
+        Api.loadCurrentSession().then( () => {
+            store.commit('SET_FINISHED_LOADING');
+            console.log("[DB] Finished loading data.");
+        });
 
-        store.commit('SET_FINISHED_LOADING');
+        
     });
     
 }
+
+// =================================================================================================
+// MAIN APP TEMPLATE LAYOUT
+// =================================================================================================
+const app_template = /*template*/`
+<v-app dark>
+
+    <v-snackbar v-model="alert" top :color="alertType" :timeout="alertTimeout">
+        {{ alertText }}
+    </v-snackbar>
+
+    <TopToolbar></TopToolbar>
+
+    <v-content>
+   
+
+        <template v-if="!isReady">
+            <v-container fluid fill-height>
+                <v-layout align-center justify-center>
+                    <v-flex class="text-xs-center">
+                        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+                    </v-flex>
+                </v-layout>
+            </v-container>
+        </template>
+
+        <template v-else>
+            <router-view></router-view>					
+        </template>
+    </v-content>
+
+    <BottomNav></BottomNav>
+
+</v-app>
+`
 
 // =================================================================================================
 // VUE APPLICATION TOP LEVEL COMPONENT
@@ -45,6 +83,8 @@ const app = new Vue({
     router: router,
     el: '#app',
     store: store,
+    template: app_template,
+    components: {TopToolbar, BottomNav},
     computed: {
         isReady() {
             return this.$store.state.finishedLoading;
@@ -52,7 +92,6 @@ const app = new Vue({
     },
     data () {
         return {
-            bottomNav: '',
             alert: false,
             alertType: 'success', // success, info, warning, error
             alertText: '',
@@ -71,6 +110,7 @@ const app = new Vue({
     },
     created: function() {
         this.$eventHub.$on('alert', this.showAlert);
+        console.log('[APP] Tanca created');
         loadEverything();
 
     },

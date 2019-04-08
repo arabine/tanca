@@ -42,25 +42,30 @@ class Backend
         });
     }
 
-    loadCurrentSession() {
+    async loadCurrentSession() {
 
-        this.getSavedSession().then((sId) => {
-            console.log('[DB] Found localStorage session');
-            return this.db.get(sId);
-        }).then((doc) => {
-            console.log('[DB] Found valid session in DB');
-            this.sessionId = doc._id;
-        }).catch((error) => {
-            console.log('[DB] Create new session because: ' + error);
-            // Tout est faux, on crée une nouvelle session
-           this.createNewSession().then( (doc) => {
-                this.sessionId = doc.id;
-                localStorage.setItem('fr.tanca.session.id', this.sessionId);
-                console.log('[DB] Session created with id: ' + this.sessionId);
-           }).catch( (err) => {
-                console.log('[DB] Cannot create session in DB: ' + err);
-           });
-            
+        return new Promise( (resolve, reject) => {
+            this.getSavedSession().then((sId) => {
+                console.log('[DB] Found localStorage session');
+                return this.db.get(sId);
+            }).then((doc) => {
+                console.log('[DB] Found valid session in DB');
+                this.sessionId = doc._id;
+                resolve();
+            }).catch((error) => {
+                console.log('[DB] Create new session because: ' + error);
+                // Tout est faux, on crée une nouvelle session
+                this.createNewSession().then( (doc) => {
+                        this.sessionId = doc.id;
+                        localStorage.setItem('fr.tanca.session.id', this.sessionId);
+                        console.log('[DB] Session created with id: ' + this.sessionId);
+                        resolve();
+                }).catch( (err) => {
+                        console.log('[DB] Cannot create session in DB: ' + err);
+                        reject();
+                });
+                
+            });
         });
     }
 
