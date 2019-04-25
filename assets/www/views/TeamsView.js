@@ -52,7 +52,12 @@ TeamsView = {
   computed: {
     teams () {
       return this.$store.getters.getTeams;
-    }
+    },
+    // mix the getters into computed with object spread operator
+    ...Vuex.mapGetters([
+      'getTeamName',
+      // ...
+    ])
   },
   //====================================================================================================================
   created() {

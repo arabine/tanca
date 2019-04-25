@@ -3,45 +3,47 @@ var games_view_template = /*template*/`
 
 <v-layout column>
   <v-flex xs12 >
-
     
     <v-layout row >
       <v-pagination v-model="page" :total-visible="3" :length="3"></v-pagination>
       <v-spacer />
       <v-btn dark fab small color="green" @click="createRounds()"><v-icon>play_circle_outline</v-icon></v-btn>
     </v-layout>
+   
+      <v-card v-for="(item, index) in getGames" :key="index" class="mx-auto" color="blue" tile flat dark>
+ 
+          <v-card-actions>
 
+            <v-flex xs6 >
+              <v-layout align-center justify-space-between row fill-height>
+                <span>({{item[0]}}) {{getTeamNameById(item[0])}}</span>
 
-    <v-list>
-      <template v-for="(item, index) in getGames">
-        
-        <v-list-tile>
-              <v-list-tile-content>
-              
-              <v-list-tile-action>
-                <p>{{ index + 1 }}: {{item[0]}}  </p>
-                </v-list-tile-action>
+                <v-avatar color="blue darken-4" size="30px">
+                  <span class="white--text">13</span>
+                </v-avatar>
 
-                <v-list-tile-action>
-                <v-icon>compare_arrows</v-icon>
-              </v-list-tile-action>
+              </v-layout>
+            </v-flex>
 
+            <v-flex xs6>
+              <v-layout align-center justify-space-between row fill-height>
+                <span>&nbsp;&nbsp;({{item[1]}}) {{getTeamNameById(item[1])}}</span>
+                
+                <v-avatar color="purple" size="30px">
+                  <span class="white--text">7</span>
+                </v-avatar>
 
-                <v-list-tile-action>
-                <p> {{item[1]}}</p>
-                </v-list-tile-action>
-              </v-list-tile-content>
-  </div>
-        </v-list-tile>
-
-        <v-divider></v-divider>
-
-      </template>
-    </v-list>
+              </v-layout>
+            </v-flex>
+           
+          </v-card-actions>
+      </v-card>
 
     </v-flex>
 </v-layout>
 `;
+
+
 
 GamesView = {
   name: 'games-view',
@@ -89,6 +91,14 @@ GamesView = {
       }).catch( (err) => {
         this.$eventHub.$emit('alert', "Impossible de créer les parties: " + err, 'error');
       });
+    },
+    getTeamNameById(teamId) {
+      let team = this.$store.getters.getTeamById(teamId);
+      let teamName = '';
+      if (team !== undefined) {
+        teamName = this.$store.getters.getTeamName(team);
+      }
+      return teamName;
     }
   },
   //====================================================================================================================

@@ -46,12 +46,21 @@ const store = new Vuex.Store({
             }
             return player;
         },
-        getTeamName(item) {
+        getTeamById: (state, getters) => (teamId) =>  {
+            let teams = getters.getTeams;
+            let oneTeam = teams.filter(t => t.id == teamId);
+            return oneTeam[0];
+        },
+        getTeamName: (state, getters) => (team) =>  {
+            let teamName = '';
+
             var players = [];
-            for (var i = 0; i < item.players.length; i++) {
-              players.push(this.$store.getters.getPlayer(item.players[i]).firstname);
+            for (var i = 0; i < team.players.length; i++) {
+                players.push(getters.getPlayer(team.players[i]).firstname);
             }
-            return players.join('/');
+            teamName = players.join(' / ');
+
+            return teamName;
         }
     },
     actions: {
