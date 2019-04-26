@@ -97,6 +97,19 @@ class Backend
         player._id = 'player:' + new Date().toISOString();
         return this.db.put(player);
     }
+    
+    setScores(scores) {
+        return this.db.get(this.sessionId).then((doc) => {
+            for (let i = 0; i < doc.teams.length; i++) {
+             = doc.teams.filter(t => t.id == teamId);
+			}
+			
+			return doc;
+            
+        }).then( (updatedDoc) => {
+            return this.db.put(updatedDoc);
+        });
+    }
 
     addTeam(players, teamId) {
         var team = {

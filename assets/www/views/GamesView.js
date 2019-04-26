@@ -3,7 +3,7 @@ var games_view_template = /*template*/`
 
 <v-layout column>
 
-  <ScoreDialog  :visible="showScoreDialog" @close="showScoreDialog=false" ></ScoreDialog>
+  <ScoreDialog  :visible="showScoreDialog" :round="page" :t1="team1" :t2="team2" :t1score="team1Score" :t2score="team2Score" :t1id="team1Id" :t2id="team2Id" @close="showScoreDialog=false" ></ScoreDialog>
   <v-flex xs12 >
   
     <v-layout row >
@@ -44,16 +44,23 @@ var games_view_template = /*template*/`
 GamesView = {
   name: 'games-view',
   template: games_view_template,
-  //====================================================================================================================
   components: {
     ScoreDialog
   },
+  //====================================================================================================================
   data () {
     return {
       page: 1,
-      showScoreDialog: false
+      showScoreDialog: false,
+      team1: '',
+      team2: '',
+      team1Score: 0,
+      team2Score: 0,
+      team1Id: 0,
+      team2Id: 0
     }
   },
+  //====================================================================================================================
   computed: {
     rounds () {
       return this.$store.getters.getRounds;
@@ -136,6 +143,12 @@ GamesView = {
     selectItem(item) {
 
       console.log("[GAMES] Game finished: " + item.finished);
+      this.team1 = '(' + item.teams[0].id + ') ' + item.teams[0].name;
+      this.team2 = '(' + item.teams[1].id + ') ' + item.teams[1].name;
+      this.team1Id = item.teams[0].id;
+      this.team2Id = item.teams[1].id;
+      this.team1Score = item.teams[0].score;
+      this.team2Score = item.teams[1].score;
       this.showScoreDialog = true;
     }
   },

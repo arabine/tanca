@@ -15,10 +15,15 @@ var score_dialog_template = /*template*/`
   <!-- CENTRE DU DIALOG --> 
   <v-card-text>
       <v-flex xs12 sm6 md3>
-        <span>{{team1}}</span>
+        <span>{{t1}}</span>
 
-        <v-text-field v-model="team1Score" type="text" :rules="[(value) => value <= 13 || 'Max 13 points']" :mask="mask" label="Number" append-outer-icon="add" @click:append-outer="incrementTeam1" prepend-icon="remove" @click:prepend="decrementTeam1"></v-text-field>
+        <v-text-field v-model="t1ScoreClone" type="text" :rules="[(value) => value <= 13 || 'Max 13 points']" :mask="mask" label="Number" append-outer-icon="add" @click:append-outer="incrementTeam1" prepend-icon="remove" @click:prepend="decrementTeam1"></v-text-field>
 
+	<v-divider></v-divider>
+
+	<span>{{t2}}</span>
+
+        <v-text-field v-model="t2ScoreClone" type="text" :rules="[(value) => value <= 13 || 'Max 13 points']" :mask="mask" label="Number" append-outer-icon="add" @click:append-outer="incrementTeam2" prepend-icon="remove" @click:prepend="decrementTeam2"></v-text-field>
 
     </v-flex>
   </v-card-text>
@@ -28,18 +33,50 @@ var score_dialog_template = /*template*/`
 
 ScoreDialog = {
   template: score_dialog_template,
-  props: ['visible'],
+  props: {
+	  visible: {
+		  type: Boolean,
+		  default: false
+	  },
+	  round: {
+		  type: Number,
+		  default: 0
+	  },
+	  t1: {
+		  type: String,
+		  default: ''
+	  },
+	  t2: {
+		  type: String,
+		  default: ''
+	  },
+	  t1score: {
+		  type: Number,
+		  default: 0
+	  },
+	  t2score: {
+		  type: Number,
+		  default: 0
+	  },
+	  t1id: {
+		  type: Number,
+		  default: 0
+	  },
+	  t1id: {
+		  type: Number,
+		  default: 0
+	  }
+  },
+  //====================================================================================================================
   data() {
       return {
         errorMessages: '',
-        formHasErrors: false,
-        team1: 'Coucou',
-        team2: '',
-        team1Score: 0,
-        team2Score: 0,
-        mask: '##'
+        mask: '##',
+        t1ScoreClone: this.t1score,
+        t2ScoreClone: this.t2score
       }
   },
+  //====================================================================================================================
   computed: {
     show: {
       get () {
@@ -50,49 +87,64 @@ ScoreDialog = {
           this.$emit('close');
         }
       }
-    },
-    form () {
-      return {
-        team1Score: this.team1Score,
-        team2Score: this.team2Score,
-      }
     }
   },
+  //====================================================================================================================
   methods: {
 
     incrementTeam1 () {
-        this.team1Score = parseInt(this.team1Score, 10) + 1
+		if (this.t1ScoreClone < 13) {
+				this.t1ScoreClone = parseInt(this.t1ScoreClone, 10) + 1;
+		}
     },
     decrementTeam1 () {
-        this.team1Score = parseInt(this.team1Score, 10) - 1
+		if (this.t1ScoreClone > 0) {
+				this.t1ScoreClone = parseInt(this.t1ScoreClone, 10) - 1;
+		}
+    },
+    incrementTeam2 () {
+		if (this.t2ScoreClone < 13) {
+				this.t2ScoreClone = parseInt(this.t2ScoreClone, 10) + 1;
+		}
+    },
+    decrementTeam2 () {
+		if (this.t2ScoreClone > 0) {
+				this.t2ScoreClone = parseInt(this.t2ScoreClone, 10) - 1;
+		}
+    },
+    isScoreOk(score) {
+		let success = false;
+		if ((score >= 0) && (score <= 13)) {
+		   success = true; 
+		}
+		return success;
     },
     save: function() {
-/*
-      this.formHasErrors = false
 
-      Object.keys(this.form).forEach(f => {
-        if (!this.form[f]) this.formHasErrors = true
-      });
+      let formHasErrors = false;
+      let scores = {
+		round: this.round,
+		team1Score: this.t1ScoreClone,
+        team2Score: this.t2ScoreClone,
+		team1Id: this.t1id,
+        team2Id: this.t2id
+      };
 
-      if (!this.formHasErrors) {
-        var player = {
-          firstname: this.firstname,
-          lastname: this.lastname
-        }
+      if (this.isScoreOk(scores.team1Score) && this.isScoreOk(scores.team2Score)) {
 
-        this.$store.dispatch('addPlayer', player).then( (doc) => {
-          return console.log('[PLAYERS] Successfully added a player!');
+        this.$store.dispatch('setScores', scores).then( (doc) => {
+          return console.log('[SCORES] Successfully saved the score!');
         }).catch((err) => {
-            console.log('[PLAYERS] Add player failure: ' + err);
-            this.$eventHub.$emit('alert', "Erreur: impossible de créer le joueur", 'error');
+            console.log('[SCORES] Save score failure: ' + err);
+            this.$eventHub.$emit('alert', "Erreur: impossible de sauvegarder les scores", 'error');
         });
         
-        
-        
+      	this.$emit('close');  
+      } else {
+          console.log('[SCORES] Score not valid');
+          this.$eventHub.$emit('alert', "Erreur: les scores ne sont pas valides", 'error');
       }
-      */
-
-      this.$emit('close');
+      
     }
 
 

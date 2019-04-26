@@ -75,7 +75,10 @@ const store = new Vuex.Store({
         },
         createRounds: (context) => {
             return Api.createRounds();
-        }
+        },
+        setScores: (context, scores) => {
+			return Api.setScores(scores);
+		}
     },
     mutations: {
         SET_FINISHED_LOADING: (state) => {
