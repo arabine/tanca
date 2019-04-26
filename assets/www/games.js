@@ -61,10 +61,18 @@ class GamesManager
                             for (let j = 0; j < session.teams.length; j++) {
                                 if (session.teams[j].id == current) {
                                     session.teams[j].opponents.push(opponent);
+
+                                    // 0 for this round means 'not started'
+                                    session.teams[j].wons.push(0);
+                                    session.teams[j].loses.push(0);
                                 }
 
                                 if (session.teams[j].id == opponent) {
                                     session.teams[j].opponents.push(current);
+                                    
+                                    // 0 for this round means 'not started'
+                                    session.teams[j].wons.push(0);
+                                    session.teams[j].loses.push(0);
                                 }
                             }
                         }

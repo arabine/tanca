@@ -2,47 +2,43 @@
 var games_view_template = /*template*/`
 
 <v-layout column>
+
+  <ScoreDialog  :visible="showScoreDialog" @close="showScoreDialog=false" ></ScoreDialog>
   <v-flex xs12 >
-    
+  
     <v-layout row >
       <v-pagination v-model="page" :total-visible="3" :length="3"></v-pagination>
       <v-spacer />
       <v-btn dark fab small color="green" @click="createRounds()"><v-icon>play_circle_outline</v-icon></v-btn>
     </v-layout>
    
-      <v-card v-for="(item, index) in getGames" :key="index" class="mx-auto" color="blue" tile flat dark>
+    <template v-for="(item, index) in getGames">
+      <v-card style="cursor:pointer;"  :color="getFinishedColor(item.finished)" tile raised dark @click.native="selectItem(item)">
  
           <v-card-actions>
+            <template xs6 v-for="(team, i) in item.teams">
+              <v-flex>
+                <v-layout align-center justify-space-between row fill-height>
+                  <span>&nbsp;</span>
+                  <span>({{team.id}})&nbsp;{{team.name}}</span>
 
-            <v-flex xs6 >
-              <v-layout align-center justify-space-between row fill-height>
-                <span>({{item[0]}}) {{getTeamNameById(item[0])}}</span>
+                  <v-avatar :color="getWinnerColor(team.winner)" size="30px">
+                    <span class="white--text">{{team.score}}</span>
+                  </v-avatar>
+                </v-layout>
+              </v-flex>
 
-                <v-avatar color="blue darken-4" size="30px">
-                  <span class="white--text">13</span>
-                </v-avatar>
-
-              </v-layout>
-            </v-flex>
-
-            <v-flex xs6>
-              <v-layout align-center justify-space-between row fill-height>
-                <span>&nbsp;&nbsp;({{item[1]}}) {{getTeamNameById(item[1])}}</span>
-                
-                <v-avatar color="purple" size="30px">
-                  <span class="white--text">7</span>
-                </v-avatar>
-
-              </v-layout>
-            </v-flex>
+            </template>
            
           </v-card-actions>
       </v-card>
 
+      <v-divider></v-divider>
+      </template>
+
     </v-flex>
 </v-layout>
 `;
-
 
 
 GamesView = {
@@ -50,17 +46,22 @@ GamesView = {
   template: games_view_template,
   //====================================================================================================================
   components: {
-    
+    ScoreDialog
   },
   data () {
     return {
-      page: 1
+      page: 1,
+      showScoreDialog: false
     }
   },
   computed: {
     rounds () {
       return this.$store.getters.getRounds;
     },
+    /**
+     * Here we build a dynamic array of objects to easily generate HTML list
+     * It is more future proof, easy to extend
+     */
     getGames() {     
       let round = this.rounds.filter((round) => {
          return round.id == this.page;
@@ -68,7 +69,41 @@ GamesView = {
 
       let gList = [];
       if (round.length == 1) {
-        gList = round[0].list; // list of games
+      //  gList = round[0].list; // list of games
+
+        let games = round[0].list;
+        let currentRound = this.page-1;
+        for (let i = 0; i < games.length; i++) {
+          let r = {
+            finished: false,
+            teams: []
+          };
+
+          for (let j = 0; j < 2; j++) {
+            let g = {};
+            g.id = games[i][j];
+            let team = this.$store.getters.getTeamById(g.id);
+            g.score = team.wons[currentRound];
+            g.name = this.$store.getters.getTeamName(team);
+
+            r.teams.push(g);
+          }
+
+          if (r.teams[0].score > r.teams[1].score) {
+            r.teams[0].winner = true;
+            r.teams[1].winner = false;
+            r.finished = true;
+          } else if (r.teams[0].score < r.teams[1].score) {
+            r.teams[0].winner = false;
+            r.teams[1].winner = true;
+            r.finished = true;
+          } else {
+            r.teams[0].winner = false;
+            r.teams[1].winner = false;
+          }
+
+          gList.push(r);
+        }
       }
 
       return gList;
@@ -85,6 +120,12 @@ GamesView = {
   },
   //====================================================================================================================
   methods : {
+    getWinnerColor(winner) {
+      return winner ? 'blue darken-4' : 'purple';
+    },
+    getFinishedColor(finished) {
+      return finished ? 'blue' : 'grey darken-2';
+    },
     createRounds() {
       this.$store.dispatch('createRounds').then( () => {
         this.$eventHub.$emit('alert', "Création des parties réussie", 'success');
@@ -92,13 +133,10 @@ GamesView = {
         this.$eventHub.$emit('alert', "Impossible de créer les parties: " + err, 'error');
       });
     },
-    getTeamNameById(teamId) {
-      let team = this.$store.getters.getTeamById(teamId);
-      let teamName = '';
-      if (team !== undefined) {
-        teamName = this.$store.getters.getTeamName(team);
-      }
-      return teamName;
+    selectItem(item) {
+
+      console.log("[GAMES] Game finished: " + item.finished);
+      this.showScoreDialog = true;
     }
   },
   //====================================================================================================================
