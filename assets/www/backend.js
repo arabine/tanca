@@ -98,10 +98,28 @@ class Backend
         return this.db.put(player);
     }
     
+    /*
+    let scores = {
+        round: this.round,
+        team1Score: this.t1ScoreClone,
+        team2Score: this.t2ScoreClone,
+        team1Id: this.t1id,
+        team2Id: this.t2id
+      };
+    */
     setScores(scores) {
         return this.db.get(this.sessionId).then((doc) => {
+            let index = scores.round - 1;
             for (let i = 0; i < doc.teams.length; i++) {
-             = doc.teams.filter(t => t.id == teamId);
+                if (doc.teams[i].id == scores.team1Id) {
+                    doc.teams[i].wons[index] = scores.team1Score;
+                    doc.teams[i].loses[index] = scores.team2Score;
+                }
+
+                if (doc.teams[i].id == scores.team2Id) {
+                    doc.teams[i].wons[index] = scores.team2Score;
+                    doc.teams[i].loses[index] = scores.team1Score;
+                }
 			}
 			
 			return doc;

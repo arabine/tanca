@@ -19,9 +19,9 @@ var score_dialog_template = /*template*/`
 
         <v-text-field v-model="t1ScoreClone" type="text" :rules="[(value) => value <= 13 || 'Max 13 points']" :mask="mask" label="Number" append-outer-icon="add" @click:append-outer="incrementTeam1" prepend-icon="remove" @click:prepend="decrementTeam1"></v-text-field>
 
-	<v-divider></v-divider>
+      <v-divider></v-divider>
 
-	<span>{{t2}}</span>
+      <span>{{t2}}</span>
 
         <v-text-field v-model="t2ScoreClone" type="text" :rules="[(value) => value <= 13 || 'Max 13 points']" :mask="mask" label="Number" append-outer-icon="add" @click:append-outer="incrementTeam2" prepend-icon="remove" @click:prepend="decrementTeam2"></v-text-field>
 
@@ -62,7 +62,7 @@ ScoreDialog = {
 		  type: Number,
 		  default: 0
 	  },
-	  t1id: {
+	  t2id: {
 		  type: Number,
 		  default: 0
 	  }
@@ -123,10 +123,10 @@ ScoreDialog = {
 
       let formHasErrors = false;
       let scores = {
-		round: this.round,
-		team1Score: this.t1ScoreClone,
+        round: this.round,
+        team1Score: this.t1ScoreClone,
         team2Score: this.t2ScoreClone,
-		team1Id: this.t1id,
+        team1Id: this.t1id,
         team2Id: this.t2id
       };
 
