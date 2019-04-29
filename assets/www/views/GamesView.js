@@ -3,7 +3,10 @@ var games_view_template = /*template*/`
 
 <v-layout column>
 
-  <ScoreDialog  :visible="showScoreDialog" :round="page" :t1="team1" :t2="team2" :t1score="team1Score" :t2score="team2Score" :t1id="team1Id" :t2id="team2Id" @close="showScoreDialog=false" ></ScoreDialog>
+  <ScoreDialog  :visible="showScoreDialog" :round="page" :t1="team1" :t2="team2" :t1score="team1Score" :t2score="team2Score" :t1id="team1Id" :t2id="team2Id" 
+      @close="showScoreDialog=false"
+      @success="editScoreSuccess">
+  </ScoreDialog>
   <v-flex xs12 >
   
     <v-layout row >
@@ -90,7 +93,7 @@ GamesView = {
             let g = {};
             g.id = games[i][j];
             let team = this.$store.getters.getTeamById(g.id);
-            g.score = team.wons[currentRound];
+            g.score = team.wins[currentRound];
             g.name = this.$store.getters.getTeamName(team);
 
             r.teams.push(g);
@@ -127,6 +130,10 @@ GamesView = {
   },
   //====================================================================================================================
   methods : {
+    editScoreSuccess() {
+      console.log("[GAMES] Edit score success");
+      
+    },
     getWinnerColor(winner) {
       return winner ? 'blue darken-4' : 'purple';
     },

@@ -93,7 +93,29 @@ var maxDiff = (roundIndex) * config.pointsWin;
 3  6  :  13  7
 4  5  :  13  4
 */
+  // each entry is an array:
+  // index 0: id 1
+  // index 1: id 2
+  // index 2: poids (+ élevé, plus de chance d'être appairé, moins élevé 0 par exemple signifie un rejet)
   var possiblePairs = [];
+
+
+  function searchForArray(array, match) {
+    let notFound = -1;
+
+    for (let i = 0; i < array.length; i++) {
+        let entry = array[i];
+        let counterOk = 0;
+        if (
+          ((entry[0] == match[0]) || (entry[0] == match[1])) &&
+          ((entry[1] == match[0]) || (entry[1] == match[1]))
+        ) {
+          notFound = 1;
+        }
+    }
+
+    return notFound;
+  }
 
   
   availablePlayers.forEach(player => {
@@ -102,18 +124,16 @@ var maxDiff = (roundIndex) * config.pointsWin;
         // player.opponents.indexOf(opponent.playerIndex) === -1
       ) {
         var match = [player.playerIndex, opponent.playerIndex]
-        match.sort(function(a, b) {
-          return a - b;
-        })
+
         if (player.opponents.indexOf(opponent.playerIndex) === -1) {
           match.push(maxDiff - Math.abs(player.points - opponent.points))
         }
         else {
           match.push(0)
         }
-//        if (this.searchForArray(possiblePairs, match) === -1) {
+        if (this.searchForArray(possiblePairs, match) === -1) {
           possiblePairs.push(match)
-//        }
+        }
       }
     })
   })
@@ -128,7 +148,7 @@ var maxDiff = (roundIndex) * config.pointsWin;
   rawPairing.forEach((match, index) => {
     if (match !== -1 && match < index) {
       
-      console.log(this.availablePlayers[index-1].playerName + " <> " + this.availablePlayers[match-1].playerName);
+      console.log(this.availablePlayers[index-1].playerIndex + " <> " + this.availablePlayers[match-1].playerIndex);
 
     }
   })

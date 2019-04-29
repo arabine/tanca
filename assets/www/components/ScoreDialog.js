@@ -124,8 +124,8 @@ ScoreDialog = {
       let formHasErrors = false;
       let scores = {
         round: this.round,
-        team1Score: this.t1ScoreClone,
-        team2Score: this.t2ScoreClone,
+        team1Score: parseInt(this.t1ScoreClone),
+        team2Score: parseInt(this.t2ScoreClone),
         team1Id: this.t1id,
         team2Id: this.t2id
       };

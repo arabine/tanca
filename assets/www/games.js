@@ -1,7 +1,7 @@
 class GamesManager
 {
     constructor() {
-
+        this.eventRanking = [];
     }
 
     isEven(n) {
@@ -21,6 +21,81 @@ class GamesManager
         }
     }
 
+    /**
+     *  Sort best score on top 
+     */
+    sortEventRanking() {
+        this.eventRanking.sort( function(a, b) {
+            if (a.total_wins < b.total_wins) {
+                return 1;
+            } else if (a.total_wins > b.total_wins) {
+                return -1;
+            } else {
+                // Equal, use diff to see who is best
+                if (a.diff < b.diff) {
+                    return 1;
+                } else if (a.diff > b.diff) {
+                    return -1;
+                } else {
+                    // Still equal, use SOS
+                    if (a.sos < b.sos) {
+                        return 1;
+                    } else if (a.sos > b.sos) {
+                        return -1;
+                    } else {
+                        // stricly equals!!
+                        return 0;
+                    }
+                }
+            }
+        });
+
+    }
+
+    updateEventRanking(session) {
+
+        // Clear then compute ranking
+        this.eventRanking = [];
+
+        for (let i = 0; i < session.teams.length; i++) {
+            let team = session.teams[i];
+
+            let rankEntry = {
+                id: team.id,
+                total_wins: 0,
+                total_losses: 0,
+                diff: 0,
+                sos: 0, // Sum of Opponent Scores (SPA == Somme des Points des Adversaires)
+                opponents: [] // opponents Ids
+            }
+
+            for (let j = 0; j < team.wins.length; j++) {
+                rankEntry.total_wins += team.wins[j];
+                rankEntry.total_losses += team.losses[j];
+            }
+
+            rankEntry.diff = rankEntry.total_wins - rankEntry.total_losses;
+            rankEntry.opponents = team.opponents;
+            
+            // Compute SOS for this team
+            
+            this.eventRanking.push(rankEntry);
+        }
+
+        // Compute SOS for all teams
+        for (let i = 0; i < this.eventRanking.length; i++) {
+            for (let j = 0; j < this.eventRanking[i].opponents.length; j++) {
+
+                for (let k = 0; k < this.eventRanking.length; k++) {
+                
+                    if (this.eventRanking[k].id == this.eventRanking[i].opponents[j]) {
+                        this.eventRanking[i].sos += this.eventRanking[k].total_wins;
+                    }
+                }
+            }
+        }
+
+    }
 
     createRounds(session) {
         // Math.floor((Math.random() * 10) + 1);
@@ -63,16 +138,16 @@ class GamesManager
                                     session.teams[j].opponents.push(opponent);
 
                                     // 0 for this round means 'not started'
-                                    session.teams[j].wons.push(0);
-                                    session.teams[j].loses.push(0);
+                                    session.teams[j].wins.push(0);
+                                    session.teams[j].losses.push(0);
                                 }
 
                                 if (session.teams[j].id == opponent) {
                                     session.teams[j].opponents.push(current);
                                     
                                     // 0 for this round means 'not started'
-                                    session.teams[j].wons.push(0);
-                                    session.teams[j].loses.push(0);
+                                    session.teams[j].wins.push(0);
+                                    session.teams[j].losses.push(0);
                                 }
                             }
                         }

@@ -68,7 +68,8 @@ AddPlayerDialog = {
         }
 
         this.$store.dispatch('addPlayer', player).then( (doc) => {
-          return console.log('[PLAYERS] Successfully added a player!');
+          this.$emit('success');
+          
         }).catch((err) => {
             console.log('[PLAYERS] Add player failure: ' + err);
             this.$eventHub.$emit('alert', "Erreur: impossible de créer le joueur", 'error');

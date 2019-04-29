@@ -112,13 +112,13 @@ class Backend
             let index = scores.round - 1;
             for (let i = 0; i < doc.teams.length; i++) {
                 if (doc.teams[i].id == scores.team1Id) {
-                    doc.teams[i].wons[index] = scores.team1Score;
-                    doc.teams[i].loses[index] = scores.team2Score;
+                    doc.teams[i].wins[index] = scores.team1Score;
+                    doc.teams[i].losses[index] = scores.team2Score;
                 }
 
                 if (doc.teams[i].id == scores.team2Id) {
-                    doc.teams[i].wons[index] = scores.team2Score;
-                    doc.teams[i].loses[index] = scores.team1Score;
+                    doc.teams[i].wins[index] = scores.team2Score;
+                    doc.teams[i].losses[index] = scores.team1Score;
                 }
 			}
 			
@@ -133,8 +133,8 @@ class Backend
         var team = {
             players: players,
             opponents: [],
-            wons: [],
-            loses: []
+            wins: [],
+            losses: []
         };
         
         return this.db.get(this.sessionId).then((doc) => {
@@ -178,6 +178,16 @@ class Backend
             return this.db.put(updatedDoc);
         });
         
+    }
+
+    updateRanking() {
+        return this.db.get(this.sessionId).then((doc) => {
+            return new Promise( (resolve, reject) => {
+                Games.updateEventRanking(doc);
+                Games.sortEventRanking();
+                resolve(Games.eventRanking);
+            });
+        });
     }
 
 }

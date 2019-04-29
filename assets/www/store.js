@@ -76,6 +76,9 @@ const store = new Vuex.Store({
         createRounds: (context) => {
             return Api.createRounds();
         },
+        updateRanking: (context) => {
+            return Api.updateRanking();
+        },
         setScores: (context, scores) => {
 			return Api.setScores(scores);
 		}
