@@ -79,45 +79,31 @@ GamesView = {
 
       let gList = [];
       if (round.length == 1) {
-      //  gList = round[0].list; // list of games
-
-        let games = round[0].list;
-        let currentRound = this.page-1;
-        for (let i = 0; i < games.length; i++) {
+        round[0].games.forEach(g => {
           let r = {
             finished: false,
-            teams: []
+            teams: [
+              {
+                id: g.team1Id,
+                score: g.team1Score,
+                name: this.getTeamNameById(g.team1Id),
+                winner: (g.team1Score > g.team2Score) ? true : false
+              },
+              {
+                id: g.team2Id,
+                score: g.team2Score,
+                name: this.getTeamNameById(g.team2Id),
+                winner: (g.team2Score > g.team1Score) ? true : false
+              },
+            ]
           };
 
-          for (let j = 0; j < 2; j++) {
-            let g = {};
-            g.id = games[i][j];
-            let team = this.$store.getters.getTeamById(g.id);
-            g.score = team.wins[currentRound];
-            g.name = this.$store.getters.getTeamName(team);
-
-            r.teams.push(g);
-          }
-
-          if (r.teams[0].score > r.teams[1].score) {
-            r.teams[0].winner = true;
-            r.teams[1].winner = false;
-            r.finished = true;
-          } else if (r.teams[0].score < r.teams[1].score) {
-            r.teams[0].winner = false;
-            r.teams[1].winner = true;
-            r.finished = true;
-          } else {
-            r.teams[0].winner = false;
-            r.teams[1].winner = false;
-          }
-
           gList.push(r);
-        }
+        });
       }
 
       return gList;
-    },
+    }
       
   },
   //====================================================================================================================
@@ -139,6 +125,10 @@ GamesView = {
     },
     getFinishedColor(finished) {
       return finished ? 'blue' : 'grey darken-2';
+    },
+    getTeamNameById(id) {
+      let team = this.$store.getters.getTeamById(id);
+      return this.$store.getters.getTeamName(team);
     },
     createRounds() {
       this.$store.dispatch('createRounds').then( () => {

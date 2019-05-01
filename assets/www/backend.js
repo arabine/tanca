@@ -109,16 +109,19 @@ class Backend
     */
     setScores(scores) {
         return this.db.get(this.sessionId).then((doc) => {
-            let index = scores.round - 1;
-            for (let i = 0; i < doc.teams.length; i++) {
-                if (doc.teams[i].id == scores.team1Id) {
-                    doc.teams[i].wins[index] = scores.team1Score;
-                    doc.teams[i].losses[index] = scores.team2Score;
-                }
 
-                if (doc.teams[i].id == scores.team2Id) {
-                    doc.teams[i].wins[index] = scores.team2Score;
-                    doc.teams[i].losses[index] = scores.team1Score;
+            for (let i = 0; i < doc.rounds.length; i++) {
+                // On recherche le round
+                if (doc.rounds[i].id == scores.round) {
+                    // on recherche le jeu en question
+                    for (let j = 0; j < doc.rounds[i].games.length; j++) {
+                        if ((doc.rounds[i].games[j].team1Id == scores.team1Id) &&
+                            (doc.rounds[i].games[j].team2Id == scores.team2Id)
+                            ) {
+                            doc.rounds[i].games[j].team1Score = scores.team1Score;
+                            doc.rounds[i].games[j].team2Score = scores.team2Score;
+                        }
+                    }
                 }
 			}
 			
@@ -132,9 +135,7 @@ class Backend
     addTeam(players, teamId) {
         var team = {
             players: players,
-            opponents: [],
-            wins: [],
-            losses: []
+            teamName: '' // optional team name
         };
         
         return this.db.get(this.sessionId).then((doc) => {

@@ -15,9 +15,9 @@ class GamesManager
     printRounds(session, index) {
 
         console.log("========= ROUND " + index + 1 + " =========");
-        for (let i = 0; i < session.rounds[index].list.length; i++) {
+        for (let i = 0; i < session.rounds[index].games.length; i++) {
             
-            console.log(session.rounds[index].list[i][0] + " <=> " + session.rounds[index].list[i][1]);
+            console.log(session.rounds[index].games[i].team1Id + " <=> " + session.rounds[index].games[i].team2Id);
         }
     }
 
@@ -69,15 +69,24 @@ class GamesManager
                 opponents: [] // opponents Ids
             }
 
-            for (let j = 0; j < team.wins.length; j++) {
-                rankEntry.total_wins += team.wins[j];
-                rankEntry.total_losses += team.losses[j];
+            for (let j = 0; j < session.rounds.length; j++) {
+
+                for (let k = 0; k < session.rounds[j].games.length; k++) {
+                    let g = session.rounds[j].games[k];
+                    if (g.team1Id == team.id) {
+                        rankEntry.total_wins += g.team1Score;
+                        rankEntry.total_losses += g.team2Score;
+                        rankEntry.opponents.push(g.team2Id);
+                    }
+                    if (g.team2Id == team.id) {
+                        rankEntry.total_wins += g.team2Score;
+                        rankEntry.total_losses += g.team1Score;
+                        rankEntry.opponents.push(g.team1Id);
+                    }
+                }
             }
 
             rankEntry.diff = rankEntry.total_wins - rankEntry.total_losses;
-            rankEntry.opponents = team.opponents;
-            
-            // Compute SOS for this team
             
             this.eventRanking.push(rankEntry);
         }
@@ -124,42 +133,51 @@ class GamesManager
                         let round = {
                             id: 1,
                             date: new Date().toISOString(),
-                            list: []
+                            games: []
                         };
 
                         for (let i = 0; i < array.length; i += 2) {
-                            let current = array[i];
-                            let opponent = array[i+1];
+                            let game = {
+                                team1Id: array[i],
+                                team2Id: array[i+1],
+                                // 0 for this round means 'not started'
+                                team1Score: 0,
+                                team2Score: 0
+                            };
 
-                            round.list.push([current, opponent]);
-
-                            for (let j = 0; j < session.teams.length; j++) {
-                                if (session.teams[j].id == current) {
-                                    session.teams[j].opponents.push(opponent);
-
-                                    // 0 for this round means 'not started'
-                                    session.teams[j].wins.push(0);
-                                    session.teams[j].losses.push(0);
-                                }
-
-                                if (session.teams[j].id == opponent) {
-                                    session.teams[j].opponents.push(current);
-                                    
-                                    // 0 for this round means 'not started'
-                                    session.teams[j].wins.push(0);
-                                    session.teams[j].losses.push(0);
-                                }
-                            }
+                            round.games.push(game);
                         }
 
                         session.rounds.push(round);
                         
                         this.printRounds(session, session.rounds.length - 1);
-
                         resolve(session);
 
                     } else {
-                        // Blossom
+                        //=========== Blossom for all other rounds ===========
+                        /*
+                        availablePlayers.forEach(player => {
+                            availablePlayers.forEach(opponent => {
+                              if (player.playerIndex !== opponent.playerIndex // &&
+                                // player.opponents.indexOf(opponent.playerIndex) === -1
+                              ) {
+                                var match = [player.playerIndex, opponent.playerIndex]
+                        
+                                if (player.opponents.indexOf(opponent.playerIndex) === -1) {
+                                  match.push(maxDiff - Math.abs(player.points - opponent.points))
+                                }
+                                else {
+                                  match.push(0)
+                                }
+                                if (this.searchForArray(possiblePairs, match) === -1) {
+                                  possiblePairs.push(match)
+                                }
+                              }
+                            })
+                          })
+                          */
+
+
                     }
 
                 } else {
