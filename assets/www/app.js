@@ -52,8 +52,7 @@ const app_template = /*template*/`
     <TopToolbar></TopToolbar>
 
     <v-content>
-   
-
+    
         <template v-if="!isReady">
             <v-container fluid fill-height>
                 <v-layout align-center justify-center>

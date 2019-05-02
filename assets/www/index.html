@@ -15,6 +15,7 @@
   <div id="app">
   </div>
 
+  <!-- Third-party JS libraries -->
   <script src="lib/vue.js"></script>
 	<script src="lib/vuex.js"></script>
 	<script src="lib/vuetify.js"></script>
@@ -22,139 +23,27 @@
 	<script src="lib/pouchdb.min.js"></script>
 	<script src="lib/blossom.js"></script>
 
+  <!--first, classes and core engine -->
   <script src="games.js"></script>
   <script src="backend.js"></script>
   <script src="store.js"></script>
-  <script src="components/TopToolbar.js"></script>
-  <script src="components/BottomNav.js"></script>
+
+  <!-- then basic components -->
+  <script src="components/SessionDialog.js"></script>
   <script src="components/AddPlayerDialog.js"></script>
   <script src="components/ScoreDialog.js"></script>
+  <script src="components/TopToolbar.js"></script>
+  <script src="components/BottomNav.js"></script>
+
+  <!-- high level views -->
   <script src="views/HomeView.js"></script>
   <script src="views/PlayersView.js"></script>
   <script src="views/TeamsView.js"></script>
   <script src="views/GamesView.js"></script>
   <script src="views/ResultsView.js"></script>
+
+  <!-- Finally, load main app -->
 	<script src="app.js"></script>
-
-<script>
-var availablePlayers = [{
-  "playerIndex": 1,
-  "playerName": "Gérard",
-  "points": 13,
-  "opponents": [7]
-}, {
-  "playerIndex": 2,
-  "playerName": "Philippe",
-  "points": 13,
-  "opponents": [8]
-}, {
-  "playerIndex": 3,
-  "playerName": "Patrick",
-  "points": 13,
-  "opponents": [6]
-}, {
-  "playerIndex": 4,
-  "playerName": "Jean",
-  "points": 13,
-  "opponents": [5]
-}, {
-  "playerIndex": 5,
-  "playerName": "Anthony",
-  "points": 4,
-  "opponents": [4]
-}, {
-  "playerIndex": 6,
-  "playerName": "Cathy",
-  "points": 7,
-  "opponents": [3]
-}, {
-  "playerIndex": 7,
-  "playerName": "Fabienne",
-  "points": 2,
-  "opponents": [1]
-}, {
-  "playerIndex": 8,
-  "playerName": "Élizabeth",
-  "points": 11,
-  "opponents": [2]
-}]
-
-var config = {
-	pointsWin: 13
-}
-
-var roundIndex = 1;
-
-
-var maxDiff = (roundIndex) * config.pointsWin;
-/*
-1  7  :  13  2
-2  8  :  13  11
-3  6  :  13  7
-4  5  :  13  4
-*/
-  // each entry is an array:
-  // index 0: id 1
-  // index 1: id 2
-  // index 2: poids (+ élevé, plus de chance d'être appairé, moins élevé 0 par exemple signifie un rejet)
-  var possiblePairs = [];
-
-
-  function searchForArray(array, match) {
-    let notFound = -1;
-
-    for (let i = 0; i < array.length; i++) {
-        let entry = array[i];
-        let counterOk = 0;
-        if (
-          ((entry[0] == match[0]) || (entry[0] == match[1])) &&
-          ((entry[1] == match[0]) || (entry[1] == match[1]))
-        ) {
-          notFound = 1;
-        }
-    }
-
-    return notFound;
-  }
-
-  
-  availablePlayers.forEach(player => {
-    availablePlayers.forEach(opponent => {
-      if (player.playerIndex !== opponent.playerIndex // &&
-        // player.opponents.indexOf(opponent.playerIndex) === -1
-      ) {
-        var match = [player.playerIndex, opponent.playerIndex]
-
-        if (player.opponents.indexOf(opponent.playerIndex) === -1) {
-          match.push(maxDiff - Math.abs(player.points - opponent.points))
-        }
-        else {
-          match.push(0)
-        }
-        if (this.searchForArray(possiblePairs, match) === -1) {
-          possiblePairs.push(match)
-        }
-      }
-    })
-  })
-
- var round = {
-	matches: []
-  }
-
-  var blossom = new Edmonds(possiblePairs, true);
-
-  var rawPairing = blossom.maxWeightMatching();
-  rawPairing.forEach((match, index) => {
-    if (match !== -1 && match < index) {
-      
-      console.log(this.availablePlayers[index-1].playerIndex + " <> " + this.availablePlayers[match-1].playerIndex);
-
-    }
-  })
-
-
-</script>
 
 
 </body>

@@ -8,9 +8,23 @@ const store = new Vuex.Store({
         docs: null, // Tous les documents sont mis en mémoire !! Optimisation possible plus tard ... il faudrait juste garder les joueurs et la session en cours
     },
     getters: {
+        getSessions: (state) => {
+            let sessions = [];
+            if (state.finishedLoading && (state.docs !== undefined)) {
+                state.docs.forEach( doc => {
+                    if ( doc._id.includes('session:')) {
+                        sessions.push(doc._id);
+                    }
+                });
+            }
+            return sessions;
+        },
+        getCurrentSession: (state) => {
+            return Api.getSessionId();
+        },
         getTeams: (state) => {
             let teams = [];
-            if (state.docs !== undefined) {
+            if (state.finishedLoading && (state.docs !== undefined)) {
                 let docs = state.docs.filter(doc => doc._id.includes(Api.getSessionId()));
                 if (docs.length == 1) {
                     teams = docs[0].teams;
@@ -24,7 +38,7 @@ const store = new Vuex.Store({
         },
         getRounds: (state) => {
             let rounds = [];
-            if (state.docs !== undefined) {
+            if (state.finishedLoading && (state.docs !== undefined)) {
                 let docs = state.docs.filter(doc => doc._id.includes(Api.getSessionId()));
                 if (docs.length == 1) {
                     rounds = docs[0].rounds;
@@ -38,7 +52,7 @@ const store = new Vuex.Store({
         },
         getPlayer: (state) => (playerId) => {
             let player = null;
-            if (state.docs !== undefined) {
+            if (state.finishedLoading && (state.docs !== undefined)) {
                 let docs = state.docs.filter(doc => doc._id.includes(playerId));
                 if (docs.length == 1) {
                     player = docs[0];

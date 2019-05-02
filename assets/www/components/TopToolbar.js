@@ -1,6 +1,9 @@
 const top_toolbar_template = /*template*/`
 <div>
 
+<SessionDialog  :visible="showSessionDialog" :currentSession="session" @close="showSessionDialog=false" ></SessionDialog>
+     
+<!--
 <v-navigation-drawer app fixed v-model="showMenu">
     <v-list dense>
     <v-list-tile @click="">
@@ -22,19 +25,21 @@ const top_toolbar_template = /*template*/`
     </v-list-tile>
     </v-list>
 </v-navigation-drawer>
-
+-->
 
 <v-toolbar fixed app>
 
     <v-toolbar-side-icon @click.stop="toggleMenu"></v-toolbar-side-icon>
     <v-toolbar-title>{{ title }}</v-toolbar-title>
     <v-spacer></v-spacer>
+    <!--
     <v-btn icon>
         <v-icon>refresh</v-icon>
     </v-btn>
     <v-btn icon>
         <v-icon>backup</v-icon>
     </v-btn>
+    -->
 </v-toolbar>
 
 </div>
@@ -45,18 +50,25 @@ const top_toolbar_template = /*template*/`
 TopToolbar = {
     name: 'top-toolbar',
     template: top_toolbar_template,
+      //====================================================================================================================
+    components: {
+        SessionDialog
+    },
     //====================================================================================================================
     data() {
         return {
             title: "Tanca",
-            showMenu: false
+            showSessionDialog: false,
+            session: ''
+           // showMenu: false,
         }
     },
     //====================================================================================================================
     methods: {
         
         toggleMenu: function()  {
-            this.showMenu = !this.showMenu;
+            this.session = this.$store.getters.getCurrentSession.replace('session:', '');
+            this.showSessionDialog = true;
         }
     },
     //====================================================================================================================
