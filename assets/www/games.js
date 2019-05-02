@@ -1,7 +1,14 @@
+
+
+
 class GamesManager
 {
     constructor() {
         this.eventRanking = [];
+        this.config = {
+            pointsWin: 13
+        }
+        
     }
 
     isEven(n) {
@@ -109,8 +116,19 @@ class GamesManager
     createRounds(session) {
         // Math.floor((Math.random() * 10) + 1);
         return new Promise ( (resolve, reject) => {
+
+            // First update the ranking
+            this.updateEventRanking(session);
+
             if (session.teams.length > 0) {
                 if (this.isEven(session.teams.length)) {
+
+                    let round = {
+                        id: session.rounds.length + 1,
+                        date: new Date().toISOString(),
+                        games: []
+                    };
+
                     if (session.rounds.length == 0) {
                         // First round: random
                         // Algorithm is very simple:
@@ -129,13 +147,7 @@ class GamesManager
                         this.shuffle(array);
                         console.log("[GAMES] Array after: " + array);
 
-                        // STEP 3
-                        let round = {
-                            id: 1,
-                            date: new Date().toISOString(),
-                            games: []
-                        };
-
+                        // STEP 3        
                         for (let i = 0; i < array.length; i += 2) {
                             let game = {
                                 team1Id: array[i],
@@ -148,37 +160,71 @@ class GamesManager
                             round.games.push(game);
                         }
 
-                        session.rounds.push(round);
-                        
-                        this.printRounds(session, session.rounds.length - 1);
-                        resolve(session);
-
                     } else {
+
+                        let finished = true;
+                        // All current rounds must be finished to continue on next round
+                        session.rounds[session.rounds.length - 1].games.forEach(g => {
+                            if ((g.team1Score == 0) && (g.team2Score == 0)) {
+                                finished = false;
+                            }
+                        });
+
+                        if (!finished) {
+                            reject(new Error("Le tour de jeu en cours n'est pas terminé"));
+                        }
+
+
                         //=========== Blossom for all other rounds ===========
-                        /*
-                        availablePlayers.forEach(player => {
-                            availablePlayers.forEach(opponent => {
-                              if (player.playerIndex !== opponent.playerIndex // &&
-                                // player.opponents.indexOf(opponent.playerIndex) === -1
-                              ) {
-                                var match = [player.playerIndex, opponent.playerIndex]
-                        
-                                if (player.opponents.indexOf(opponent.playerIndex) === -1) {
-                                  match.push(maxDiff - Math.abs(player.points - opponent.points))
+                        let  maxDiff = (session.rounds.length) * config.pointsWin;
+
+                        // each entry is an array:
+                        // index 0: id 1
+                        // index 1: id 2
+                        // index 2: poids (+ élevé, plus de chance d'être appairé, moins élevé 0 par exemple signifie un rejet)
+                        let possiblePairs = [];
+
+                        this.eventRanking.forEach( (player, idx1)  => {
+                            this.eventRanking.forEach( (opponent, idx2)  => {
+
+                                // Si les deux équipes n'ont jamais jouées ensemble
+                                if ((player.id !== opponent.id) &&
+                                    (player.opponents.indexOf(opponent.id) === -1)
+                                ) {
+                                    let match = [idx1, idx2];
+                            
+                                    match.push(maxDiff - Math.abs(player.total_wins - opponent.total_wins))
+
+                                    if (this.searchForArray(possiblePairs, match) === -1) {
+                                        possiblePairs.push(match)
+                                    }
                                 }
-                                else {
-                                  match.push(0)
-                                }
-                                if (this.searchForArray(possiblePairs, match) === -1) {
-                                  possiblePairs.push(match)
-                                }
-                              }
                             })
-                          })
-                          */
+                        });
 
+                        let blossom = new Edmonds(possiblePairs, true);
+                        let rawPairing = blossom.maxWeightMatching();
+                        rawPairing.forEach((match, index) => {
+                            if ((match !== -1) && (match < index)) {
+                            
+                          //      console.log(this.eventRanking[index].id + " <> " + this.eventRanking[match].id);
 
+                                let game = {
+                                    team1Id: this.eventRanking[index].id,
+                                    team2Id: this.eventRanking[match].id,
+                                    // 0 for this round means 'not started'
+                                    team1Score: 0,
+                                    team2Score: 0
+                                };
+    
+                                round.games.push(game);
+                            }
+                        });
                     }
+
+                    session.rounds.push(round);
+                    this.printRounds(session, session.rounds.length - 1);
+                    resolve(session);
 
                 } else {
                     reject(new Error("Nombre d'équipes impair, ajouter une équipe"));
@@ -187,6 +233,23 @@ class GamesManager
                 reject(new Error("Aucune équipe !"));
             }
         });
+    }
+
+    searchForArray(array, match) {
+        let notFound = -1;
+    
+        for (let i = 0; i < array.length; i++) {
+            let entry = array[i];
+            let counterOk = 0;
+            if (
+              ((entry[0] == match[0]) || (entry[0] == match[1])) &&
+              ((entry[1] == match[0]) || (entry[1] == match[1]))
+            ) {
+              notFound = 1;
+            }
+        }
+    
+        return notFound;
     }
 }
 

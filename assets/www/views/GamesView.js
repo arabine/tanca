@@ -81,7 +81,7 @@ GamesView = {
       if (round.length == 1) {
         round[0].games.forEach(g => {
           let r = {
-            finished: false,
+            finished: (g.team1Score != 0) && (g.team2Score != 0),
             teams: [
               {
                 id: g.team1Id,
