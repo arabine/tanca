@@ -56,14 +56,22 @@ SessionDialog = {
       }
   },
   computed: {
+    currentSession() {
+      return this.$store.state.sessionId;
+    }, 
     show: {
       get () {
         return this.visible
       },
       set (value) {
         if (!value) {
-          this.$router.push('teams');
-          this.$emit('close');
+
+          if (this.currentSession == '') {
+            this.$eventHub.$emit('alert', "Sélectionnez ou créez une session.", 'error');
+          } else {
+            this.$router.push('teams');
+            this.$emit('close');
+          }
         }
       }
     },

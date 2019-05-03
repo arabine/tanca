@@ -33,6 +33,9 @@ const top_toolbar_template = /*template*/`
     <v-toolbar-side-icon @click.stop="toggleMenu"></v-toolbar-side-icon>
     <v-toolbar-title>{{ title }}</v-toolbar-title>
     <v-spacer></v-spacer>
+    <v-btn to="/home" icon>
+        <v-icon>home</v-icon>
+    </v-btn>
     <!--
     <v-btn icon>
         <v-icon>refresh</v-icon>

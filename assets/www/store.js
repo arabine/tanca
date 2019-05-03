@@ -121,7 +121,11 @@ const store = new Vuex.Store({
             return Api.createNewSession();
         },
         deleteSession: (context, sessionId) => {
-			return Api.deleteSession(sessionId);
+			return Api.deleteSession(sessionId).then(() => {
+                if (sessionId == context.state.sessionId) {
+                    context.commit('SET_SESSION', ''); //empty session, user must select or create new one
+                } 
+            });
         },
     },
     mutations: {
