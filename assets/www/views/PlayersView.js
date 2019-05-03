@@ -3,7 +3,7 @@ var players_view_template = /*template*/`
 
 <v-layout column>
   
-      <AddPlayerDialog  :visible="showAddPlayerDialog" @close="showAddPlayerDialog=false" ></AddPlayerDialog>
+      <AddPlayerDialog  :visible="showAddPlayerDialog" :key="showAddPlayerDialog" @close="showAddPlayerDialog=false" ></AddPlayerDialog>
       
       <v-layout row justify-end>
         <v-btn dark fab small color="indigo" @click="addSelectedToTeam"><v-icon>group_add</v-icon></v-btn>

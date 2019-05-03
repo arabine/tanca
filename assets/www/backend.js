@@ -49,34 +49,62 @@ class Backend
                 console.log('[DB] Found localStorage session');
                 return this.db.get(sId);
             }).then((doc) => {
-                console.log('[DB] Found valid session in DB');
-                this.sessionId = doc._id;
-                resolve();
+
+                if (doc.state !== undefined) {
+                    if (doc.state == 'ok') {
+                        this.loadSession(doc._id);
+                        resolve();
+                    }
+                }
+                throw new Error("Invalid session (deleted or obsolete)");
+                
             }).catch((error) => {
                 console.log('[DB] Create new session because: ' + error);
                 // Tout est faux, on crée une nouvelle session
-                this.createNewSession().then( (doc) => {
-                        this.sessionId = doc.id;
-                        localStorage.setItem('fr.tanca.session.id', this.sessionId);
-                        console.log('[DB] Session created with id: ' + this.sessionId);
-                        resolve();
-                }).catch( (err) => {
-                        console.log('[DB] Cannot create session in DB: ' + err);
-                        reject();
+                this.createNewSession().then( () => {
+                    resolve();
+                }).catch( (error) => {
+                    reject(error);
                 });
-                
             });
         });
     }
 
+    loadSession(sessionId) {
+        console.log('[DB] Set current session: ' + sessionId);
+        this.sessionId = sessionId;
+        localStorage.setItem('fr.tanca.session.id', sessionId);
+    }
+
+    /**
+     * @brief Not a real delete, just change the state of the session document
+     */
+    deleteSession(sessionId) {
+        return this.db.get(sessionId).then((doc) => {
+            doc.state = 'deleted';
+            return doc;
+        }).then( (updatedDoc) => {
+            return this.db.put(updatedDoc);
+        });
+    }
+
     async createNewSession() {
-        var s = {
-            _id: 'session:' + new Date().toISOString(),
-            teams: [],
-            counter: 1, // unique counter used for team numbering
-            rounds: []
-        };
-        return this.db.put(s);
+        return new Promise( (resolve, reject) => {
+            var s = {
+                _id: 'session:' + new Date().toISOString(),
+                state: 'ok',
+                teams: [],
+                counter: 1, // unique counter used for team numbering
+                rounds: []
+            };
+            this.db.put(s).then( (doc) => {
+                this.loadSession(doc.id);
+                resolve();
+            }).catch( (err) => {
+                console.log('[DB] Cannot create session in DB: ' + err);
+                reject(err);
+            });
+        });
     }
 
     removeDiacritics(str) {

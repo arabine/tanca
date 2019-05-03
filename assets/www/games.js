@@ -6,9 +6,9 @@ class GamesManager
     constructor() {
         this.eventRanking = [];
         this.config = {
-            pointsWin: 13
+            pointsWin: 13,
+            maxRounds: 3
         }
-        
     }
 
     isEven(n) {
@@ -21,7 +21,7 @@ class GamesManager
 
     printRounds(session, index) {
 
-        console.log("========= ROUND " + index + 1 + " =========");
+        console.log("========= ROUND " + parseInt(index) + 1 + " =========");
         for (let i = 0; i < session.rounds[index].games.length; i++) {
             
             console.log(session.rounds[index].games[i].team1Id + " <=> " + session.rounds[index].games[i].team2Id);
@@ -117,6 +117,10 @@ class GamesManager
         // Math.floor((Math.random() * 10) + 1);
         return new Promise ( (resolve, reject) => {
 
+            if (session.rounds.length >= this.config.maxRounds) {
+                reject(new Error("Max rounds played."));
+            }
+
             // First update the ranking
             this.updateEventRanking(session);
 
@@ -176,7 +180,7 @@ class GamesManager
 
 
                         //=========== Blossom for all other rounds ===========
-                        let  maxDiff = (session.rounds.length) * config.pointsWin;
+                        let  maxDiff = (session.rounds.length) * this.config.pointsWin;
 
                         // each entry is an array:
                         // index 0: id 1

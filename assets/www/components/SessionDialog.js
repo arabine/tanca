@@ -10,17 +10,28 @@ var session_dialog_template = /*template*/`
 
   <!-- CENTRE DU DIALOG --> 
   <v-card-text>
-      <v-flex xs12 sm6 md3>
-        <span>List of sessions {{currentSessionClone}}</span>
-        <v-select
-            :items="sessions"
-            v-model='currentSessionClone'
-            label="List of sessions"
-            persistent-hint
-            return-object
-            single-line
-          ></v-select>
+    <v-layout column>
+      <v-flex xs12 >
+        <v-btn color="success" @click="newSession()">New session</v-btn>
+        <v-data-table :headers="headers"
+                :items="sessions"
+                expand
+                class="elevation-1">
+          <template slot="items" slot-scope="props">
+            <tr :style="{backgroundColor: props.item.isCurrent ? 'steelblue' : 'transparent' }">
+              <td class="text-xs">{{ props.item.date }}</td>
+              <td>
+                <v-icon small @click="loadSession(props.item)">get_app</v-icon>
+              </td>
+              <td>
+                <v-icon small @click="deleteSession(props.item)">delete</v-icon>
+              </td>
+            </tr>
+          </template>
+        </v-data-table>
+         
     </v-flex>
+    </v-layout>
   </v-card-text>
  
 </v-card>
@@ -41,7 +52,12 @@ SessionDialog = {
   data() {
       return {
         errorMessages: '',
-        currentSessionClone: this.currentSession
+        currentSessionClone: this.currentSession,
+        headers: [
+          { text: 'Session Date', value: 'date' },
+          { text: 'Load', value: 'load' },
+          { text: 'Delete', value: 'delete' },
+        ]
       }
   },
   computed: {
@@ -51,6 +67,7 @@ SessionDialog = {
       },
       set (value) {
         if (!value) {
+          this.$router.push('teams');
           this.$emit('close');
         }
       }
@@ -62,8 +79,9 @@ SessionDialog = {
 
             let iso = s.replace('session:', '');
             let entry = {
-                value: iso,
-                text: iso
+                date_iso: iso,
+                date: moment(iso).format("MMMM Do YYYY, H:mm"),
+                isCurrent: iso == this.currentSessionClone
             }
             items.push(entry);
         });
@@ -72,7 +90,31 @@ SessionDialog = {
     }
   },
   methods: {
-
+    newSession () {
+      this.$store.dispatch('createSession').then( () => {
+        this.$eventHub.$emit('alert', "Nouvelle session créée", 'success');
+      }).catch( (err) => {
+        this.$eventHub.$emit('alert', "Impossible de créer la session: " + err, 'error');
+      });
+    },
+    deleteSession(item) {
+      if (this.$store.getters.sessionExists(item.date_iso)) {
+        this.$store.dispatch('deleteSession', 'session:' + item.date_iso).then( () => {
+          this.$eventHub.$emit('alert', "Session supprimée", 'success');
+        }).catch((err) => {
+          this.$eventHub.$emit('alert', "Impossible de supprimer la session: " + err, 'error');
+        });
+      }
+    },
+    loadSession(item) {
+      if (this.$store.getters.sessionExists(item.date_iso)) {
+        this.$store.dispatch('loadSession', 'session:' + item.date_iso).then( () => {
+          this.$eventHub.$emit('alert', "Session chargée", 'success');
+        }).catch((err) => {
+          this.$eventHub.$emit('alert', "Impossible de charger la session: " + err, 'error');
+        });
+      }
+    }
   }
 }
 

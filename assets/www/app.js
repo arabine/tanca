@@ -25,13 +25,15 @@ async function loadEverything()
     }, function(id) {
         store.commit('DB_DELETE', id);
     }, function(docs) {
-        console.log("[DB] Loaded");
+        console.log("[APP] Loaded");
         store.commit('SET_DOCS', docs);
 
         // Add here all other inits
         Api.loadCurrentSession().then( () => {
             store.commit('SET_FINISHED_LOADING');
-            console.log("[DB] Finished loading data.");
+            console.log("[APP] Finished loading data.");
+        }).catch((error) => {
+            console.log("[APP] Finished loading data.");
         });
 
         

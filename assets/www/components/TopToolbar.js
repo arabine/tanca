@@ -1,7 +1,8 @@
 const top_toolbar_template = /*template*/`
 <div>
 
-<SessionDialog  :visible="showSessionDialog" :currentSession="session" @close="showSessionDialog=false" ></SessionDialog>
+<!-- The key is necessary to re-render the component in case of session has changed -->
+<SessionDialog  :visible="showSessionDialog" :currentSession="session" :key="session" @close="showSessionDialog=false" ></SessionDialog>
      
 <!--
 <v-navigation-drawer app fixed v-model="showMenu">
@@ -60,7 +61,6 @@ TopToolbar = {
             title: "Tanca",
             showSessionDialog: false,
             session: ''
-           // showMenu: false,
         }
     },
     //====================================================================================================================

@@ -3,14 +3,14 @@ var games_view_template = /*template*/`
 
 <v-layout column>
 
-  <ScoreDialog  :visible="showScoreDialog" :round="page" :t1="team1" :t2="team2" :t1score="team1Score" :t2score="team2Score" :t1id="team1Id" :t2id="team2Id" 
+  <ScoreDialog  :visible="showScoreDialog" :key="showScoreDialog" :round="page" :t1="team1" :t2="team2" :t1score="team1Score" :t2score="team2Score" :t1id="team1Id" :t2id="team2Id" 
       @close="showScoreDialog=false"
       @success="editScoreSuccess">
   </ScoreDialog>
   <v-flex xs12 >
   
     <v-layout row >
-      <v-pagination v-model="page" :total-visible="3" :length="3"></v-pagination>
+      <v-pagination v-model="page" :total-visible="3" :length="maxRounds"></v-pagination>
       <v-spacer />
       <v-btn dark fab small color="green" @click="createRounds()"><v-icon>play_circle_outline</v-icon></v-btn>
     </v-layout>
@@ -54,6 +54,7 @@ GamesView = {
   data () {
     return {
       page: 1,
+      maxRounds: Games.config.maxRounds,
       showScoreDialog: false,
       team1: '',
       team2: '',
@@ -81,7 +82,7 @@ GamesView = {
       if (round.length == 1) {
         round[0].games.forEach(g => {
           let r = {
-            finished: (g.team1Score != 0) && (g.team2Score != 0),
+            finished: (g.team1Score != 0) || (g.team2Score != 0),
             teams: [
               {
                 id: g.team1Id,

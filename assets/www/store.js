@@ -13,11 +13,26 @@ const store = new Vuex.Store({
             if (state.finishedLoading && (state.docs !== undefined)) {
                 state.docs.forEach( doc => {
                     if ( doc._id.includes('session:')) {
-                        sessions.push(doc._id);
+                        if (doc.state !== undefined) {
+                            if (doc.state === 'ok') {
+                                sessions.push(doc._id);
+                            }
+                        }
                     }
                 });
             }
             return sessions;
+        },
+        sessionExists: (state) => (sessionIsoDate) => {
+            let exists = false;
+            if (state.finishedLoading && (state.docs !== undefined)) {
+                state.docs.forEach( doc => {
+                    if ( doc._id.includes(sessionIsoDate)) {
+                        exists = true;
+                    }
+                });
+            }
+            return exists;
         },
         getCurrentSession: (state) => {
             return Api.getSessionId();
@@ -95,7 +110,16 @@ const store = new Vuex.Store({
         },
         setScores: (context, scores) => {
 			return Api.setScores(scores);
-		}
+        },
+        loadSession: (context, sessionId) => {
+            return Api.loadSession(sessionId);
+        },
+        createSession: (context) =>  {
+            return Api.createNewSession();
+        },
+        deleteSession: (context, sessionId) => {
+			return Api.deleteSession(sessionId);
+        },
     },
     mutations: {
         SET_FINISHED_LOADING: (state) => {
