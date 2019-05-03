@@ -18,7 +18,7 @@ var session_dialog_template = /*template*/`
                 expand
                 class="elevation-1">
           <template slot="items" slot-scope="props">
-            <tr :style="{backgroundColor: props.item.isCurrent ? 'steelblue' : 'transparent' }">
+            <tr :style="getRowStyle(props.item.isCurrent)">
               <td class="text-xs">{{ props.item.date }}</td>
               <td>
                 <v-icon small @click="loadSession(props.item)">get_app</v-icon>
@@ -44,15 +44,10 @@ SessionDialog = {
         type: Boolean,
         default: false
     },
-    currentSession: {
-        type: String,
-        default: ''
-    }
   },
   data() {
       return {
         errorMessages: '',
-        currentSessionClone: this.currentSession,
         headers: [
           { text: 'Session Date', value: 'date' },
           { text: 'Load', value: 'load' },
@@ -77,11 +72,11 @@ SessionDialog = {
         let sList = this.$store.getters.getSessions;
         sList.forEach(s => {
 
-            let iso = s.replace('session:', '');
+            let iso = s.id.replace('session:', '');
             let entry = {
                 date_iso: iso,
                 date: moment(iso).format("MMMM Do YYYY, H:mm"),
-                isCurrent: iso == this.currentSessionClone
+                isCurrent: s.isCurrent
             }
             items.push(entry);
         });
@@ -90,6 +85,9 @@ SessionDialog = {
     }
   },
   methods: {
+    getRowStyle(isCurrent) {
+      return { backgroundColor: isCurrent ? 'steelblue' : 'transparent' }
+    },
     newSession () {
       this.$store.dispatch('createSession').then( () => {
         this.$eventHub.$emit('alert', "Nouvelle session créée", 'success');

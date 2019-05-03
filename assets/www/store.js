@@ -5,6 +5,7 @@ const store = new Vuex.Store({
     // Global generic purpose states
     state: {
         finishedLoading: false,
+        sessionId: '',
         docs: null, // Tous les documents sont mis en mémoire !! Optimisation possible plus tard ... il faudrait juste garder les joueurs et la session en cours
     },
     getters: {
@@ -15,7 +16,11 @@ const store = new Vuex.Store({
                     if ( doc._id.includes('session:')) {
                         if (doc.state !== undefined) {
                             if (doc.state === 'ok') {
-                                sessions.push(doc._id);
+                                let s = {
+                                    id: doc._id,
+                                    isCurrent: state.sessionId == doc._id
+                                }
+                                sessions.push(s);
                             }
                         }
                     }
@@ -34,13 +39,10 @@ const store = new Vuex.Store({
             }
             return exists;
         },
-        getCurrentSession: (state) => {
-            return Api.getSessionId();
-        },
         getTeams: (state) => {
             let teams = [];
             if (state.finishedLoading && (state.docs !== undefined)) {
-                let docs = state.docs.filter(doc => doc._id.includes(Api.getSessionId()));
+                let docs = state.docs.filter(doc => doc._id.includes(state.sessionId));
                 if (docs.length == 1) {
                     teams = docs[0].teams;
                 } else {
@@ -54,7 +56,7 @@ const store = new Vuex.Store({
         getRounds: (state) => {
             let rounds = [];
             if (state.finishedLoading && (state.docs !== undefined)) {
-                let docs = state.docs.filter(doc => doc._id.includes(Api.getSessionId()));
+                let docs = state.docs.filter(doc => doc._id.includes(state.sessionId));
                 if (docs.length == 1) {
                     rounds = docs[0].rounds;
                 } else {
@@ -97,21 +99,22 @@ const store = new Vuex.Store({
             return Api.addPlayer(player);
         },
         addTeam: (context, players) => {
-            return Api.addTeam(players);
+            return Api.addTeam(players, null, context.state.sessionId);
         },
         deleteTeam: (context, indexList) => {
-            return Api.deleteTeam(indexList)
+            return Api.deleteTeam(indexList, context.state.sessionId)
         },
         createRounds: (context) => {
-            return Api.createRounds();
+            return Api.createRounds(context.state.sessionId);
         },
         updateRanking: (context) => {
-            return Api.updateRanking();
+            return Api.updateRanking(context.state.sessionId);
         },
         setScores: (context, scores) => {
-			return Api.setScores(scores);
+			return Api.setScores(scores, context.state.sessionId);
         },
         loadSession: (context, sessionId) => {
+            context.commit('SET_SESSION', sessionId);
             return Api.loadSession(sessionId);
         },
         createSession: (context) =>  {
@@ -124,6 +127,9 @@ const store = new Vuex.Store({
     mutations: {
         SET_FINISHED_LOADING: (state) => {
             state.finishedLoading = true;
+        },
+        SET_SESSION(state, newSessionId) {
+            state.sessionId = newSessionId;
         },
         SET_DOCS: (state, docs) => {
             state.docs = docs;

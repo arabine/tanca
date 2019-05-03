@@ -2,7 +2,7 @@ class Backend
 {
     constructor() {
         this.db = null;
-        this.sessionId = '';
+      //  this.sessionId = '';
     }
 
     initializeDb(updatedCb, deletedCb, loadedCb) {
@@ -28,10 +28,6 @@ class Backend
         });
     }
 
-    getSessionId() {
-        return this.sessionId;
-    }
-
     async getSavedSession() {
         return new Promise( (resolve, reject) => {
             if (localStorage.getItem('fr.tanca.session.id')) {
@@ -49,20 +45,25 @@ class Backend
                 console.log('[DB] Found localStorage session');
                 return this.db.get(sId);
             }).then((doc) => {
-
+                let ok = false;
                 if (doc.state !== undefined) {
                     if (doc.state == 'ok') {
                         this.loadSession(doc._id);
-                        resolve();
+                        ok  = true;
                     }
                 }
-                throw new Error("Invalid session (deleted or obsolete)");
+
+                if (ok) {
+                    resolve(doc._id);
+                } else {
+                    throw new Error("Invalid session (deleted or obsolete)");
+                }
                 
             }).catch((error) => {
                 console.log('[DB] Create new session because: ' + error);
                 // Tout est faux, on crée une nouvelle session
-                this.createNewSession().then( () => {
-                    resolve();
+                this.createNewSession().then( (sessionId) => {
+                    resolve(sessionId);
                 }).catch( (error) => {
                     reject(error);
                 });
@@ -72,7 +73,6 @@ class Backend
 
     loadSession(sessionId) {
         console.log('[DB] Set current session: ' + sessionId);
-        this.sessionId = sessionId;
         localStorage.setItem('fr.tanca.session.id', sessionId);
     }
 
@@ -99,7 +99,7 @@ class Backend
             };
             this.db.put(s).then( (doc) => {
                 this.loadSession(doc.id);
-                resolve();
+                resolve(doc.id);
             }).catch( (err) => {
                 console.log('[DB] Cannot create session in DB: ' + err);
                 reject(err);
@@ -135,8 +135,8 @@ class Backend
         team2Id: this.t2id
       };
     */
-    setScores(scores) {
-        return this.db.get(this.sessionId).then((doc) => {
+    setScores(scores, sessionId) {
+        return this.db.get(sessionId).then((doc) => {
 
             for (let i = 0; i < doc.rounds.length; i++) {
                 // On recherche le round
@@ -160,33 +160,36 @@ class Backend
         });
     }
 
-    addTeam(players, teamId) {
+    addTeam(players, teamId, sessionId) {
         var team = {
             players: players,
             teamName: '' // optional team name
         };
         
-        return this.db.get(this.sessionId).then((doc) => {
+        return this.db.get(sessionId).then((doc) => {
             var idIsUnique = true;
-            for (var i = 0; i < doc.teams.length; i++) {
-                if (doc.teams[i].id == teamId) {
-                    idIsUnique = false;
-                    break;
+
+            if (teamId) {
+                for (var i = 0; i < doc.teams.length; i++) {
+                    if (doc.teams[i].id == teamId) {
+                        idIsUnique = false;
+                        break;
+                    }
                 }
             }
 
-            if ((teamId === undefined) || (!idIsUnique)) {
-                team.id = doc.counter++; // generate unique id for this team
-            } else {
+            if (teamId && idIsUnique) {
                 team.id = teamId; // specified id is ok
+            } else {
+                team.id = doc.counter++; // generate unique id for this team
             }
             doc.teams.push(team);
             return this.db.put(doc);
         });
     }
 
-    deleteTeam(indexList) {
-        return this.db.get(this.sessionId).then((doc) => {
+    deleteTeam(indexList, sessionId) {
+        return this.db.get(sessionId).then((doc) => {
             var newArray = [];
             for (var i = 0; i < doc.teams.length; i++) {
                 if (indexList.indexOf(i) === -1) {
@@ -199,8 +202,8 @@ class Backend
         });
     }
 
-    createRounds() {
-        return this.db.get(this.sessionId).then((doc) => {
+    createRounds(sessionId) {
+        return this.db.get(sessionId).then((doc) => {
         
             return Games.createRounds(doc);
         }).then( (updatedDoc) => {
@@ -209,8 +212,8 @@ class Backend
         
     }
 
-    updateRanking() {
-        return this.db.get(this.sessionId).then((doc) => {
+    updateRanking(sessionId) {
+        return this.db.get(sessionId).then((doc) => {
             return new Promise( (resolve, reject) => {
                 Games.updateEventRanking(doc);
                 Games.sortEventRanking();

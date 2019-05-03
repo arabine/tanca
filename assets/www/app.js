@@ -29,8 +29,9 @@ async function loadEverything()
         store.commit('SET_DOCS', docs);
 
         // Add here all other inits
-        Api.loadCurrentSession().then( () => {
+        Api.loadCurrentSession().then( (sessionId) => {
             store.commit('SET_FINISHED_LOADING');
+            store.commit('SET_SESSION', sessionId);
             console.log("[APP] Finished loading data.");
         }).catch((error) => {
             console.log("[APP] Finished loading data.");

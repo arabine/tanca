@@ -2,7 +2,7 @@ const top_toolbar_template = /*template*/`
 <div>
 
 <!-- The key is necessary to re-render the component in case of session has changed -->
-<SessionDialog  :visible="showSessionDialog" :currentSession="session" :key="session" @close="showSessionDialog=false" ></SessionDialog>
+<SessionDialog  :visible="showSessionDialog" :key="showSessionDialog" @close="showSessionDialog=false" ></SessionDialog>
      
 <!--
 <v-navigation-drawer app fixed v-model="showMenu">
@@ -60,14 +60,12 @@ TopToolbar = {
         return {
             title: "Tanca",
             showSessionDialog: false,
-            session: ''
         }
     },
     //====================================================================================================================
     methods: {
         
         toggleMenu: function()  {
-            this.session = this.$store.getters.getCurrentSession.replace('session:', '');
             this.showSessionDialog = true;
         }
     },

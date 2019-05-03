@@ -38,7 +38,7 @@ var players_view_template = /*template*/`
         </template>
       </v-list>
 
-      <pre>{{ selected }}</pre>
+   <!--   <pre>{{ selected }}</pre> -->
   
 </v-layout>
 `;
