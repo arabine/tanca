@@ -14,6 +14,7 @@ public:
     BackendServer();
     ~BackendServer();
 
+    void Initialize();
     BackendServer(const std::string &rootDir);
 
 private:

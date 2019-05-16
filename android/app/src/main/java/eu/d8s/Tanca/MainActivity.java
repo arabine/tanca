@@ -20,8 +20,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        // FIXME: check few open ports, then pass it to the server initialization
-        initialize();
+        int tcpPort = initialize();
 
         mWebView = (WebView) findViewById(R.id.activity_main_webview);
         mWebView.clearCache(true);
@@ -33,7 +32,7 @@ public class MainActivity extends Activity {
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
 
-        mWebView.loadUrl("http://127.0.0.1:8000"); // FIXME: use the TCP port discovered just before
+        mWebView.loadUrl("http://127.0.0.1:" + String.valueOf(tcpPort)); // FIXME: use the TCP port discovered just before
     }
 
     static {
@@ -41,5 +40,5 @@ public class MainActivity extends Activity {
         System.loadLibrary("icl");
     }
 
-    public native void initialize();
+    public native int initialize();
 }
