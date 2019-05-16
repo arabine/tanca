@@ -17,7 +17,6 @@
 package eu.d8s.Tanca;
 
 import android.os.Build;
-import android.support.annotation.Keep;
 import android.util.Log;
 
 /*
@@ -31,7 +30,6 @@ public class JniHandler {
     /*
      * Print out status to logcat
      */
-    @Keep
     private void updateStatus(String msg) {
         if (msg.toLowerCase().contains("error")) {
             Log.e("JniHandler", "Native Err: " + msg);
@@ -43,7 +41,6 @@ public class JniHandler {
     /*
      * Return OS build version: a static function
      */
-    @Keep
     static public String getBuildVersion() {
         return Build.VERSION.RELEASE;
     }
@@ -51,7 +48,6 @@ public class JniHandler {
     /*
      * Return Java memory info
      */
-    @Keep
     public long getRuntimeMemorySize() {
         return Runtime.getRuntime().freeMemory();
     }
