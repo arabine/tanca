@@ -15,31 +15,32 @@ const router = new VueRouter({
     ]
 });
 
+
 // =================================================================================================
 // SYNCHRONOUS LOADING AT START-UP
 // =================================================================================================
 async function loadEverything()
 {
-    Api.initializeDb(function onUpdatedOrInserted(newDoc) {
+    let docs = await Api.initializeDb(function onUpdatedOrInserted(newDoc) {
         store.commit('DB_UPDATE', newDoc);
     }, function(id) {
         store.commit('DB_DELETE', id);
-    }, function(docs) {
-        console.log("[APP] Loaded");
-        store.commit('SET_DOCS', docs);
-
-        // Add here all other inits
-        Api.loadCurrentSession().then( (sessionId) => {
-            store.commit('SET_FINISHED_LOADING');
-            store.commit('SET_SESSION', sessionId);
-            console.log("[APP] Finished loading data.");
-        }).catch((error) => {
-            console.log("[APP] Finished loading data.");
-        });
-
-        
     });
-    
+
+    console.log("[APP] Database loaded");
+    store.commit('SET_DOCS', docs);
+
+    let response = await fetch(Api.getRootUrl() + "/i18n/i18n.json", {referrerPolicy: "no-referrer", cache: "no-store"});
+    let locales = await response.json();
+
+    for (let key in locales) {
+        i18n.setLocaleMessage(key, locales[key]);
+    }
+
+    let sessionId = await Api.loadCurrentSession();
+
+    store.commit('SET_SESSION', sessionId);
+    store.commit('SET_FINISHED_LOADING');
 }
 
 // =================================================================================================
@@ -84,7 +85,8 @@ Vue.prototype.$eventHub = new Vue(); // Global event bus
 const app = new Vue({
     router: router,
     el: '#app',
-    store: store,
+    store,
+    i18n,
     template: app_template,
     components: {TopToolbar, BottomNav},
     computed: {
@@ -112,8 +114,45 @@ const app = new Vue({
     },
     created: function() {
         this.$eventHub.$on('alert', this.showAlert);
-        console.log('[APP] Tanca created');
         loadEverything();
+
+        i18n.locale = navigator.language || navigator.userLanguage; 
+        moment.locale(i18n.locale);
+
+        this.$vuetify.lang.current = i18n.locale;
+        this.$vuetify.lang.locales = {
+            en: {
+                noDataText: 'Nothing',
+                dataIterator: {
+                    rowsPerPageText: "Items per page:",
+                    rowsPerPageAll: "All",
+                    pageText: "{0}-{1} of {2}",
+                    noResultsText: "No matching records found",
+                    nextPage: "Next page",
+                    prevPage: "Previous page"
+                },
+                dataTable: {
+                    rowsPerPageText: "Rows per page:"
+                }
+            },
+            fr: {
+                noDataText: 'Aucune donnée',
+                dataIterator: {
+                    rowsPerPageText: "Éléments par page:",
+                    rowsPerPageAll: "Tous",
+                    pageText: "{0}-{1} de {2}",
+                    noResultsText: "Aucun élément correspondant",
+                    nextPage: "Page suivante",
+                    prevPage: "Page précédente"
+                },
+                dataTable: {
+                    rowsPerPageText: "Lignes par page :"
+                }
+            }
+        }
+
+        console.log('[APP] Tanca created');
+        
 
     },
     beforeMount: function() {

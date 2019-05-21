@@ -34,12 +34,12 @@ ResultsView = {
   data () {
     return {
       headers: [
-        { text: 'Rank', value: 'rank' },
-        { text: 'Team', value: 'team' },
-        { text: 'Wins', value: 'total_wins' },
-        { text: 'Losses', value: 'total_losses' },
-        { text: 'Diff', value: 'diff' },
-        { text: 'SPA', value: 'sos' },
+        { text: this.$t('rank'), value: 'rank' },
+        { text: this.$t('team'), value: 'team' },
+        { text: this.$t('wins'), value: 'total_wins' },
+        { text: this.$t('losses'), value: 'total_losses' },
+        { text: this.$t('diff'), value: 'diff' },
+        { text: this.$t('sos'), value: 'sos' },
       ],
       items: [
 

@@ -12,7 +12,7 @@ var session_dialog_template = /*template*/`
   <v-card-text>
     <v-layout column>
       <v-flex xs12 >
-        <v-btn color="success" @click="newSession()">New session</v-btn>
+        <v-btn color="success" @click="newSession()">{{ $t('new_session') }}</v-btn>
         <v-data-table :headers="headers"
                 :items="sessions"
                 expand
@@ -49,9 +49,9 @@ SessionDialog = {
       return {
         errorMessages: '',
         headers: [
-          { text: 'Session Date', value: 'date' },
-          { text: 'Load', value: 'load' },
-          { text: 'Delete', value: 'delete' },
+          { text: this.$t('session_date'), value: 'date' },
+          { text: this.$t('load'), value: 'load' },
+          { text: this.$t('delete'), value: 'delete' },
         ]
       }
   },

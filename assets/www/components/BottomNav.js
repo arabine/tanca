@@ -10,22 +10,22 @@ const bottom_nav_template = /*template*/`
         </v-btn>
 -->
         <v-btn color="teal" flat small value="players" to="players">
-            <span>Players</span>
+            <span>{{ $t('players') }}</span>
             <v-icon>face</v-icon>
         </v-btn>
 
         <v-btn color="teal" flat small value="teams" to="teams">
-            <span>Teams</span>
+            <span>{{ $t('teams') }}</span>
             <v-icon>group</v-icon>
         </v-btn>
 
         <v-btn color="teal" flat small value="games" to="games">
-            <span>Games</span>
+            <span>{{ $t('games') }}</span>
             <v-icon>casino</v-icon>
         </v-btn>
 
         <v-btn color="teal" flat small value="results" to="results">
-            <span>Results</span>
+            <span>{{ $t('results') }}</span>
             <v-icon>assignment</v-icon>
         </v-btn>
 

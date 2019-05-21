@@ -14,26 +14,16 @@ var home_view_template = /*template*/`
   <v-flex xs12>
     <v-card color="transparent">
       <v-card-text class="px-0">
-        <blockquote class="blockquote">Bienvenue sur Tanca, une application permettant de gérer le déroulement d'un concours de Pétanque.</blockquote>
-        <blockquote class="blockquote">Les icônes du bas vous serviront à accéder aux différentes étapes : l'enregistrement des joueurs,
-        la création des équipes, le pointage des scores, la génération des manches et enfin l'affichage des résultats.</blockquote>
-        <blockquote class="blockquote">Les équipes et jeux sont enregistrés localement, dans une session. Utilisez l'icône sandwich en haut 
-        pour facilement changer de session ou en créer de nouvelles.</blockquote>
-
-        <blockquote class="blockquote">Bon jeu à tous !</blockquote>
-
-        <blockquote class="blockquote">Commentaires : contact@tanca.fr</blockquote>
+        <blockquote class="blockquote">{{ $t('welcome') }}</blockquote>
+        <blockquote class="blockquote">{{ $t('welcome2') }}</blockquote>
+        <blockquote class="blockquote">{{ $t('welcome3') }}</blockquote>
+        <blockquote class="blockquote">{{ $t('welcome4') }}</blockquote>
+        <blockquote class="blockquote">{{ $t('welcome5') }}</blockquote>
       </v-card-text>
     </v-card>
   </v-flex>
 
-
-        
-
-        
-
   </div>
-
     
 </v-layout>
 `;

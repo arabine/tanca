@@ -5,14 +5,16 @@ class Backend
       //  this.sessionId = '';
     }
 
-    initializeDb(updatedCb, deletedCb, loadedCb) {
+    getRootUrl()
+    {
+        var uri = window.location.protocol + "//" + window.location.host;
+        return uri;
+    }
+
+    async initializeDb(updatedCb, deletedCb) {
         this.db = new PouchDB('tanca');
 
-        this.db.allDocs({include_docs: true}).then(function (res) {
-            var docs = res.rows.map(function (row) { return row.doc; });  
-            loadedCb(docs);
-        }).catch(console.log.bind(console));
-
+        /* setup Database parameters */
         this.db.changes({live: true, since: 'now', include_docs: true})
         .on('change', function (change) {
             if (change.deleted) {
@@ -26,6 +28,10 @@ class Backend
         .on('error', function (err) {
             // handle errors
         });
+
+        // Load and return documents
+        let res = await this.db.allDocs({include_docs: true});
+        return res.rows.map(function (row) { return row.doc; });         
     }
 
     async getSavedSession() {
