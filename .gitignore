@@ -24,3 +24,5 @@ build-tanca-Android_for_x86_Clang_Qt_5_12_3_for_Android_x862-Debug/
 build-tanca-mobile-Android_for_x86_Clang_Qt_5_12_3_for_Android_x862-Debug/
 
 android/\.idea/caches/
+
+android/app/release/

@@ -1,18 +1,24 @@
 apply plugin: 'com.android.application'
 
+ext.isRelease = { array ->
+    array.each { name ->
+        if (name.contains("Debug")) {
+            return false
+        }
+    }
+    return true
+}
+
 android {
     compileSdkVersion 28
     buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId 'eu.d8s.Tanca'
-        minSdkVersion 28
+        minSdkVersion 27
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        ndk {
-            abiFilters 'x86', 'x86_64', 'armeabi-v7a'
-            stl "c++_shared"
-        }
+
         externalNativeBuild {
             cmake {
                 arguments '-DANDROID_PLATFORM=android-28',
@@ -41,6 +47,16 @@ android {
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
+        }
+    }
+
+
+    splits {
+        abi {
+            enable isRelease(gradle.startParameter.taskNames)
+            reset()
+            include "x86_64", "x86", "arm64-v8a", "armeabi-v7a"
+            universalApk true
         }
     }
 }

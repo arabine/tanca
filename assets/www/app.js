@@ -113,13 +113,19 @@ const app = new Vue({
         }
     },
     created: function() {
+        localStorage.setItem('log', 'debug');
+
         this.$eventHub.$on('alert', this.showAlert);
         loadEverything();
 
-        i18n.locale = navigator.language || navigator.userLanguage; 
-        moment.locale(i18n.locale);
+        let locale = navigator.language || navigator.userLanguage;
+        locale = locale.substring(0, 2); // sometimes the format returned is fr-FR or us-US , so take only the first two characters
 
-        this.$vuetify.lang.current = i18n.locale;
+        i18n.locale = locale;
+        ulog.info('Detected language: ' + locale);
+        moment.locale(locale);
+
+        this.$vuetify.lang.current = locale;
         this.$vuetify.lang.locales = {
             en: {
                 noDataText: 'Nothing',
