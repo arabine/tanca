@@ -16,7 +16,7 @@ android {
         applicationId 'eu.d8s.Tanca'
         minSdkVersion 25
         targetSdkVersion 26
-        versionCode 2
+        versionCode 4
         versionName "1.0.1"
 
         externalNativeBuild {
