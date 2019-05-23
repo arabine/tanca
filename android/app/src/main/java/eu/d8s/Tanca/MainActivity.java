@@ -1,9 +1,7 @@
 package eu.d8s.Tanca;
 
-//import android.support.annotation.Keep;
 import android.app.Activity;
 import android.os.Bundle;
-//import android.widget.TextView;
 
 import android.webkit.WebView;
 import android.webkit.WebSettings;
@@ -12,7 +10,6 @@ import android.webkit.WebViewClient;
 
 
 public class MainActivity extends Activity {
-
 
     private WebView mWebView;
 
@@ -32,7 +29,7 @@ public class MainActivity extends Activity {
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
 
-        mWebView.loadUrl("http://127.0.0.1:" + String.valueOf(tcpPort)); // FIXME: use the TCP port discovered just before
+        mWebView.loadUrl("http://127.0.0.1:" + String.valueOf(tcpPort));
     }
 
     static {
