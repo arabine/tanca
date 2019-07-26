@@ -44,7 +44,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -55,7 +55,8 @@
     <g
        id="g916"
        inkscape:export-xdpi="96.000015"
-       inkscape:export-ydpi="96.000015">
+       inkscape:export-ydpi="96.000015"
+       inkscape:export-filename="/home/anthony/git/tanca-android/fastlane/metadata/android/en-US/featureGraphic.png">
       <rect
          y="-14.716611"
          x="-147.8649"

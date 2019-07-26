@@ -30,12 +30,13 @@
 
 #include "Value.h"
 #include "Log.h"
+#include "Util.h"
 #include "MainWindow.h"
 #include "TableHelper.h"
 #include "ui_MainWindow.h"
 #include "ui_RewardWindow.h"
 
-static const QString gVersion = "1.12";
+static const QString gVersion = "1.13";
 
 // Table headers
 static QStringList gGamesTableHeader;
@@ -51,18 +52,6 @@ QString gAppDataPath = QStandardPaths::writableLocation(QStandardPaths::HomeLoca
 #endif
 static QString gDbFullPath = gAppDataPath + "/tanca.db";
 
-class Outputter : public Observer<std::string>
-{
-public:
-    virtual ~Outputter();
-
-    virtual void Update(const std::string &info)
-    {
-        std::cout << info << std::endl;
-    }
-};
-
-static Outputter consoleOutput;
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -72,7 +61,6 @@ MainWindow::MainWindow(QWidget *parent)
     , mCurrentRankingRound(1)
 {
     Log::SetLogPath(gAppDataPath.toStdString());
-    Log::RegisterListener(consoleOutput);
 
     std::cout << "Application path set to: " << gAppDataPath.toStdString() << std::endl;
 
@@ -953,5 +941,3 @@ std::string TypeToString(const Event &event)
         return "";
     }
 }
-
-Outputter::~Outputter() {}

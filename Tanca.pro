@@ -28,7 +28,7 @@ MOC_DIR         = $$DESTDIR/moc
 # ICL Configuration
 # ------------------------------------------------------------------------------
 
-#CONFIG += ICL_DB
+CONFIG += icl_zip icl_database
 
 ICL_DIR = $$BASE_DIR/src/icl
 include($$ICL_DIR/icl.pri)
@@ -68,12 +68,6 @@ windows {
 
 TARGET = Tanca
 
-# ------------------------------------------------------------------------------
-# HTTP FILE SERVER
-# ------------------------------------------------------------------------------
-VPATH += src src/www
-INCLUDEPATH += src src/www
-SOURCES += www_files.c file_server.cpp
 
 # ------------------------------------------------------------------------------
 # Source files

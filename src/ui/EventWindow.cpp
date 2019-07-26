@@ -24,6 +24,7 @@
  */
 
 #include "EventWindow.h"
+#include "Util.h"
 
 EventWindow::EventWindow(QWidget *parent)
     : QDialog(parent)

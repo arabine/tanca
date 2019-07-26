@@ -31,10 +31,9 @@
 
 //#define UNIT_TESTS
 
-extern "C" void StartFileServer(void);
 
 /*****************************************************************************/
-class Logger : public Observer<std::string>
+class Logger : public Observer<Log::Infos>
 {
 public:
     Logger()
@@ -45,9 +44,9 @@ public:
 
     virtual ~Logger();
 
-    void Update(const std::string &info)
+    void Update(const Log::Infos &info)
     {
-        std::cout << info << std::endl;
+        std::cout << info.message << std::endl;
     }
 };
 
@@ -55,19 +54,9 @@ extern void RunTests();
 
 int main(int argc, char *argv[])
 {
-
-#ifdef UNIT_TESTS
-
-    (void) argc;
-    (void) argv;
-
-    RunTests();
-    return 0;
-#else
+    QCoreApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);
     Logger logger;
     Log::RegisterListener(logger);
-
-    StartFileServer();
 
     QApplication a(argc, argv);
 
@@ -76,7 +65,6 @@ int main(int argc, char *argv[])
     w.show();
 
     return a.exec();
-#endif
 
 }
 
