@@ -136,7 +136,7 @@ MainWindow::MainWindow(QWidget *parent)
     gGamesTableHeader << tr("Id") << tr("Partie") << tr("Équipe 1") << tr("Équipe 2") << tr("Score 1") << tr("Score 2");
     gEventsTableHeader << tr("Id") << tr("Date") << tr("Type") << tr("Titre") << tr("État");
     gPlayersTableHeader << tr("Id") << tr("UUID") << tr("Prénom") << tr("Nom") << tr("Pseudonyme") << tr("E-mail") << tr("Téléphone (mobile)") << tr("Téléphone (maison)") << tr("Date de naissance") << tr("Rue") << tr("Code postal") << tr("Ville") << tr("Licences") << tr("Commentaires") << tr("Statut") << tr("Divers");
-    gTeamsTableHeader << tr("Id") << tr("Numéro") << tr("Joueur 1") << tr("Joueur 2") << ("Nom de l'équipe");
+    gTeamsTableHeader << tr("Id") << tr("Numéro") << tr("Joueur 1") << tr("Joueur 2") << tr("Joueur 3") << ("Nom de l'équipe");
     gRewardsTableHeader << tr("Id") << tr("Montant") << tr("Commentaire");
 }
 
@@ -293,9 +293,14 @@ void MainWindow::UpdateTeamList()
             mPlayersInTeams.push_back(team.player2Id);
         }
 
+        if (mDatabase.FindPlayer(team.player3Id, p3))
+        {
+            mPlayersInTeams.push_back(team.player3Id);
+        }
+
         teamWindow->AddId(team.number);
 
-        std::list<Value> rowData = {team.id, team.number, p1.FullName(), p2.FullName(), team.teamName};
+        std::list<Value> rowData = {team.id, team.number, p1.FullName(), p2.FullName(), p3.FullName(), team.teamName};
         helper.AppendLine(rowData, false);
     }
 

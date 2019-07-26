@@ -307,7 +307,7 @@ void DbManager::UpdatePlayerList()
         player.email = query.value("email").toString().toStdString();
         player.mobilePhone = query.value("mobile_phone").toString().toStdString();
         player.homePhone = query.value("home_phone").toString().toStdString();
-        player.birthDate = Util::FromISODateTime(query.value("birth_date").toString().toStdString());
+        player.birthDate = Util::FromISODate(query.value("birth_date").toString().toStdString());
         player.road = query.value("road").toString().toStdString();
         player.postCode = query.value("post_code").toInt();
         player.city = query.value("city").toString().toStdString();

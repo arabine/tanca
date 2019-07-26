@@ -59,6 +59,7 @@ private:
     bool mIsEdit;
 
     void Update();
+    std::string GetMinifiedName(const Player &p);
 };
 
 #endif // TEAM_WINDOW_H

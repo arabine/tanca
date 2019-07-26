@@ -32,7 +32,7 @@
 
 
 TeamWindow::TeamWindow(QWidget *parent)
-    : SelectionWindow(parent, tr("Créer/modifier une équipe"), 2, 2)
+    : SelectionWindow(parent, tr("Créer/modifier une équipe"), 1, 3)
     , mTeamsId(0U, 2000000U)
     , mIsEdit(false)
 {
@@ -104,23 +104,39 @@ void TeamWindow::SetTeam(const Player &p1, const Player &p2, const Team &team)
     Update();
 }
 
+std::string TeamWindow::GetMinifiedName(const Player &p)
+{
+    return p.name + " " + p.lastName.substr(0, 3);
+}
+
 void TeamWindow::GetTeam(Team &team)
 {
+    std::string proposedTeamName;
+
     if (mSelection.size() == 3)
     {
         team.player1Id = mSelection.at(0).id;
         team.player2Id = mSelection.at(1).id;
         team.player3Id = mSelection.at(2).id;
+
+        proposedTeamName = GetMinifiedName(mSelection.at(0)) + " " +
+                    GetMinifiedName(mSelection.at(1)) + " " +
+                    GetMinifiedName(mSelection.at(2));
     }
     else if (mSelection.size() == 2)
     {
         team.player1Id = mSelection.at(0).id;
         team.player2Id = mSelection.at(1).id;
+
+        proposedTeamName = GetMinifiedName(mSelection.at(0)) + " " +
+                    GetMinifiedName(mSelection.at(1));
     }
     else if (mSelection.size() == 1)
     {
         team.player1Id = mSelection.at(0).id;
         team.player2Id = Player::cDummyPlayer;
+
+        proposedTeamName = GetMinifiedName(mSelection.at(0));
     }
     else
     {
@@ -133,7 +149,7 @@ void TeamWindow::GetTeam(Team &team)
     if (name.size() == 0)
     {
         // No any team name specified, create one
-        DbManager::CreateName(team, mSelection.at(0), mSelection.at(1));
+        team.teamName = proposedTeamName.c_str();
     }
     else
     {
