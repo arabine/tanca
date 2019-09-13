@@ -34,23 +34,31 @@
 bool RankHighFirst (Rank &i, Rank &j)
 {
     bool ret = false;
-    if (i.pointsWon > j.pointsWon)
+
+    if (i.gamesWon > j.gamesWon)
     {
-        ret = true;
+       ret = true;
     }
-    else if (i.pointsWon == j.pointsWon)
+    else if (i.gamesWon == j.gamesWon)
     {
-        if (i.Difference() > j.Difference())
-        {
-            ret = true;
-        }
-        else if (i.Difference() == j.Difference())
-        {
-            if (i.pointsOpponents > j.pointsOpponents)
-            {
-                ret = true;
-            }
-        }
+	    if (i.pointsWon > j.pointsWon)
+	    {
+		ret = true;
+	    }
+	    else if (i.pointsWon == j.pointsWon)
+	    {
+		if (i.Difference() > j.Difference())
+		{
+		    ret = true;
+		}
+		else if (i.Difference() == j.Difference())
+		{
+		    if (i.pointsOpponents > j.pointsOpponents)
+		    {
+			ret = true;
+		    }
+		}
+	    }
     }
     return ret;
 }
